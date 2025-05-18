@@ -2,6 +2,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
+    alias(libs.plugins.dagger)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -56,4 +59,37 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation(libs.androidx.material)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.core)
+
+    implementation(libs.androidx.lifecycle.runtime.compose)
+
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.kotlin.script.runtime)
+
+    implementation(libs.androidx.navigation.compose)
+
+    implementation(libs.androidx.security.crypto)
+
+    implementation(libs.logging.interceptor)
+
+    implementation(platform(libs.firebase.bom))
+
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+    implementation(libs.play.services.auth)
+    implementation(libs.firebase.auth)
+
+    implementation(libs.dagger.hilt)
+    implementation(libs.hilt.compose.navigation)
+    add("ksp", libs.dagger.kapt)
 }
