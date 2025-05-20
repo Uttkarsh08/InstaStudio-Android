@@ -1,0 +1,17 @@
+name: Trigger Monorepo Sync
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  notify-monorepo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send dispatch to InstaStudio
+        run: |
+          curl -X POST https://api.github.com/repos/Uttkarsh08/InstaStudio/dispatches \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: token ${{ secrets.DISPATCH_PAT }}" \
+          -d '{"event_type":"sync-submodules"}'
