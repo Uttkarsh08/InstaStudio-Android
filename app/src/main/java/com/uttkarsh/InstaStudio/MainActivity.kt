@@ -15,7 +15,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
 import com.uttkarsh.InstaStudio.presentation.navigation.Navigation
+import com.uttkarsh.InstaStudio.presentation.ui.LoginTypeScreen
+import com.uttkarsh.InstaStudio.presentation.ui.OnBoardingScreen
 import com.uttkarsh.InstaStudio.presentation.ui.SignInScreen
 import com.uttkarsh.InstaStudio.ui.theme.InstaStudioTheme
 import dagger.hilt.android.AndroidEntryPoint

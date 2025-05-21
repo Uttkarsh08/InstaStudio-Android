@@ -1,11 +1,16 @@
 package com.uttkarsh.InstaStudio.presentation.viewmodel
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.uttkarsh.InstaStudio.domain.model.LoginRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.UserType
 import com.uttkarsh.InstaStudio.domain.repository.AuthRepository
+import com.uttkarsh.InstaStudio.utils.SharedPref.OnboardingStore
 import com.uttkarsh.InstaStudio.utils.SharedPref.TokenStore
 import com.uttkarsh.InstaStudio.utils.states.AuthState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,7 +23,9 @@ import javax.inject.Inject
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val tokenStore: TokenStore
+    private val tokenStore: TokenStore,
+    private val onboardingStore: OnboardingStore,
+    private val firebaseAuth: FirebaseAuth
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
@@ -26,6 +33,12 @@ class AuthViewModel @Inject constructor(
 
     private val _loginType = MutableStateFlow<UserType>(UserType.ADMIN)
     val loginType: StateFlow<UserType> = _loginType.asStateFlow()
+
+    private var _myAuth: FirebaseAuth = Firebase.auth
+
+    fun setLoginType(type: UserType) {
+        _loginType.value = type
+    }
 
     fun signInWithGoogle(context: Context) {
         viewModelScope.launch {
@@ -59,5 +72,11 @@ class AuthViewModel @Inject constructor(
             }
         }
     }
+
+    fun isUserLoggedIn(): Boolean = firebaseAuth.currentUser != null
+
+    fun isOnboardingShown(): Boolean = onboardingStore.isOnboardingShown()
+
+    fun setOnboardingShown() = onboardingStore.setOnboardingShown()
 
 }
