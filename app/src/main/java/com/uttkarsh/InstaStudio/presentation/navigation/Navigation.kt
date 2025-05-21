@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,21 +27,17 @@ fun Navigation(
     viewModel: AuthViewModel = hiltViewModel(),
 ) {
     val navController = rememberNavController()
-    var startDestination by remember { mutableStateOf<String>(Screens.OnBoardingScreen.route) }
+    val startDestination by viewModel.startDestination.collectAsState()
 
-    LaunchedEffect(Unit) {
-        val shown = viewModel.isOnboardingShown()
-        val loggedIn = viewModel.isUserLoggedIn()
-
-        startDestination = when {
-            !shown -> Screens.OnBoardingScreen.route
-            !loggedIn -> Screens.LoginTypeScreen.route
-            else -> Screens.LogOutScreen.route
+    if (startDestination == null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(text = "Loading...")
         }
+        return
     }
 
     NavHost(navController = navController,
-        startDestination = startDestination
+        startDestination = startDestination!!
     ){
 
         composable(Screens.OnBoardingScreen.route) {

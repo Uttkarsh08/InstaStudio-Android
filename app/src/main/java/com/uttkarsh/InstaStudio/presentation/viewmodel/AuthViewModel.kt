@@ -10,6 +10,7 @@ import com.google.firebase.ktx.Firebase
 import com.uttkarsh.InstaStudio.domain.model.LoginRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.UserType
 import com.uttkarsh.InstaStudio.domain.repository.AuthRepository
+import com.uttkarsh.InstaStudio.presentation.navigation.Screens
 import com.uttkarsh.InstaStudio.utils.SharedPref.OnboardingStore
 import com.uttkarsh.InstaStudio.utils.SharedPref.TokenStore
 import com.uttkarsh.InstaStudio.utils.states.AuthState
@@ -34,7 +35,21 @@ class AuthViewModel @Inject constructor(
     private val _loginType = MutableStateFlow<UserType>(UserType.ADMIN)
     val loginType: StateFlow<UserType> = _loginType.asStateFlow()
 
-    private var _myAuth: FirebaseAuth = Firebase.auth
+    private val _startDestination = MutableStateFlow<String?>(null)
+    val startDestination: StateFlow<String?> = _startDestination
+
+    init {
+        viewModelScope.launch {
+            val shown = isOnboardingShown()
+            val loggedIn = isUserLoggedIn()
+
+            _startDestination.value = when {
+                !shown -> Screens.OnBoardingScreen.route
+                !loggedIn -> Screens.LoginTypeScreen.route
+                else -> Screens.LogOutScreen.route
+            }
+        }
+    }
 
     fun setLoginType(type: UserType) {
         _loginType.value = type
