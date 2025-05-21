@@ -7,12 +7,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -46,22 +50,22 @@ import com.uttkarsh.InstaStudio.presentation.viewmodel.AuthViewModel
 fun LoginTypeScreen(
     viewModel: AuthViewModel = hiltViewModel(),
     navController: NavController
-){
+) {
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     val scrollState = rememberScrollState()
 
-
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .then(
                 if (isLandscape) Modifier.verticalScroll(scrollState) else Modifier
-            )
+            ),
+        horizontalAlignment = Alignment.CenterHorizontally, // Center content horizontally
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
         Column(
             modifier = Modifier
-                .align(Alignment.TopCenter)
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -69,21 +73,23 @@ fun LoginTypeScreen(
                 painter = painterResource(id = R.drawable.camera),
                 contentDescription = null,
                 modifier = Modifier
+                    .padding(45.dp)
                     .padding(top = 120.dp)
-                    .width(240.dp).height(200.dp),
+                    .width(240.dp)
+                    .height(200.dp),
                 contentScale = ContentScale.Crop,
             )
         }
 
         Column(
-            modifier = Modifier.fillMaxWidth()
-                .align(Alignment.BottomCenter)
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(45.dp)
                 .padding(bottom = 80.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LoginTypeButton(painter = painterResource(id = R.drawable.admin),
+            LoginTypeButton(
+                painter = painterResource(id = R.drawable.admin),
                 text = "Admin Login",
                 onClick = {
                     viewModel.setLoginType(UserType.ADMIN)
@@ -93,26 +99,32 @@ fun LoginTypeScreen(
             )
             Spacer(modifier = Modifier.height(30.dp))
 
-            LoginTypeButton(painter = painterResource(id = R.drawable.subadmin),
+            LoginTypeButton(
+                painter = painterResource(id = R.drawable.subadmin),
                 text = "Member Login",
                 onClick = {
                     viewModel.setLoginType(UserType.MEMBER)
                     navController.navigate(Screens.SignInScreen.route)
                     Log.d("LoginType", viewModel.loginType.value.toString())
-                })
+                }
+            )
             Spacer(modifier = Modifier.height(30.dp))
 
-            LoginTypeButton(painter = painterResource(id = R.drawable.customer),
+            LoginTypeButton(
+                painter = painterResource(id = R.drawable.customer),
                 text = "Customer Login",
                 onClick = {
                     viewModel.setLoginType(UserType.CUSTOMER)
                     navController.navigate(Screens.SignInScreen.route)
                     Log.d("LoginType", viewModel.loginType.value.toString())
-                })
+                }
+            )
             Spacer(modifier = Modifier.height(30.dp))
+            // extra space below the last button and before the main bottom padding.
+            // If you want extra space specifically after the last button but before the
+            // 80.dp bottom padding, you can add it back.
         }
     }
-
 }
 
 

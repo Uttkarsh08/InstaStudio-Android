@@ -60,14 +60,17 @@ fun SignInScreen(
     val errorMessage = if (state is AuthState.Error) (state as AuthState.Error).message else null
     val isLoading = state is AuthState.Loading
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .then(if (isLandscape) Modifier.verticalScroll(scrollState) else Modifier)
+            .then(
+                if (isLandscape) Modifier.verticalScroll(scrollState) else Modifier
+            ),
+        horizontalAlignment = Alignment.CenterHorizontally, // Center content horizontally
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
         Column(
             modifier = Modifier
-                .align(Alignment.TopCenter)
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -75,6 +78,7 @@ fun SignInScreen(
                 painter = painterResource(id = R.drawable.camera),
                 contentDescription = null,
                 modifier = Modifier
+                    .padding(45.dp)
                     .padding(top = 120.dp)
                     .width(240.dp)
                     .height(200.dp),
@@ -85,7 +89,6 @@ fun SignInScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.BottomCenter)
                 .padding(45.dp)
                 .padding(bottom = 110.dp),
             horizontalAlignment = Alignment.CenterHorizontally
