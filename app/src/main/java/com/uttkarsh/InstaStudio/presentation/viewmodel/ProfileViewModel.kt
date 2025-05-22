@@ -1,0 +1,151 @@
+package com.uttkarsh.InstaStudio.presentation.viewmodel
+
+import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.uttkarsh.InstaStudio.domain.model.AdminProfileSetupRequestDTO
+import com.uttkarsh.InstaStudio.domain.model.ProfileRequestDTO
+import com.uttkarsh.InstaStudio.domain.model.StudioRequestDTO
+import com.uttkarsh.InstaStudio.domain.model.validators.validate
+import com.uttkarsh.InstaStudio.domain.repository.ProfileRepository
+import com.uttkarsh.InstaStudio.utils.SharedPref.TokenStore
+import com.uttkarsh.InstaStudio.utils.states.ProfileState
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import javax.inject.Inject
+
+@HiltViewModel
+class ProfileViewModel @Inject constructor(
+    private val repository: ProfileRepository,
+    private val tokenStore: TokenStore
+) : ViewModel() {
+
+    private val _profileState = MutableStateFlow<ProfileState>(ProfileState.Idle)
+    val profileState = _profileState.asStateFlow()
+
+    private val _userEmail = MutableStateFlow<String>("")
+    val userEmail = _userEmail.asStateFlow()
+
+    var studioName by mutableStateOf("")
+        private set
+
+    var phoneNumber by mutableStateOf("")
+        private set
+
+    var address by mutableStateOf("")
+        private set
+
+    var city by mutableStateOf("")
+        private set
+
+    var state by mutableStateOf("")
+        private set
+
+    var pinCode by mutableStateOf("")
+        private set
+
+    fun updateStudioName(name: String) {
+        studioName = name
+    }
+
+    fun updatePhoneNumber(phone: String) {
+        phoneNumber = phone
+    }
+
+    fun updateAddress(newAddress: String) {
+        address = newAddress
+    }
+
+    fun updateCity(newCity: String) {
+        city = newCity
+    }
+
+    fun updateState(newState: String) {
+        state = newState
+    }
+
+    fun updatePinCode(newPinCode: String) {
+        pinCode = newPinCode
+    }
+
+    fun fetchLatestEmail() {
+        viewModelScope.launch {
+            val email = tokenStore.getEmail().orEmpty()
+            Log.d("ProfileViewModel", "Fetched email: $email")
+            _userEmail.value = email
+        }
+    }
+
+    fun saveAdminProfile() {
+        viewModelScope.launch {
+            _profileState.value = ProfileState.Loading
+            try {
+                val profileRequest = ProfileRequestDTO(
+                    firebaseId = tokenStore.getFirebaseId().toString(),
+                    userName = tokenStore.getName().toString(),
+                    userPhoneNo = phoneNumber,
+                    userEmail = tokenStore.getEmail().toString(),
+                    userType = tokenStore.getUserType()
+                )
+
+                val profileError = profileRequest.validate()
+                if (profileError != null) {
+                    _profileState.value = ProfileState.Error(profileError)
+                    return@launch
+                }
+
+                val studioRequest = StudioRequestDTO(
+                    studioName = studioName,
+                    studioAddress = address,
+                    studioCity = city,
+                    studioState = state,
+                    studioPinCode = pinCode,
+                    imageDataBase64 = null
+                )
+
+                val studioError = studioRequest.validate()
+                if (studioError != null) {
+                    _profileState.value = ProfileState.Error(studioError)
+                    return@launch
+                }
+
+                val adminProfileSetupRequestDTO = AdminProfileSetupRequestDTO(
+                    user = profileRequest,
+                    studio = studioRequest
+                )
+
+                val response = withContext(Dispatchers.IO) {
+                    repository.adminProfileSetup(adminProfileSetupRequestDTO)
+                }
+                if (response.data == null) {
+                    _profileState.value = ProfileState.Error(
+                        (response.error.message + ": " + response.error.subErrors.joinToString())
+                    )
+                    return@launch
+                }
+
+                _profileState.value = ProfileState.Success(response.data.studioId, response.data.userId)
+                Log.d("Profile Saved", response.data.studioId.toString())
+                Log.d("Studio Saved", response.data.userId.toString())
+
+                withContext(Dispatchers.IO) {
+                    tokenStore.updateIsRegistered()
+                    tokenStore.saveStudioId(response.data.studioId)
+                    tokenStore.saveUserId(response.data.userId)
+                }
+
+            } catch (e: Exception) {
+                Log.e("ProfileViewModel", "Unexpected error in saveAdminProfile", e)
+                _profileState.value = ProfileState.Error(e.localizedMessage ?: "An unexpected error occurred.")
+            }
+        }
+    }
+
+}

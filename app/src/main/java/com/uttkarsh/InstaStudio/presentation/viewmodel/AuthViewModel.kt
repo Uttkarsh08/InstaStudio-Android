@@ -15,10 +15,12 @@ import com.uttkarsh.InstaStudio.utils.SharedPref.OnboardingStore
 import com.uttkarsh.InstaStudio.utils.SharedPref.TokenStore
 import com.uttkarsh.InstaStudio.utils.states.AuthState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -42,11 +44,13 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             val shown = isOnboardingShown()
             val loggedIn = isUserLoggedIn()
+            val registered = isUserRegistered()
 
             _startDestination.value = when {
                 !shown -> Screens.OnBoardingScreen.route
                 !loggedIn -> Screens.LoginTypeScreen.route
-                else -> Screens.LogOutScreen.route
+                !registered -> Screens.ProfileCompletionScreen.route
+                else -> Screens.DashBoardScreen.route
             }
         }
     }
@@ -78,8 +82,9 @@ class AuthViewModel @Inject constructor(
             try {
                 val response = authRepository.validateFirebaseToken(requestDTO)
 
-                tokenStore.saveTokens(response.accessToken, response.refreshToken)
-                tokenStore.saveUserInfo(response.userName, response.userEmail, response.firebaseId, response.userType)
+                withContext(Dispatchers.IO) { tokenStore.saveTokens(response.accessToken, response.refreshToken) }
+                withContext(Dispatchers.IO) { tokenStore.saveUserInfo(response.userName, response.userEmail, response.firebaseId, response.userType, false) }
+                Log.d("TokenStore", "Saving email: ${response.userEmail}")
 
                 _authState.value = AuthState.BackendSuccess(response)
             } catch (e: Exception) {
@@ -89,6 +94,8 @@ class AuthViewModel @Inject constructor(
     }
 
     fun isUserLoggedIn(): Boolean = firebaseAuth.currentUser != null
+
+    fun isUserRegistered(): Boolean = tokenStore.getIsRegistered()
 
     fun isOnboardingShown(): Boolean = onboardingStore.isOnboardingShown()
 

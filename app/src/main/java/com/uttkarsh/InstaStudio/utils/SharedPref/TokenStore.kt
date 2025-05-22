@@ -7,6 +7,7 @@ import com.uttkarsh.InstaStudio.domain.model.UserType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import androidx.core.content.edit
 
 @Singleton
 class TokenStore @Inject constructor(@ApplicationContext context: Context) {
@@ -24,19 +25,32 @@ class TokenStore @Inject constructor(@ApplicationContext context: Context) {
     )
 
     fun saveTokens(access: String, refresh: String) {
-        prefs.edit()
-            .putString("access", access)
-            .putString("refresh", refresh)
-            .apply()
+        prefs.edit {
+            putString("access", access)
+                .putString("refresh", refresh)
+        }
     }
 
-    fun saveUserInfo(name: String?, email: String?, firebaseId: String?, userType: UserType) {
-        prefs.edit()
-            .putString("name", name)
-            .putString("email", email)
-            .putString("firebaseId", firebaseId)
-            .putString("userType", userType.toString())
-            .apply()
+    fun saveUserInfo(name: String?, email: String?, firebaseId: String?, userType: UserType, isRegistered: Boolean) {
+        prefs.edit {
+            putString("name", name)
+                .putString("email", email)
+                .putString("firebaseId", firebaseId)
+                .putString("userType", userType.toString())
+                .putBoolean("isRegistered", isRegistered)
+        }
+    }
+
+    fun saveStudioId(studioId: Long) {
+        prefs.edit {
+            putLong("studioId", studioId)
+        }
+    }
+
+    fun saveUserId(userId: Long) {
+        prefs.edit {
+            putLong("userId", userId)
+        }
     }
 
     fun getAccessToken(): String? = prefs.getString("access", null)
@@ -46,8 +60,13 @@ class TokenStore @Inject constructor(@ApplicationContext context: Context) {
     fun getEmail(): String? = prefs.getString("email", null)
     fun getFirebaseId(): String? = prefs.getString("firebaseId", null)
     fun getUserType(): UserType? = prefs.getString("userType", null)?.let { UserType.valueOf(it) }
+    fun getIsRegistered(): Boolean = prefs.getBoolean("isRegistered", false)
+    fun updateIsRegistered() {
+        val currentValue = prefs.getBoolean("isRegistered", false)
+        return prefs.edit(commit = true) { putBoolean("isRegistered", !currentValue) }
+    }
 
     fun clear() {
-        prefs.edit().clear().apply()
+        prefs.edit { clear() }
     }
 }

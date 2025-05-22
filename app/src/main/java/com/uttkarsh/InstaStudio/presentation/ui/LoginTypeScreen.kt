@@ -61,7 +61,7 @@ fun LoginTypeScreen(
             .then(
                 if (isLandscape) Modifier.verticalScroll(scrollState) else Modifier
             ),
-        horizontalAlignment = Alignment.CenterHorizontally, // Center content horizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Column(
@@ -120,9 +120,7 @@ fun LoginTypeScreen(
                 }
             )
             Spacer(modifier = Modifier.height(30.dp))
-            // extra space below the last button and before the main bottom padding.
-            // If you want extra space specifically after the last button but before the
-            // 80.dp bottom padding, you can add it back.
+
         }
     }
 }

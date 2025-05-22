@@ -1,6 +1,7 @@
 package com.uttkarsh.InstaStudio.presentation.ui
 
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +26,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.uttkarsh.InstaStudio.R
 import com.uttkarsh.InstaStudio.domain.model.LoginRequestDTO
+import com.uttkarsh.InstaStudio.domain.model.validators.validate
 import com.uttkarsh.InstaStudio.presentation.navigation.Screens
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AuthViewModel
 import com.uttkarsh.InstaStudio.utils.states.AuthState
@@ -45,10 +47,16 @@ fun SignInScreen(
     LaunchedEffect(state) {
         if (state is AuthState.Success) {
             val token = (state as AuthState.Success).token
-            viewModel.onFirebaseLoginSuccess(LoginRequestDTO(token, loginType))
+            val loginRequest = LoginRequestDTO(token, loginType)
+            val validationError = loginRequest.validate()
+            if (validationError != null) {
+                Toast.makeText(context, validationError, Toast.LENGTH_SHORT).show()
+                return@LaunchedEffect
+            }
+            viewModel.onFirebaseLoginSuccess(loginRequest)
         }
         if (state is AuthState.BackendSuccess) {
-            navController.navigate(Screens.LogOutScreen.route) {
+            navController.navigate(Screens.ProfileCompletionScreen.route) {
                 popUpTo(navController.graph.startDestinationId) {
                     inclusive = true
                 }
@@ -66,7 +74,7 @@ fun SignInScreen(
             .then(
                 if (isLandscape) Modifier.verticalScroll(scrollState) else Modifier
             ),
-        horizontalAlignment = Alignment.CenterHorizontally, // Center content horizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Column(

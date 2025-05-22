@@ -10,4 +10,7 @@
     <color name="LightBlack">#706C61</color>
     <color name="GoogleBlue">#5383EC</color>
     <color name="errorRed">#EB6A63</color>
+    <color name="logo">#A5A5A5</color>
+    <color name="grey">#746666</color>
+    <color name="darkGrey">#706C61</color>
 </resources>
