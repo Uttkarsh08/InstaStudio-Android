@@ -11,10 +11,16 @@ import javax.inject.Singleton
 class ProfileRepository @Inject constructor(
     private val profileApi: ProfileApiService,
 
-){
+    ){
 
     suspend fun adminProfileSetup(requestDTO: AdminProfileSetupRequestDTO): ApiResponse<AdminProfileSetupResponseDTO>{
         return profileApi.adminProfileSetup(requestDTO)
 
     }
+
+    suspend fun getStudioImage(studioId: Long): ApiResponse<String>{
+        return profileApi.getStudioImage(studioId)
+
+    }
+
 }

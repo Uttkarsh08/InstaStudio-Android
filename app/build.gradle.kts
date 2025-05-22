@@ -92,4 +92,6 @@ dependencies {
     implementation(libs.dagger.hilt)
     implementation(libs.hilt.compose.navigation)
     add("ksp", libs.dagger.kapt)
+
+    implementation("io.coil-kt:coil-compose:2.7.0")
 }

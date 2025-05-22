@@ -62,9 +62,9 @@ class TokenStore @Inject constructor(@ApplicationContext context: Context) {
     fun getUserType(): UserType? = prefs.getString("userType", null)?.let { UserType.valueOf(it) }
     fun getIsRegistered(): Boolean = prefs.getBoolean("isRegistered", false)
     fun updateIsRegistered() {
-        val currentValue = prefs.getBoolean("isRegistered", false)
-        return prefs.edit(commit = true) { putBoolean("isRegistered", !currentValue) }
-    }
+         prefs.edit(commit = true) { putBoolean("isRegistered", true) } }
+    fun getStudioId(): Long = prefs.getLong("studioId", -1)
+    fun getUserId(): Long = prefs.getLong("userId", -1)
 
     fun clear() {
         prefs.edit { clear() }

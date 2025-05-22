@@ -1,5 +1,8 @@
 package com.uttkarsh.InstaStudio.presentation.viewmodel
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -12,6 +15,7 @@ import com.uttkarsh.InstaStudio.domain.model.StudioRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.validators.validate
 import com.uttkarsh.InstaStudio.domain.repository.ProfileRepository
 import com.uttkarsh.InstaStudio.utils.SharedPref.TokenStore
+import com.uttkarsh.InstaStudio.utils.image.ImageUtils
 import com.uttkarsh.InstaStudio.utils.states.ProfileState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -51,6 +55,15 @@ class ProfileViewModel @Inject constructor(
     var pinCode by mutableStateOf("")
         private set
 
+    var selectedStudioImageUri by mutableStateOf<Uri?>(null)
+        private set
+
+    var selectedStudioImageBase64 by mutableStateOf<String?>(null)
+        private set
+
+    var StudioImageBitMap by mutableStateOf<Bitmap?>(null)
+        private set
+
     fun updateStudioName(name: String) {
         studioName = name
     }
@@ -83,6 +96,19 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    fun onImageSelected(context: Context, uri: Uri) {
+        selectedStudioImageUri = uri
+        viewModelScope.launch {
+            val base64Image = ImageUtils.uriToBase64(context, uri)
+            if (base64Image != null) {
+                selectedStudioImageBase64 = base64Image
+                Log.d("EncodedImage", base64Image)
+            } else {
+                _profileState.value = ProfileState.Error("Image encoding failed")
+            }
+        }
+    }
+
     fun saveAdminProfile() {
         viewModelScope.launch {
             _profileState.value = ProfileState.Loading
@@ -107,7 +133,7 @@ class ProfileViewModel @Inject constructor(
                     studioCity = city,
                     studioState = state,
                     studioPinCode = pinCode,
-                    imageDataBase64 = null
+                    imageDataBase64 = selectedStudioImageBase64
                 )
 
                 val studioError = studioRequest.validate()
@@ -126,7 +152,7 @@ class ProfileViewModel @Inject constructor(
                 }
                 if (response.data == null) {
                     _profileState.value = ProfileState.Error(
-                        (response.error.message + ": " + response.error.subErrors.joinToString())
+                        (response.error?.message + ": " + response.error?.subErrors?.joinToString())
                     )
                     return@launch
                 }
@@ -141,10 +167,29 @@ class ProfileViewModel @Inject constructor(
                     tokenStore.saveUserId(response.data.userId)
                 }
 
+
+
             } catch (e: Exception) {
                 Log.e("ProfileViewModel", "Unexpected error in saveAdminProfile", e)
                 _profileState.value = ProfileState.Error(e.localizedMessage ?: "An unexpected error occurred.")
             }
+        }
+    }
+
+
+    fun getStudioImage(){
+        viewModelScope.launch {
+            try {
+                val studioId = tokenStore.getStudioId()
+                val response = repository.getStudioImage(studioId)
+                if(response.data != null) {
+                    StudioImageBitMap = ImageUtils.base64ToBitmap(response.data)
+                }
+
+            }catch (e: Exception){
+                Log.e("ProfileViewModel", "Unexpected error in getStudioImage", e)
+            }
+
         }
     }
 

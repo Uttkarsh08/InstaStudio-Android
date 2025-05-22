@@ -1,7 +1,9 @@
 package com.uttkarsh.InstaStudio.presentation.ui
 
 import android.content.res.Configuration
-import android.util.Log
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -29,9 +31,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
@@ -40,6 +44,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.uttkarsh.InstaStudio.presentation.navigation.Screens
 import com.uttkarsh.InstaStudio.presentation.viewmodel.ProfileViewModel
 import com.uttkarsh.InstaStudio.utils.states.ProfileState
@@ -54,6 +59,7 @@ fun ProfileCompletionScreen(
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     val scrollState = rememberScrollState()
     val alatsiFont = FontFamily(Font(R.font.alatsi))
+    val context = LocalContext.current
     val state by viewModel.profileState.collectAsState()
 
     val studioName = viewModel.studioName
@@ -62,6 +68,7 @@ fun ProfileCompletionScreen(
     val city = viewModel.city
     val stateText = viewModel.state
     val pinCode = viewModel.pinCode
+    val selectedImageUri = viewModel.selectedStudioImageUri
 
     val isLoading = state is ProfileState.Loading
     val errorMessage = (state as? ProfileState.Error)?.message
@@ -98,30 +105,14 @@ fun ProfileCompletionScreen(
                     if (isLandscape) Modifier.verticalScroll(scrollState) else Modifier
                 )
         ) {
-            Column(
-                modifier = Modifier.fillMaxWidth()
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() },
-                        onClick = { TODO() }
-                    ),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.studiologo),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .padding(top = 12.dp)
-                        .width(80.dp)
-                        .height(80.dp),
-                    contentScale = ContentScale.Crop,
-                )
-                Text(text = "Add Logo",
-                    fontFamily = alatsiFont,
-                    fontSize = 14.sp,
-                    color = colorResource(R.color.logo)
-                )
-            }
+            SelectLogoSection(
+                selectedImageUri = selectedImageUri,
+                onImageSelected = { uri: Uri? ->
+                    if (uri != null) {
+                        viewModel.onImageSelected(context, uri)
+                    }
+                }
+            )
 
             Spacer(Modifier.height(20.dp))
 
@@ -285,7 +276,7 @@ fun ProfileCompletionScreen(
                         fontFamily = alatsiFont,
                         fontSize = 14.sp,
                         color = colorResource(R.color.logo)
-                        )
+                    )
                 }
                 if (errorMessage != null) {
                     Text("Failure: $errorMessage", color = colorResource(R.color.errorRed), fontFamily = alatsiFont)
@@ -319,3 +310,61 @@ fun ProfileCompletionScreen(
         }
     }
 }
+
+@Composable
+fun SelectLogoSection(
+    selectedImageUri: Uri?,
+    onImageSelected: (Uri?) -> Unit
+) {
+    val alatsiFont = FontFamily(Font(R.font.alatsi))
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        onImageSelected(uri)
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = {
+                    launcher.launch("image/*")
+                }
+            ),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (selectedImageUri != null) {
+            Image(
+                painter = rememberAsyncImagePainter(selectedImageUri),
+                contentDescription = "Selected Logo",
+                modifier = Modifier
+                    .padding(top = 12.dp)
+                    .width(80.dp)
+                    .height(80.dp)
+                    .clip(RoundedCornerShape(100.dp)),
+                contentScale = ContentScale.Crop,
+            )
+        } else {
+            Image(
+                painter = painterResource(id = R.drawable.studiologo),
+                contentDescription = "Default Logo",
+                modifier = Modifier
+                    .padding(top = 12.dp)
+                    .width(80.dp)
+                    .height(80.dp),
+                contentScale = ContentScale.Crop
+            )
+        }
+
+        Text(
+            text = "Add Logo",
+            fontFamily = alatsiFont,
+            fontSize = 14.sp,
+            color = colorResource(R.color.logo)
+        )
+    }
+}
+
