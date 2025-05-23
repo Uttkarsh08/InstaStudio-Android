@@ -5,14 +5,12 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import com.uttkarsh.InstaStudio.domain.model.LoginRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.UserType
 import com.uttkarsh.InstaStudio.domain.repository.AuthRepository
 import com.uttkarsh.InstaStudio.presentation.navigation.Screens
 import com.uttkarsh.InstaStudio.utils.SharedPref.OnboardingStore
-import com.uttkarsh.InstaStudio.utils.SharedPref.TokenStore
+import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.states.AuthState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val tokenStore: TokenStore,
+    private val sessionStore: SessionStore,
     private val onboardingStore: OnboardingStore,
     private val firebaseAuth: FirebaseAuth
 ) : ViewModel() {
@@ -37,26 +35,37 @@ class AuthViewModel @Inject constructor(
     private val _loginType = MutableStateFlow<UserType>(UserType.ADMIN)
     val loginType: StateFlow<UserType> = _loginType.asStateFlow()
 
-    private val _startDestination = MutableStateFlow<String?>(null)
-    val startDestination: StateFlow<String?> = _startDestination
+    private val _isLoggedIn = MutableStateFlow<Boolean>(false)
+    val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
 
-    init {
-        viewModelScope.launch {
-            val shown = isOnboardingShown()
-            val loggedIn = isUserLoggedIn()
-            val registered = isUserRegistered()
+    private val _isRegistered = MutableStateFlow<Boolean>(false)
+    val isRegistered: StateFlow<Boolean> = _isRegistered.asStateFlow()
 
-            _startDestination.value = when {
-                !shown -> Screens.OnBoardingScreen.route
-                !loggedIn -> Screens.LoginTypeScreen.route
-                !registered -> Screens.ProfileCompletionScreen.route
-                else -> Screens.DashBoardScreen.route
-            }
-        }
-    }
+    private val _isOnBoardingShown = MutableStateFlow<Boolean>(false)
+    val isOnBoardingShown: StateFlow<Boolean> = _isOnBoardingShown.asStateFlow()
+
+    private val _isAuthRefreshed = MutableStateFlow(false)
+    val isAuthRefreshed: StateFlow<Boolean> = _isAuthRefreshed.asStateFlow()
+
 
     fun setLoginType(type: UserType) {
         _loginType.value = type
+    }
+
+    fun refreshAuthState() {
+        viewModelScope.launch {
+            _isAuthRefreshed.value = false
+
+            _isLoggedIn.value = isUserLoggedIn()
+            _isRegistered.value = isUserRegistered()
+            _isOnBoardingShown.value = isOnboardingShown()
+
+            _isAuthRefreshed.value = true
+        }
+    }
+
+    fun resetAuthRefreshFlag() {
+        _isAuthRefreshed.value = false
     }
 
     fun signInWithGoogle(context: Context) {
@@ -73,6 +82,9 @@ class AuthViewModel @Inject constructor(
 
     fun logout() {
         authRepository.signOut()
+        sessionStore.clear()
+        _isLoggedIn.value = false
+        _isRegistered.value = false
         _authState.value = AuthState.Idle
     }
 
@@ -82,23 +94,25 @@ class AuthViewModel @Inject constructor(
             try {
                 val response = authRepository.validateFirebaseToken(requestDTO)
 
-                withContext(Dispatchers.IO) { tokenStore.saveTokens(response.accessToken, response.refreshToken) }
-                withContext(Dispatchers.IO) { tokenStore.saveUserInfo(response.userName, response.userEmail, response.firebaseId, response.userType, false) }
-                Log.d("TokenStore", "Saving email: ${response.userEmail}")
+                withContext(Dispatchers.IO) { sessionStore.saveTokens(response.accessToken, response.refreshToken) }
+                withContext(Dispatchers.IO) { sessionStore.saveUserInfo(response.userName, response.userEmail, response.firebaseId, response.userType, response.isRegistered) }
+                Log.d("SessionStore", "Saving email: ${response.userEmail}")
 
                 _authState.value = AuthState.BackendSuccess(response)
+                refreshAuthState()
             } catch (e: Exception) {
                 _authState.value = AuthState.Error("Backend login failed")
             }
         }
     }
 
-    fun isUserLoggedIn(): Boolean = firebaseAuth.currentUser != null
+    suspend fun isUserLoggedIn(): Boolean = withContext(Dispatchers.IO) { firebaseAuth.currentUser != null }
 
-    fun isUserRegistered(): Boolean = tokenStore.getIsRegistered()
+    suspend fun isUserRegistered(): Boolean = withContext(Dispatchers.IO) { sessionStore.getIsRegistered() }
 
-    fun isOnboardingShown(): Boolean = onboardingStore.isOnboardingShown()
+    suspend fun isOnboardingShown(): Boolean = withContext(Dispatchers.IO) { onboardingStore.isOnboardingShown() }
 
     fun setOnboardingShown() = onboardingStore.setOnboardingShown()
+
 
 }

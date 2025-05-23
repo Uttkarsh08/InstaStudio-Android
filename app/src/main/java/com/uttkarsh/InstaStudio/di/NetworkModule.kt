@@ -2,7 +2,7 @@ package com.uttkarsh.InstaStudio.di
 
 import com.uttkarsh.InstaStudio.data.auth.AuthApiService
 import com.uttkarsh.InstaStudio.data.auth.ProfileApiService
-import com.uttkarsh.InstaStudio.utils.SharedPref.TokenStore
+import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,10 +29,10 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideAuthInterceptor(tokenStore: TokenStore): Interceptor {
+    fun provideAuthInterceptor(sessionStore: SessionStore): Interceptor {
         return Interceptor { chain ->
             val requestBuilder = chain.request().newBuilder()
-            tokenStore.getAccessToken()?.let { token ->
+            sessionStore.getAccessToken()?.let { token ->
                 requestBuilder.header("Authorization", "Bearer $token")
             }
             chain.proceed(requestBuilder.build())

@@ -43,6 +43,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.uttkarsh.InstaStudio.presentation.navigation.Screens
@@ -52,7 +53,7 @@ import com.uttkarsh.InstaStudio.utils.states.ProfileState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileCompletionScreen(
-    viewModel: ProfileViewModel,
+    viewModel: ProfileViewModel = hiltViewModel(),
     navController: NavController
 ) {
     val configuration = LocalConfiguration.current
@@ -61,6 +62,7 @@ fun ProfileCompletionScreen(
     val alatsiFont = FontFamily(Font(R.font.alatsi))
     val context = LocalContext.current
     val state by viewModel.profileState.collectAsState()
+    val isAuthRefreshed by viewModel.isAuthRefreshed.collectAsState()
 
     val studioName = viewModel.studioName
     val phoneNo = viewModel.phoneNumber
@@ -78,12 +80,10 @@ fun ProfileCompletionScreen(
     }
     val email = viewModel.userEmail.collectAsState()
 
-    LaunchedEffect(state) {
-        if (state is ProfileState.Success) {
-            navController.navigate(Screens.DashBoardScreen.route) {
-                popUpTo(0) { inclusive = true }
-                launchSingleTop = true
-            }
+    LaunchedEffect(state, isAuthRefreshed) {
+        if (state is ProfileState.Success && isAuthRefreshed) {
+            navController.navigate(Screens.DashBoardScreen.route)
+            viewModel.resetAuthRefreshFlag()
         }
     }
 

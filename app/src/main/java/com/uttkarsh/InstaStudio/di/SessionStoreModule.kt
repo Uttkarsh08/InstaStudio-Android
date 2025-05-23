@@ -1,7 +1,7 @@
 package com.uttkarsh.InstaStudio.di
 
 import android.content.Context
-import com.uttkarsh.InstaStudio.utils.SharedPref.TokenStore
+import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -11,11 +11,11 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object TokenStoreModule {
+object SessionStoreModule {
 
     @Provides
     @Singleton
-    fun provideTokenStore(@ApplicationContext context: Context): TokenStore {
-        return TokenStore(context)
+    fun provideSessionStore(@ApplicationContext context: Context): SessionStore {
+        return SessionStore(context)
     }
 }

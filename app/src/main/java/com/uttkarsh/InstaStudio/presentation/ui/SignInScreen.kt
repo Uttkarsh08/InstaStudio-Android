@@ -1,6 +1,7 @@
 package com.uttkarsh.InstaStudio.presentation.ui
 
 import android.content.res.Configuration
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -30,6 +31,7 @@ import com.uttkarsh.InstaStudio.domain.model.validators.validate
 import com.uttkarsh.InstaStudio.presentation.navigation.Screens
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AuthViewModel
 import com.uttkarsh.InstaStudio.utils.states.AuthState
+import kotlinx.coroutines.delay
 
 @Composable
 fun SignInScreen(
@@ -42,7 +44,9 @@ fun SignInScreen(
     val alatsiFont = FontFamily(Font(R.font.alatsi))
     val context = LocalContext.current
     val state by viewModel.authState.collectAsState()
+    val isRegistered by viewModel.isRegistered.collectAsState()
     val loginType = viewModel.loginType.collectAsState().value
+    val isAuthRefreshed by viewModel.isAuthRefreshed.collectAsState()
 
     LaunchedEffect(state) {
         if (state is AuthState.Success) {
@@ -55,15 +59,28 @@ fun SignInScreen(
             }
             viewModel.onFirebaseLoginSuccess(loginRequest)
         }
+    }
+
+    LaunchedEffect(state) {
         if (state is AuthState.BackendSuccess) {
-            navController.navigate(Screens.ProfileCompletionScreen.route) {
-                popUpTo(navController.graph.startDestinationId) {
-                    inclusive = true
-                }
-                launchSingleTop = true
-            }
+            viewModel.refreshAuthState()
         }
     }
+
+    LaunchedEffect(state, isAuthRefreshed) {
+        if (state is AuthState.BackendSuccess && isAuthRefreshed) {
+            val nextDestination = if (isRegistered) {
+                Screens.DashBoardScreen.route
+            } else {
+                Screens.ProfileCompletionScreen.route
+            }
+
+            navController.navigate(nextDestination)
+
+            viewModel.resetAuthRefreshFlag()
+        }
+    }
+
 
     val errorMessage = if (state is AuthState.Error) (state as AuthState.Error).message else null
     val isLoading = state is AuthState.Loading

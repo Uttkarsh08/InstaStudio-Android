@@ -18,6 +18,10 @@ class ProfileRepository @Inject constructor(
 
     }
 
+    suspend fun getUserProfile(): ApiResponse<UserProfileResponseDTO>{
+        return profileApi.getUserProfile()
+    }
+
     suspend fun getStudioImage(studioId: Long): ApiResponse<String>{
         return profileApi.getStudioImage(studioId)
 

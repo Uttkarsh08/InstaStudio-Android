@@ -10,7 +10,7 @@ import javax.inject.Singleton
 import androidx.core.content.edit
 
 @Singleton
-class TokenStore @Inject constructor(@ApplicationContext context: Context) {
+class SessionStore @Inject constructor(@ApplicationContext context: Context) {
 
     private val masterKey = MasterKey.Builder(context)
         .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -60,9 +60,14 @@ class TokenStore @Inject constructor(@ApplicationContext context: Context) {
     fun getEmail(): String? = prefs.getString("email", null)
     fun getFirebaseId(): String? = prefs.getString("firebaseId", null)
     fun getUserType(): UserType? = prefs.getString("userType", null)?.let { UserType.valueOf(it) }
-    fun getIsRegistered(): Boolean = prefs.getBoolean("isRegistered", false)
+
+    fun getIsRegistered(): Boolean {
+        return prefs.getBoolean("isRegistered", false)
+    }
+
     fun updateIsRegistered() {
-         prefs.edit(commit = true) { putBoolean("isRegistered", true) } }
+         prefs.edit(commit = true) { putBoolean("isRegistered", true) }
+    }
     fun getStudioId(): Long = prefs.getLong("studioId", -1)
     fun getUserId(): Long = prefs.getLong("userId", -1)
 

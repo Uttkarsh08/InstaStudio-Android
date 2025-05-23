@@ -82,10 +82,10 @@ fun OnBoardingScreen(
             Button(
                 onClick = {
                     viewModel.setOnboardingShown()
-                    navController.navigate(Screens.LoginTypeScreen.route){
-                        popUpTo(Screens.OnBoardingScreen.route) { inclusive = true }
+                    navController.navigate(Screens.LoginTypeScreen.route) {
+                        popUpTo(0) { inclusive = true }
+                        launchSingleTop = true
                     }
-                    Log.d("OnBoarding", viewModel.isOnboardingShown().toString())
                 },
                 modifier = Modifier
                     .fillMaxWidth()

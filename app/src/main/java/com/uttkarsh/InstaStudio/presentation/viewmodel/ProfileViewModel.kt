@@ -14,13 +14,14 @@ import com.uttkarsh.InstaStudio.domain.model.ProfileRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.StudioRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.validators.validate
 import com.uttkarsh.InstaStudio.domain.repository.ProfileRepository
-import com.uttkarsh.InstaStudio.utils.SharedPref.TokenStore
+import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
 import com.uttkarsh.InstaStudio.utils.image.ImageUtils
 import com.uttkarsh.InstaStudio.utils.states.ProfileState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -30,7 +31,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val repository: ProfileRepository,
-    private val tokenStore: TokenStore
+    private val sessionStore: SessionStore
 ) : ViewModel() {
 
     private val _profileState = MutableStateFlow<ProfileState>(ProfileState.Idle)
@@ -38,6 +39,9 @@ class ProfileViewModel @Inject constructor(
 
     private val _userEmail = MutableStateFlow<String>("")
     val userEmail = _userEmail.asStateFlow()
+
+    private val _isAuthRefreshed = MutableStateFlow(false)
+    val isAuthRefreshed: StateFlow<Boolean> = _isAuthRefreshed.asStateFlow()
 
     var studioName by mutableStateOf("")
         private set
@@ -92,10 +96,14 @@ class ProfileViewModel @Inject constructor(
 
     fun fetchLatestEmail() {
         viewModelScope.launch {
-            val email = tokenStore.getEmail().orEmpty()
+            val email = sessionStore.getEmail().orEmpty()
             Log.d("ProfileViewModel", "Fetched email: $email")
             _userEmail.value = email
         }
+    }
+
+    fun resetAuthRefreshFlag() {
+        _isAuthRefreshed.value = false
     }
 
     fun onImageSelected(context: Context, uri: Uri) {
@@ -116,11 +124,11 @@ class ProfileViewModel @Inject constructor(
             _profileState.value = ProfileState.Loading
             try {
                 val profileRequest = ProfileRequestDTO(
-                    firebaseId = tokenStore.getFirebaseId().toString(),
-                    userName = tokenStore.getName().toString(),
+                    firebaseId = sessionStore.getFirebaseId().toString(),
+                    userName = sessionStore.getName().toString(),
                     userPhoneNo = phoneNumber,
-                    userEmail = tokenStore.getEmail().toString(),
-                    userType = tokenStore.getUserType()
+                    userEmail = sessionStore.getEmail().toString(),
+                    userType = sessionStore.getUserType()
                 )
 
                 val profileError = profileRequest.validate()
@@ -163,13 +171,16 @@ class ProfileViewModel @Inject constructor(
                 Log.d("Profile Saved", response.data.studioId.toString())
                 Log.d("Studio Saved", response.data.userId.toString())
 
+                _isAuthRefreshed.value = false
+
                 withContext(Dispatchers.IO) {
-                    tokenStore.updateIsRegistered()
-                    tokenStore.saveStudioId(response.data.studioId)
-                    tokenStore.saveUserId(response.data.userId)
+                    sessionStore.updateIsRegistered()
+                    sessionStore.saveStudioId(response.data.studioId)
+                    sessionStore.saveUserId(response.data.userId)
                 }
 
-
+                _isAuthRefreshed.value = true
+                Log.d("isRegistered Changed", sessionStore.getIsRegistered().toString())
 
             } catch (e: HttpException) {
                 val errorMessage = ApiErrorExtractor.extractMessage(e)
@@ -179,14 +190,18 @@ class ProfileViewModel @Inject constructor(
                 Log.e("ProfileViewModel", "Unexpected error in saveAdminProfile", e)
                 _profileState.value = ProfileState.Error(e.localizedMessage ?: "An unexpected error occurred.")
             }
+
         }
     }
 
+    fun resetProfileState() {
+        _profileState.value = ProfileState.Idle
+    }
 
     fun getStudioImage(){
         viewModelScope.launch {
             try {
-                val studioId = tokenStore.getStudioId()
+                val studioId = sessionStore.getStudioId()
                 val response = repository.getStudioImage(studioId)
                 if(response.data != null) {
                     StudioImageBitMap = ImageUtils.base64ToBitmap(response.data)
