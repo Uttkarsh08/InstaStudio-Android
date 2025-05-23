@@ -1,7 +1,7 @@
 package com.uttkarsh.InstaStudio.data.auth
 
 import com.uttkarsh.InstaStudio.domain.model.AdminProfileSetupRequestDTO
-import com.uttkarsh.InstaStudio.domain.model.AdminProfileSetupResponseDTO
+import com.uttkarsh.InstaStudio.domain.model.UserProfileResponseDTO
 import com.uttkarsh.InstaStudio.domain.model.ApiResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -14,8 +14,10 @@ interface ProfileApiService {
 
 
     @POST("/api/v1/register/adminProfileSetup")
-    suspend fun adminProfileSetup(@Body request: AdminProfileSetupRequestDTO): ApiResponse<AdminProfileSetupResponseDTO>
+    suspend fun adminProfileSetup(@Body request: AdminProfileSetupRequestDTO): ApiResponse<UserProfileResponseDTO>
 
     @GET("/api/v1/image/{studioId}")
     suspend fun getStudioImage(@Path("studioId") studioId: Long): ApiResponse<String>
+
+
 }

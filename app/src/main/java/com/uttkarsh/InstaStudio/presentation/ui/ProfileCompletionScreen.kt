@@ -81,7 +81,7 @@ fun ProfileCompletionScreen(
     LaunchedEffect(state) {
         if (state is ProfileState.Success) {
             navController.navigate(Screens.DashBoardScreen.route) {
-                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                popUpTo(0) { inclusive = true }
                 launchSingleTop = true
             }
         }

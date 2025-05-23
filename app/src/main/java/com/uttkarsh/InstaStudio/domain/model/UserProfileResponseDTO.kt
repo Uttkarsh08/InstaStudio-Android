@@ -1,6 +1,6 @@
 package com.uttkarsh.InstaStudio.domain.model
 
-data class AdminProfileSetupResponseDTO(
+data class UserProfileResponseDTO(
     val studioId: Long,
     val userId: Long
 )

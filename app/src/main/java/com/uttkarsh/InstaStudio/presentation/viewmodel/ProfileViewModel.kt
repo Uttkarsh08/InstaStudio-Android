@@ -15,6 +15,7 @@ import com.uttkarsh.InstaStudio.domain.model.StudioRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.validators.validate
 import com.uttkarsh.InstaStudio.domain.repository.ProfileRepository
 import com.uttkarsh.InstaStudio.utils.SharedPref.TokenStore
+import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
 import com.uttkarsh.InstaStudio.utils.image.ImageUtils
 import com.uttkarsh.InstaStudio.utils.states.ProfileState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +24,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import retrofit2.HttpException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -152,7 +154,7 @@ class ProfileViewModel @Inject constructor(
                 }
                 if (response.data == null) {
                     _profileState.value = ProfileState.Error(
-                        (response.error?.message + ": " + response.error?.subErrors?.joinToString())
+                        (response.error.message + ": " + response.error.subErrors.joinToString())
                     )
                     return@launch
                 }
@@ -168,6 +170,10 @@ class ProfileViewModel @Inject constructor(
                 }
 
 
+
+            } catch (e: HttpException) {
+                val errorMessage = ApiErrorExtractor.extractMessage(e)
+                Log.e("ProfileViewModel", "API Error: $errorMessage")
 
             } catch (e: Exception) {
                 Log.e("ProfileViewModel", "Unexpected error in saveAdminProfile", e)
@@ -186,7 +192,11 @@ class ProfileViewModel @Inject constructor(
                     StudioImageBitMap = ImageUtils.base64ToBitmap(response.data)
                 }
 
-            }catch (e: Exception){
+            } catch (e: HttpException) {
+                val errorMessage = ApiErrorExtractor.extractMessage(e)
+                Log.e("ProfileViewModel", "API Error: $errorMessage")
+
+            } catch (e: Exception){
                 Log.e("ProfileViewModel", "Unexpected error in getStudioImage", e)
             }
 
