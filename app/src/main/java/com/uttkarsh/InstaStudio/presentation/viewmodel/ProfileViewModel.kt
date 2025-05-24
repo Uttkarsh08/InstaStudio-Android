@@ -12,8 +12,10 @@ import androidx.lifecycle.viewModelScope
 import com.uttkarsh.InstaStudio.domain.model.AdminProfileSetupRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.ProfileRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.StudioRequestDTO
+import com.uttkarsh.InstaStudio.domain.model.TokenRefreshRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.UserType
 import com.uttkarsh.InstaStudio.domain.model.validators.validate
+import com.uttkarsh.InstaStudio.domain.repository.AuthRepository
 import com.uttkarsh.InstaStudio.domain.repository.ProfileRepository
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
@@ -22,7 +24,6 @@ import com.uttkarsh.InstaStudio.utils.states.ProfileState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
@@ -34,7 +35,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val repository: ProfileRepository,
+    private val profileRepository: ProfileRepository,
+    private val authRepository: AuthRepository,
     private val sessionStore: SessionStore
 ) : ViewModel() {
 
@@ -173,24 +175,33 @@ class ProfileViewModel @Inject constructor(
                     studio = studioRequest
                 )
 
-                val response = withContext(Dispatchers.IO) {
-                    repository.adminProfileSetup(adminProfileSetupRequestDTO)
+                val profileResponse = withContext(Dispatchers.IO) {
+                    profileRepository.adminProfileSetup(adminProfileSetupRequestDTO)
                 }
-                if (response.data == null) {
+                if (profileResponse.data == null) {
                     _profileState.value = ProfileState.Error(
-                        (response.error.message + ": " + response.error.subErrors.joinToString())
+                        (profileResponse.error.message + ": " + profileResponse.error.subErrors.joinToString())
                     )
                     return@launch
                 }
+                val refreshToken = sessionStore.refreshTokenFlow.firstOrNull().orEmpty()
+                val requestDTO = TokenRefreshRequestDTO(refreshToken)
 
-                _profileState.value = ProfileState.Success(response.data.studioId, response.data.userId)
-                Log.d("Profile Saved", response.data.studioId.toString())
-                Log.d("Studio Saved", response.data.userId.toString())
+                val networkResponse = withContext(Dispatchers.IO) {
+                    authRepository.refreshToken(requestDTO)
+                }
+                if(networkResponse.data != null){
+                    sessionStore.saveTokens(networkResponse.data.accessToken, networkResponse.data.refreshToken)
+                    Log.d("ProfileViewModel", "New Tokens Saved")
+                }
 
+                _profileState.value = ProfileState.Success(profileResponse.data.studioId, profileResponse.data.userId)
+                Log.d("Profile Saved", profileResponse.data.studioId.toString())
+                Log.d("Studio Saved", profileResponse.data.userId.toString())
 
-                    sessionStore.updateIsRegistered()
-                    sessionStore.saveStudioId(response.data.studioId)
-                    sessionStore.saveUserId(response.data.userId)
+                sessionStore.updateIsRegistered()
+                sessionStore.saveStudioId(profileResponse.data.studioId)
+                sessionStore.saveUserId(profileResponse.data.userId)
 
                 Log.d("isRegistered Changed", sessionStore.isRegisteredFlow.firstOrNull().toString())
 
@@ -211,7 +222,7 @@ class ProfileViewModel @Inject constructor(
             try {
                 val studioId = sessionStore.studioIdFlow.first()
 
-                val response = repository.getStudioImage(studioId)
+                val response = profileRepository.getStudioImage(studioId)
                 if(response.data != null) {
                     StudioImageBitMap = ImageUtils.base64ToBitmap(response.data)
                 }

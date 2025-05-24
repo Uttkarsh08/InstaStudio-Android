@@ -3,6 +3,7 @@ package com.uttkarsh.InstaStudio.di
 import com.uttkarsh.InstaStudio.data.auth.AuthApiService
 import com.uttkarsh.InstaStudio.data.auth.ProfileApiService
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
+import com.uttkarsh.InstaStudio.utils.api.TokenAuthenticator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -46,6 +47,15 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideTokenAuthenticator(
+        sessionStore: SessionStore,
+        authApiService: AuthApiService
+    ): TokenAuthenticator {
+        return TokenAuthenticator(sessionStore, authApiService)
+    }
+
+    @Provides
+    @Singleton
     @Named("UnauthenticatedClient")
     fun provideDefaultOkHttpClient(
         logging: HttpLoggingInterceptor
@@ -60,10 +70,12 @@ object NetworkModule {
     @Named("AuthenticatedClient")
     fun provideAuthOkHttpClient(
         logging: HttpLoggingInterceptor,
-        authInterceptor: Interceptor
+        authInterceptor: Interceptor,
+        tokenAuthenticator: TokenAuthenticator
     ): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(authInterceptor)
+            .authenticator(tokenAuthenticator)
             .addInterceptor(logging)
             .build()
     }

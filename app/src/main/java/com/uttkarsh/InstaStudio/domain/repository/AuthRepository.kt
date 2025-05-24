@@ -3,8 +3,11 @@ package com.uttkarsh.InstaStudio.domain.repository
 import android.content.Context
 import com.uttkarsh.InstaStudio.data.auth.AuthApiService
 import com.uttkarsh.InstaStudio.data.auth.GoogleSignInManager
+import com.uttkarsh.InstaStudio.domain.model.ApiResponse
 import com.uttkarsh.InstaStudio.domain.model.LoginRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.LoginResponseDTO
+import com.uttkarsh.InstaStudio.domain.model.TokenRefreshRequestDTO
+import com.uttkarsh.InstaStudio.domain.model.TokenRefreshResponseDTO
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -24,6 +27,10 @@ class AuthRepository @Inject constructor(
         } else {
             throw Exception("API error: ${resp.error}")
         }
+    }
+
+    suspend fun refreshToken(request: TokenRefreshRequestDTO): ApiResponse<TokenRefreshResponseDTO>{
+        return authApi.refreshToken(request);
     }
 
     fun signOut() = googleSignInManager.signOut()
