@@ -1,5 +1,7 @@
 package com.uttkarsh.InstaStudio.di
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.uttkarsh.InstaStudio.data.auth.AuthApiService
 import com.uttkarsh.InstaStudio.data.auth.ProfileApiService
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
@@ -7,6 +9,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.flow.firstOrNull
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -27,13 +30,18 @@ object NetworkModule {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @Provides
     @Singleton
     fun provideAuthInterceptor(sessionStore: SessionStore): Interceptor {
-        return Interceptor { chain ->
+        return Interceptor { chain: Interceptor.Chain ->
             val requestBuilder = chain.request().newBuilder()
-            sessionStore.getAccessToken()?.let { token ->
-                requestBuilder.header("Authorization", "Bearer $token")
+
+            val token = kotlinx.coroutines.runBlocking {
+                sessionStore.accessTokenFlow.firstOrNull()
+            }
+            token?.let {
+                requestBuilder.header("Authorization", "Bearer $it")
             }
             chain.proceed(requestBuilder.build())
         }

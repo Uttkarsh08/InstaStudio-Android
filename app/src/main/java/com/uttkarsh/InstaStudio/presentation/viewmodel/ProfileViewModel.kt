@@ -3,7 +3,9 @@ package com.uttkarsh.InstaStudio.presentation.viewmodel
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -12,6 +14,7 @@ import androidx.lifecycle.viewModelScope
 import com.uttkarsh.InstaStudio.domain.model.AdminProfileSetupRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.ProfileRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.StudioRequestDTO
+import com.uttkarsh.InstaStudio.domain.model.UserType
 import com.uttkarsh.InstaStudio.domain.model.validators.validate
 import com.uttkarsh.InstaStudio.domain.repository.ProfileRepository
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
@@ -23,11 +26,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import javax.inject.Inject
 
+@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val repository: ProfileRepository,
@@ -39,9 +46,6 @@ class ProfileViewModel @Inject constructor(
 
     private val _userEmail = MutableStateFlow<String>("")
     val userEmail = _userEmail.asStateFlow()
-
-    private val _isAuthRefreshed = MutableStateFlow(false)
-    val isAuthRefreshed: StateFlow<Boolean> = _isAuthRefreshed.asStateFlow()
 
     var studioName by mutableStateOf("")
         private set
@@ -96,14 +100,24 @@ class ProfileViewModel @Inject constructor(
 
     fun fetchLatestEmail() {
         viewModelScope.launch {
-            val email = sessionStore.getEmail().orEmpty()
+            val email = sessionStore.emailFlow.collectLatest {
+                _userEmail.value = it.toString()
+            }
             Log.d("ProfileViewModel", "Fetched email: $email")
-            _userEmail.value = email
+
         }
     }
 
-    fun resetAuthRefreshFlag() {
-        _isAuthRefreshed.value = false
+    fun resetProfileState() {
+        _profileState.value = ProfileState.Idle
+        StudioImageBitMap = null
+        selectedStudioImageUri = null
+        studioName = ""
+        phoneNumber = ""
+        pinCode = ""
+        state = ""
+        city = ""
+        address = ""
     }
 
     fun onImageSelected(context: Context, uri: Uri) {
@@ -118,17 +132,22 @@ class ProfileViewModel @Inject constructor(
             }
         }
     }
-
     fun saveAdminProfile() {
         viewModelScope.launch {
             _profileState.value = ProfileState.Loading
             try {
+
+                val firebaseId = sessionStore.firebaseIdFlow.firstOrNull().orEmpty()
+                val userName = sessionStore.nameFlow.firstOrNull().orEmpty()
+                val userEmail = sessionStore.emailFlow.firstOrNull().orEmpty()
+                val userType = sessionStore.userTypeFlow.firstOrNull() ?: UserType.ADMIN
+
                 val profileRequest = ProfileRequestDTO(
-                    firebaseId = sessionStore.getFirebaseId().toString(),
-                    userName = sessionStore.getName().toString(),
+                    firebaseId = firebaseId,
+                    userName = userName,
                     userPhoneNo = phoneNumber,
-                    userEmail = sessionStore.getEmail().toString(),
-                    userType = sessionStore.getUserType()
+                    userEmail = userEmail,
+                    userType = userType
                 )
 
                 val profileError = profileRequest.validate()
@@ -171,16 +190,12 @@ class ProfileViewModel @Inject constructor(
                 Log.d("Profile Saved", response.data.studioId.toString())
                 Log.d("Studio Saved", response.data.userId.toString())
 
-                _isAuthRefreshed.value = false
 
-                withContext(Dispatchers.IO) {
                     sessionStore.updateIsRegistered()
                     sessionStore.saveStudioId(response.data.studioId)
                     sessionStore.saveUserId(response.data.userId)
-                }
 
-                _isAuthRefreshed.value = true
-                Log.d("isRegistered Changed", sessionStore.getIsRegistered().toString())
+                Log.d("isRegistered Changed", sessionStore.isRegisteredFlow.firstOrNull().toString())
 
             } catch (e: HttpException) {
                 val errorMessage = ApiErrorExtractor.extractMessage(e)
@@ -194,14 +209,11 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun resetProfileState() {
-        _profileState.value = ProfileState.Idle
-    }
-
     fun getStudioImage(){
         viewModelScope.launch {
             try {
-                val studioId = sessionStore.getStudioId()
+                val studioId = sessionStore.studioIdFlow.first()
+
                 val response = repository.getStudioImage(studioId)
                 if(response.data != null) {
                     StudioImageBitMap = ImageUtils.base64ToBitmap(response.data)

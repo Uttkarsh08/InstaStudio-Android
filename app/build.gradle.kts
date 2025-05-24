@@ -93,5 +93,6 @@ dependencies {
     implementation(libs.hilt.compose.navigation)
     add("ksp", libs.dagger.kapt)
 
-    implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation(libs.coil.compose)
+    implementation(libs.androidx.datastore.preferences)
 }

@@ -1,6 +1,8 @@
 package com.uttkarsh.InstaStudio.presentation.ui
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +31,7 @@ import kotlinx.coroutines.delay
 import androidx.compose.runtime.getValue
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SplashScreen(
     authViewModel: AuthViewModel = hiltViewModel(),
@@ -38,29 +41,21 @@ fun SplashScreen(
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
     val isRegistered by authViewModel.isRegistered.collectAsState()
     val isOnBoardingShown by authViewModel.isOnBoardingShown.collectAsState()
-    val isAuthRefreshed by authViewModel.isAuthRefreshed.collectAsState()
 
     LaunchedEffect(Unit) {
-        authViewModel.refreshAuthState()
-    }
+        delay(1000)
+        Log.d("Splash", "LoggedIn: $isLoggedIn, Registered: $isRegistered, OnBoardingShown: $isOnBoardingShown")
 
-    LaunchedEffect(isAuthRefreshed) {
-        if (isAuthRefreshed) {
-            Log.d("Splash", "LoggedIn: $isLoggedIn, Registered: $isRegistered, OnBoardingShown: $isOnBoardingShown")
+        val nextDestination = when {
+            !isOnBoardingShown -> Screens.OnBoardingScreen.route
+            !isLoggedIn -> Screens.LoginTypeScreen.route
+            !isRegistered -> Screens.ProfileCompletionScreen.route
+            else -> Screens.DashBoardScreen.route
+        }
 
-            val nextDestination = when {
-                !isOnBoardingShown -> Screens.OnBoardingScreen.route
-                !isLoggedIn -> Screens.LoginTypeScreen.route
-                !isRegistered -> Screens.ProfileCompletionScreen.route
-                else -> Screens.DashBoardScreen.route
-            }
-
-            navController.navigate(nextDestination) {
-                popUpTo(0) { inclusive = true }
-                launchSingleTop = true
-            }
-
-            authViewModel.resetAuthRefreshFlag()
+        navController.navigate(nextDestination) {
+            popUpTo(0) { inclusive = true }
+            launchSingleTop = true
         }
     }
 

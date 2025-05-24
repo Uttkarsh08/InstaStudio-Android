@@ -1,6 +1,8 @@
 package com.uttkarsh.InstaStudio.presentation.ui
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,6 +33,7 @@ import com.uttkarsh.InstaStudio.presentation.viewmodel.DashBoardViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.ProfileViewModel
 import com.uttkarsh.InstaStudio.utils.states.DashBoardState
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DashBoardScreen(
     authViewModel: AuthViewModel = hiltViewModel(),
@@ -42,16 +45,9 @@ fun DashBoardScreen(
     val state by dashBoardViewModel.dashBoardState.collectAsState()
     val studioImage = profileViewModel.StudioImageBitMap
     val isRegistered by authViewModel.isRegistered.collectAsState()
-    val isAuthRefreshed by authViewModel.isAuthRefreshed.collectAsState()
 
     LaunchedEffect(Unit) {
-        authViewModel.refreshAuthState()
-    }
-    LaunchedEffect(isAuthRefreshed) {
-        if (isAuthRefreshed){
-            Log.d("isRegistered in DashBoard: ", isRegistered.toString())
-            authViewModel.resetAuthRefreshFlag()
-        }
+        Log.d("DashBoardScreen:" , isRegistered.toString())
     }
 
     LaunchedEffect(state) {
@@ -103,7 +99,11 @@ fun DashBoardScreen(
         Button(onClick = {
             authViewModel.logout()
             profileViewModel.resetProfileState()
-            navController.navigate(Screens.LoginTypeScreen.route)
+            dashBoardViewModel.resetDashBoardState()
+            navController.navigate(Screens.LoginTypeScreen.route){
+                popUpTo(0) { inclusive = true }
+                launchSingleTop = true
+            }
 
         }) {
             Text("Logout")

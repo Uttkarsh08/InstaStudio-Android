@@ -1,7 +1,9 @@
 package com.uttkarsh.InstaStudio.presentation.ui
 
 import android.content.res.Configuration
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +38,7 @@ import com.uttkarsh.InstaStudio.R
 import com.uttkarsh.InstaStudio.presentation.navigation.Screens
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AuthViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun OnBoardingScreen(
     viewModel: AuthViewModel = hiltViewModel(),
@@ -81,8 +84,8 @@ fun OnBoardingScreen(
 
             Button(
                 onClick = {
-                    viewModel.setOnboardingShown()
-                    navController.navigate(Screens.LoginTypeScreen.route) {
+                    viewModel.setOnBoardingShown()
+                    navController.navigate(Screens.LoginTypeScreen.route){
                         popUpTo(0) { inclusive = true }
                         launchSingleTop = true
                     }
@@ -105,10 +108,4 @@ fun OnBoardingScreen(
         }
     }
 }
-@Preview(showBackground = true)
-@Composable
-fun ScreenPreview(){
-    OnBoardingScreen(
-        navController = rememberNavController()
-    )
-}
+

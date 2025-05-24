@@ -1,7 +1,9 @@
 package com.uttkarsh.InstaStudio.presentation.ui
 
 import android.content.res.Configuration
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -46,6 +48,7 @@ import com.uttkarsh.InstaStudio.domain.model.UserType
 import com.uttkarsh.InstaStudio.presentation.navigation.Screens
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AuthViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun LoginTypeScreen(
     viewModel: AuthViewModel = hiltViewModel(),

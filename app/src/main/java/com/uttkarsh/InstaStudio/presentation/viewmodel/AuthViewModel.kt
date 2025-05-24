@@ -1,14 +1,15 @@
 package com.uttkarsh.InstaStudio.presentation.viewmodel
 
 import android.content.Context
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.uttkarsh.InstaStudio.domain.model.LoginRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.UserType
 import com.uttkarsh.InstaStudio.domain.repository.AuthRepository
-import com.uttkarsh.InstaStudio.presentation.navigation.Screens
 import com.uttkarsh.InstaStudio.utils.SharedPref.OnboardingStore
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.states.AuthState
@@ -17,10 +18,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
@@ -44,28 +47,29 @@ class AuthViewModel @Inject constructor(
     private val _isOnBoardingShown = MutableStateFlow<Boolean>(false)
     val isOnBoardingShown: StateFlow<Boolean> = _isOnBoardingShown.asStateFlow()
 
-    private val _isAuthRefreshed = MutableStateFlow(false)
-    val isAuthRefreshed: StateFlow<Boolean> = _isAuthRefreshed.asStateFlow()
-
-
-    fun setLoginType(type: UserType) {
-        _loginType.value = type
-    }
-
-    fun refreshAuthState() {
+    init {
+        Log.d("AuthViewModel", "SessionStore collector started")
         viewModelScope.launch {
-            _isAuthRefreshed.value = false
+            Log.d("AuthViewModel", "SessionStore collector started for onBoarding")
+            onboardingStore.isOnboardingShownFlow.collectLatest {
+                _isOnBoardingShown.value = it
+            }
+        }
 
+        viewModelScope.launch {
+            Log.d("AuthViewModel", "SessionStore collector started for isRegistered")
+            sessionStore.isRegisteredFlow.collectLatest {
+                Log.d("AuthViewModel", "Read isRegistered: $it")
+                _isRegistered.value = it
+            }
+        }
+
+        viewModelScope.launch {
             _isLoggedIn.value = isUserLoggedIn()
-            _isRegistered.value = isUserRegistered()
-            _isOnBoardingShown.value = isOnboardingShown()
-
-            _isAuthRefreshed.value = true
         }
     }
-
-    fun resetAuthRefreshFlag() {
-        _isAuthRefreshed.value = false
+    fun setLoginType(type: UserType) {
+        _loginType.value = type
     }
 
     fun signInWithGoogle(context: Context) {
@@ -81,11 +85,13 @@ class AuthViewModel @Inject constructor(
     }
 
     fun logout() {
-        authRepository.signOut()
-        sessionStore.clear()
-        _isLoggedIn.value = false
-        _isRegistered.value = false
-        _authState.value = AuthState.Idle
+        viewModelScope.launch {
+            authRepository.signOut()
+            sessionStore.clear()
+            _isLoggedIn.value = false
+            _isRegistered.value = false
+            _authState.value = AuthState.Idle
+        }
     }
 
     fun onFirebaseLoginSuccess(requestDTO: LoginRequestDTO) {
@@ -94,12 +100,13 @@ class AuthViewModel @Inject constructor(
             try {
                 val response = authRepository.validateFirebaseToken(requestDTO)
 
-                withContext(Dispatchers.IO) { sessionStore.saveTokens(response.accessToken, response.refreshToken) }
-                withContext(Dispatchers.IO) { sessionStore.saveUserInfo(response.userName, response.userEmail, response.firebaseId, response.userType, response.isRegistered) }
+                sessionStore.saveTokens(response.accessToken, response.refreshToken)
+                sessionStore.saveUserInfo(response.userName, response.userEmail, response.firebaseId, response.userType, response.isRegistered)
+
                 Log.d("SessionStore", "Saving email: ${response.userEmail}")
+                Log.d("AuthViewModel", "Saving isRegistered: ${response.isRegistered}")
 
                 _authState.value = AuthState.BackendSuccess(response)
-                refreshAuthState()
             } catch (e: Exception) {
                 _authState.value = AuthState.Error("Backend login failed")
             }
@@ -108,11 +115,17 @@ class AuthViewModel @Inject constructor(
 
     suspend fun isUserLoggedIn(): Boolean = withContext(Dispatchers.IO) { firebaseAuth.currentUser != null }
 
-    suspend fun isUserRegistered(): Boolean = withContext(Dispatchers.IO) { sessionStore.getIsRegistered() }
+    fun setOnBoardingShown() {
+        viewModelScope.launch {
+            try {
+                onboardingStore.setOnboardingShown()
+            } catch (e: Exception) {
+                Log.e("AuthViewModel", "Failed to set onboarding shown", e)
+            }
+        }
+    }
 
-    suspend fun isOnboardingShown(): Boolean = withContext(Dispatchers.IO) { onboardingStore.isOnboardingShown() }
 
-    fun setOnboardingShown() = onboardingStore.setOnboardingShown()
 
 
 }

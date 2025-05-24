@@ -1,8 +1,10 @@
 package com.uttkarsh.InstaStudio.presentation.ui
 
 import android.content.res.Configuration
+import android.os.Build
 import android.util.Log
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +35,7 @@ import com.uttkarsh.InstaStudio.presentation.viewmodel.AuthViewModel
 import com.uttkarsh.InstaStudio.utils.states.AuthState
 import kotlinx.coroutines.delay
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SignInScreen(
     viewModel: AuthViewModel = hiltViewModel(),
@@ -46,7 +49,6 @@ fun SignInScreen(
     val state by viewModel.authState.collectAsState()
     val isRegistered by viewModel.isRegistered.collectAsState()
     val loginType = viewModel.loginType.collectAsState().value
-    val isAuthRefreshed by viewModel.isAuthRefreshed.collectAsState()
 
     LaunchedEffect(state) {
         if (state is AuthState.Success) {
@@ -62,25 +64,21 @@ fun SignInScreen(
     }
 
     LaunchedEffect(state) {
+        delay(1000)
         if (state is AuthState.BackendSuccess) {
-            viewModel.refreshAuthState()
-        }
-    }
-
-    LaunchedEffect(state, isAuthRefreshed) {
-        if (state is AuthState.BackendSuccess && isAuthRefreshed) {
             val nextDestination = if (isRegistered) {
                 Screens.DashBoardScreen.route
             } else {
                 Screens.ProfileCompletionScreen.route
             }
+            Log.e("SignIn: isRegistered: ",  isRegistered.toString())
 
-            navController.navigate(nextDestination)
-
-            viewModel.resetAuthRefreshFlag()
+            navController.navigate(nextDestination){
+                popUpTo(0) { inclusive = true }
+                launchSingleTop = true
+            }
         }
     }
-
 
     val errorMessage = if (state is AuthState.Error) (state as AuthState.Error).message else null
     val isLoading = state is AuthState.Loading

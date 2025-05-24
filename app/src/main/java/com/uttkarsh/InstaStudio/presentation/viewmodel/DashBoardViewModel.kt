@@ -1,6 +1,8 @@
 package com.uttkarsh.InstaStudio.presentation.viewmodel
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.uttkarsh.InstaStudio.domain.repository.ProfileRepository
@@ -12,11 +14,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import javax.inject.Inject
 
+@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class DashBoardViewModel @Inject constructor(
     private val repository: ProfileRepository,
@@ -27,10 +31,14 @@ class DashBoardViewModel @Inject constructor(
     private val _dashBoardState = MutableStateFlow<DashBoardState>(DashBoardState.Idle)
     val dashBoardState = _dashBoardState.asStateFlow()
 
+    fun resetDashBoardState(){
+        _dashBoardState.value = DashBoardState.Idle
+
+    }
     fun getUserProfile(){
         viewModelScope.launch {
-            val currentStudioId = sessionStore.getStudioId()
-            val currentUserId = sessionStore.getUserId()
+            val currentStudioId = sessionStore.studioIdFlow.first()
+            val currentUserId = sessionStore.userIdFlow.first()
             Log.d("DashBoardViewModel", "getUserProfile called. StudioID from session: $currentStudioId, UserID from session: $currentUserId")
 
             try {
@@ -46,6 +54,7 @@ class DashBoardViewModel @Inject constructor(
                 _dashBoardState.value = DashBoardState.Success(response.data.studioId, response.data.userId)
 
                 withContext(Dispatchers.IO) {
+
                     sessionStore.saveStudioId(response.data.studioId)
                     sessionStore.saveUserId(response.data.userId)
                 }
