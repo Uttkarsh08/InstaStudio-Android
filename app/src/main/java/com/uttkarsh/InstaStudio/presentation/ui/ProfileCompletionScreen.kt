@@ -47,6 +47,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.uttkarsh.InstaStudio.presentation.navigation.Screens
+import com.uttkarsh.InstaStudio.presentation.ui.utils.AppTopBar
 import com.uttkarsh.InstaStudio.presentation.viewmodel.ProfileViewModel
 import com.uttkarsh.InstaStudio.utils.states.ProfileState
 
@@ -90,14 +91,8 @@ fun ProfileCompletionScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text(text = "Profile Completion",
-                    fontFamily = alatsiFont,
-                    fontSize = 20.sp,
-                    color = Color.Black)
-                }
-            )
-        },
+            AppTopBar("Profile Completion", false, null, {})
+        }
     ){
         Column(
             modifier = Modifier.fillMaxSize()

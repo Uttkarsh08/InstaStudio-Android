@@ -1,13 +1,11 @@
 package com.uttkarsh.InstaStudio.presentation.navigation
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.uttkarsh.InstaStudio.presentation.ui.DashBoardScreen
+import com.uttkarsh.InstaStudio.presentation.ui.DashBoardPages.DashBoardScreen
 import com.uttkarsh.InstaStudio.presentation.ui.LoginTypeScreen
 import com.uttkarsh.InstaStudio.presentation.ui.OnBoardingScreen
 import com.uttkarsh.InstaStudio.presentation.ui.ProfileCompletionScreen
