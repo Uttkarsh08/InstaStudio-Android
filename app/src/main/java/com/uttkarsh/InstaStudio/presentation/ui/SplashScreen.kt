@@ -1,8 +1,6 @@
 package com.uttkarsh.InstaStudio.presentation.ui
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,8 +28,6 @@ import com.uttkarsh.InstaStudio.presentation.viewmodel.AuthViewModel
 import kotlinx.coroutines.delay
 import androidx.compose.runtime.getValue
 
-
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SplashScreen(
     authViewModel: AuthViewModel = hiltViewModel(),

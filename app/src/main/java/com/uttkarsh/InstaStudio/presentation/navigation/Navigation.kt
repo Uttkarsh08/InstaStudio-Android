@@ -17,7 +17,6 @@ import com.uttkarsh.InstaStudio.presentation.viewmodel.AuthViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.DashBoardViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.ProfileViewModel
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Navigation(
     authViewModel: AuthViewModel = hiltViewModel(),

@@ -1,6 +1,5 @@
 package com.uttkarsh.InstaStudio.data.auth
 
-import android.accounts.AccountManager
 import android.content.Context
 import android.util.Log
 import androidx.credentials.CredentialManager

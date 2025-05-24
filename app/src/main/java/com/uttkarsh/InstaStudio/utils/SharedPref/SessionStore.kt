@@ -5,10 +5,10 @@ import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Log
+import android.util.Base64
 import androidx.annotation.RequiresApi
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
-import androidx.security.crypto.MasterKey
 import com.uttkarsh.InstaStudio.domain.model.UserType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
@@ -19,11 +19,9 @@ import javax.crypto.spec.GCMParameterSpec
 import javax.inject.Inject
 import javax.inject.Singleton
 import java.security.KeyStore
-import java.util.*
 
 private val Context.dataStore by preferencesDataStore("auth_prefs")
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Singleton
 class SessionStore @Inject constructor(@ApplicationContext private val context: Context) {
 
@@ -69,12 +67,12 @@ class SessionStore @Inject constructor(@ApplicationContext private val context: 
         cipher.init(Cipher.ENCRYPT_MODE, secretKey)
         val iv = cipher.iv
         val encrypted = cipher.doFinal(plainText.toByteArray(Charsets.UTF_8))
-        return Base64.getEncoder().encodeToString(iv + encrypted)
+        return Base64.encodeToString(iv + encrypted, Base64.NO_WRAP)
     }
 
     private fun decrypt(encryptedText: String): String? {
         return try {
-            val decoded = Base64.getDecoder().decode(encryptedText)
+            val decoded = Base64.decode(encryptedText, Base64.NO_WRAP)
             val iv = decoded.copyOfRange(0, 12)
             val encrypted = decoded.copyOfRange(12, decoded.size)
             val cipher = createCipher()

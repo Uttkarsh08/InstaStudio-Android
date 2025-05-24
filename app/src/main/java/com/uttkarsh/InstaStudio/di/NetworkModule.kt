@@ -1,7 +1,5 @@
 package com.uttkarsh.InstaStudio.di
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.uttkarsh.InstaStudio.data.auth.AuthApiService
 import com.uttkarsh.InstaStudio.data.auth.ProfileApiService
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
@@ -30,7 +28,6 @@ object NetworkModule {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     @Provides
     @Singleton
     fun provideAuthInterceptor(sessionStore: SessionStore): Interceptor {

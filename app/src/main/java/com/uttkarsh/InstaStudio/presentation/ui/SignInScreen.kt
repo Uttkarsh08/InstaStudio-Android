@@ -1,10 +1,8 @@
 package com.uttkarsh.InstaStudio.presentation.ui
 
 import android.content.res.Configuration
-import android.os.Build
 import android.util.Log
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
@@ -35,7 +33,6 @@ import com.uttkarsh.InstaStudio.presentation.viewmodel.AuthViewModel
 import com.uttkarsh.InstaStudio.utils.states.AuthState
 import kotlinx.coroutines.delay
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SignInScreen(
     viewModel: AuthViewModel = hiltViewModel(),
