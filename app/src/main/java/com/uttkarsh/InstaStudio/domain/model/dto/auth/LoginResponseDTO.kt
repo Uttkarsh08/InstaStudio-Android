@@ -1,4 +1,6 @@
-package com.uttkarsh.InstaStudio.domain.model
+package com.uttkarsh.InstaStudio.domain.model.dto.auth
+
+import com.uttkarsh.InstaStudio.domain.model.UserType
 
 data class LoginResponseDTO(
     val accessToken: String,

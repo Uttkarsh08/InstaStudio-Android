@@ -98,4 +98,7 @@ dependencies {
 
     implementation(libs.glide)
     ksp(libs.compiler)
+
+    implementation(libs.androidx.paging.runtime.ktx)
+    implementation(libs.androidx.paging.compose)
 }

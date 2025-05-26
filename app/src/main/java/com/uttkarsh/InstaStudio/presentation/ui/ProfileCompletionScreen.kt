@@ -21,7 +21,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CenterAlignedTopAppBar
 import com.uttkarsh.InstaStudio.R
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -124,7 +123,7 @@ fun ProfileCompletionScreen(
                     Icon(painterResource(R.drawable.stidioname),
                         contentDescription = "Studio Name",
                         modifier = Modifier.size(25.dp),
-                        colorResource(R.color.logo)
+                        colorResource(R.color.darkGrey)
                     )
 
                     Spacer(Modifier.width(15.dp))
@@ -150,7 +149,7 @@ fun ProfileCompletionScreen(
                     Icon(painterResource(R.drawable.phone),
                         contentDescription = "Phone Number",
                         modifier = Modifier.size(25.dp),
-                        colorResource(R.color.logo)
+                        colorResource(R.color.darkGrey)
                     )
 
                     Spacer(Modifier.width(20.dp))
@@ -177,7 +176,7 @@ fun ProfileCompletionScreen(
                     Icon(painterResource(R.drawable.address),
                         contentDescription = "Studio Address",
                         modifier = Modifier.size(25.dp),
-                        colorResource(R.color.logo)
+                        colorResource(R.color.darkGrey)
                     )
 
                     Spacer(Modifier.width(20.dp))
@@ -263,7 +262,7 @@ fun ProfileCompletionScreen(
                     Icon(painterResource(R.drawable.mail),
                         contentDescription = "User Mail",
                         modifier = Modifier.size(25.dp),
-                        colorResource(R.color.logo)
+                        colorResource(R.color.darkGrey)
                     )
 
                     Spacer(Modifier.width(20.dp))
@@ -271,7 +270,7 @@ fun ProfileCompletionScreen(
                     Text(text = email.value,
                         fontFamily = alatsiFont,
                         fontSize = 14.sp,
-                        color = colorResource(R.color.logo)
+                        color = colorResource(R.color.darkGrey)
                     )
                 }
                 if (errorMessage != null) {
@@ -284,7 +283,7 @@ fun ProfileCompletionScreen(
                         .fillMaxWidth()
                         .height(67.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = colorResource(R.color.darkGrey),
+                        containerColor = colorResource(R.color.buttons),
                         contentColor = Color.White
                     ),
                     shape = RoundedCornerShape(19.dp)
@@ -359,7 +358,7 @@ fun SelectLogoSection(
             text = "Add Logo",
             fontFamily = alatsiFont,
             fontSize = 14.sp,
-            color = colorResource(R.color.logo)
+            color = colorResource(R.color.darkGrey)
         )
     }
 }

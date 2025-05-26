@@ -1,8 +1,8 @@
 package com.uttkarsh.InstaStudio.domain.repository
 
 import com.uttkarsh.InstaStudio.data.auth.ProfileApiService
-import com.uttkarsh.InstaStudio.domain.model.AdminProfileSetupRequestDTO
-import com.uttkarsh.InstaStudio.domain.model.UserProfileResponseDTO
+import com.uttkarsh.InstaStudio.domain.model.dto.admin.AdminProfileSetupRequestDTO
+import com.uttkarsh.InstaStudio.domain.model.dto.user.UserProfileResponseDTO
 import com.uttkarsh.InstaStudio.domain.model.ApiResponse
 import javax.inject.Inject
 import javax.inject.Singleton

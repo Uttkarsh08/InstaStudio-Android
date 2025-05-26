@@ -1,4 +1,4 @@
-package com.uttkarsh.InstaStudio.presentation.ui.DashBoardPages.util
+package com.uttkarsh.InstaStudio.presentation.ui.DashBoardPages
 
 import android.util.Log
 import androidx.annotation.DrawableRes
@@ -146,7 +146,7 @@ fun BottomBar(
             onClick = {  },
             shape = CircleShape,
             elevation = FloatingActionButtonDefaults.elevation(6.dp),
-            containerColor = colorResource(id = R.color.lightGrey),
+            containerColor = colorResource(id = R.color.dashBoardContainer),
             contentColor = Color.Black,
             modifier = Modifier
                 .align(Alignment.TopCenter)

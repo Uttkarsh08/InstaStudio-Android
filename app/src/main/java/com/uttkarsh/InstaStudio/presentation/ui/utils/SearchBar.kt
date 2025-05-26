@@ -33,17 +33,16 @@ import androidx.compose.ui.unit.dp
 import com.uttkarsh.InstaStudio.R
 
 @Composable
-fun SearchBar(onSearchChanged: (String) -> Unit) {
+fun SearchBar(
+    modifier: Modifier = Modifier,
+    onSearchChanged: (String) -> Unit
+) {
 
     val alatsiFont = FontFamily(Font(R.font.alatsi))
     var query by remember { mutableStateOf("") }
 
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
-            .border(BorderStroke(1.dp, colorResource(R.color.searchBarBorder)),
-                RoundedCornerShape(14.dp))
+        modifier = modifier
 
     ) {
         Column(

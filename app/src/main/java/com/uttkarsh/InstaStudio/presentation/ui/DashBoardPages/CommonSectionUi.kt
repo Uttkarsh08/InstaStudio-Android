@@ -1,4 +1,4 @@
-package com.uttkarsh.InstaStudio.presentation.ui.DashBoardPages.util
+package com.uttkarsh.InstaStudio.presentation.ui.DashBoardPages
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -43,7 +43,7 @@ fun CommonSectionUi(
             .height(if(isBig) 230.dp else 180.dp)
             .padding(top = 8.dp, start = if(isLeft) 16.dp else 8.dp, end = if(isLeft) 8.dp else 16.dp, bottom = 8.dp),
         shape = RoundedCornerShape(27.dp),
-        color = colorResource(R.color.lightGrey),
+        color = colorResource(R.color.dashBoardContainer),
         onClick = onClick
     ) {
         Column(
@@ -57,7 +57,7 @@ fun CommonSectionUi(
             )
 
             Text(text = heading, fontFamily = alatsiFont, fontSize = 20.sp, color = Color.Black, fontWeight = FontWeight.Bold)
-            Text(text = description, fontFamily = alatsiFont, fontSize = 14.sp, color = colorResource(R.color.darkGrey))
+            Text(text = description, fontFamily = alatsiFont, fontSize = 14.sp, color = colorResource(R.color.buttons))
         }
     }
 

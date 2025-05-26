@@ -1,4 +1,4 @@
-package com.uttkarsh.InstaStudio.domain.model
+package com.uttkarsh.InstaStudio.domain.model.dto.auth
 
 data class TokenRefreshResponseDTO(
     val accessToken: String,

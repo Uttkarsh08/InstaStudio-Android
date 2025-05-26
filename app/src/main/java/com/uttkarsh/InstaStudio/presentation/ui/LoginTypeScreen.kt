@@ -133,7 +133,7 @@ fun LoginTypeButton(painter: Painter, text: String, onClick: ()-> Unit){
             .fillMaxWidth()
             .height(67.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = colorResource(id = R.color.LightBlack),
+            containerColor = colorResource(id = R.color.buttons),
             contentColor = Color.White
         ),
         shape = RoundedCornerShape(19.dp),

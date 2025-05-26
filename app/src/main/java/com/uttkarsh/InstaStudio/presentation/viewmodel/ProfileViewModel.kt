@@ -9,10 +9,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.uttkarsh.InstaStudio.domain.model.AdminProfileSetupRequestDTO
-import com.uttkarsh.InstaStudio.domain.model.ProfileRequestDTO
-import com.uttkarsh.InstaStudio.domain.model.StudioRequestDTO
-import com.uttkarsh.InstaStudio.domain.model.TokenRefreshRequestDTO
+import com.uttkarsh.InstaStudio.domain.model.dto.admin.AdminProfileSetupRequestDTO
+import com.uttkarsh.InstaStudio.domain.model.dto.user.ProfileRequestDTO
+import com.uttkarsh.InstaStudio.domain.model.dto.studio.StudioRequestDTO
+import com.uttkarsh.InstaStudio.domain.model.dto.auth.TokenRefreshRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.UserType
 import com.uttkarsh.InstaStudio.domain.model.validators.validate
 import com.uttkarsh.InstaStudio.domain.repository.AuthRepository
@@ -99,10 +99,9 @@ class ProfileViewModel @Inject constructor(
 
     fun fetchLatestEmail() {
         viewModelScope.launch {
-            val email = sessionStore.emailFlow.collectLatest {
+            sessionStore.emailFlow.collectLatest {
                 _userEmail.value = it.toString()
             }
-            Log.d("ProfileViewModel", "Fetched email: $email")
 
         }
     }

@@ -1,6 +1,6 @@
 package com.uttkarsh.InstaStudio.domain.model.validators
 
-import com.uttkarsh.InstaStudio.domain.model.StudioRequestDTO
+import com.uttkarsh.InstaStudio.domain.model.dto.studio.StudioRequestDTO
 
 fun StudioRequestDTO.validate(): String? {
     if (studioName.isBlank()) return "Studio name can't be blank"

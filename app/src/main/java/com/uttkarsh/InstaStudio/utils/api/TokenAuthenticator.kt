@@ -2,7 +2,7 @@ package com.uttkarsh.InstaStudio.utils.api
 
 import android.util.Log
 import com.uttkarsh.InstaStudio.data.auth.AuthApiService
-import com.uttkarsh.InstaStudio.domain.model.TokenRefreshRequestDTO
+import com.uttkarsh.InstaStudio.domain.model.dto.auth.TokenRefreshRequestDTO
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking

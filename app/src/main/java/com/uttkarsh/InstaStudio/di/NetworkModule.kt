@@ -2,6 +2,7 @@ package com.uttkarsh.InstaStudio.di
 
 import com.uttkarsh.InstaStudio.data.auth.AuthApiService
 import com.uttkarsh.InstaStudio.data.auth.ProfileApiService
+import com.uttkarsh.InstaStudio.data.auth.ResourceApiService
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.api.TokenAuthenticator
 import dagger.Module
@@ -120,5 +121,14 @@ object NetworkModule {
         @Named("AuthenticatedRetrofit") retrofit: Retrofit
     ): ProfileApiService {
         return retrofit.create(ProfileApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideResourceApi(
+        @Named("AuthenticatedRetrofit") retrofit: Retrofit
+
+    ): ResourceApiService{
+        return retrofit.create(ResourceApiService::class.java)
     }
 }

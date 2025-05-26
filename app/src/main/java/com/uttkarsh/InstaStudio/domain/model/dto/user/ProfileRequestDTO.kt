@@ -1,4 +1,6 @@
-package com.uttkarsh.InstaStudio.domain.model
+package com.uttkarsh.InstaStudio.domain.model.dto.user
+
+import com.uttkarsh.InstaStudio.domain.model.UserType
 
 data class ProfileRequestDTO(
     val firebaseId: String,

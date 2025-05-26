@@ -1,7 +1,7 @@
 package com.uttkarsh.InstaStudio.data.auth
 
-import com.uttkarsh.InstaStudio.domain.model.AdminProfileSetupRequestDTO
-import com.uttkarsh.InstaStudio.domain.model.UserProfileResponseDTO
+import com.uttkarsh.InstaStudio.domain.model.dto.admin.AdminProfileSetupRequestDTO
+import com.uttkarsh.InstaStudio.domain.model.dto.user.UserProfileResponseDTO
 import com.uttkarsh.InstaStudio.domain.model.ApiResponse
 import retrofit2.http.Body
 import retrofit2.http.GET

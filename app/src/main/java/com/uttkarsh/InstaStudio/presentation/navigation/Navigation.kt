@@ -9,17 +9,20 @@ import com.uttkarsh.InstaStudio.presentation.ui.DashBoardPages.DashBoardScreen
 import com.uttkarsh.InstaStudio.presentation.ui.LoginTypeScreen
 import com.uttkarsh.InstaStudio.presentation.ui.OnBoardingScreen
 import com.uttkarsh.InstaStudio.presentation.ui.ProfileCompletionScreen
+import com.uttkarsh.InstaStudio.presentation.ui.ResourcePages.ResourceScreen
 import com.uttkarsh.InstaStudio.presentation.ui.SignInScreen
 import com.uttkarsh.InstaStudio.presentation.ui.SplashScreen
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AuthViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.DashBoardViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.ProfileViewModel
+import com.uttkarsh.InstaStudio.presentation.viewmodel.ResourceViewModel
 
 @Composable
 fun Navigation(
     authViewModel: AuthViewModel = hiltViewModel(),
     profileViewModel: ProfileViewModel = hiltViewModel(),
-    dashBoardViewModel: DashBoardViewModel = hiltViewModel()
+    dashBoardViewModel: DashBoardViewModel = hiltViewModel(),
+    resourceViewModel: ResourceViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
 
@@ -46,6 +49,8 @@ fun Navigation(
             DashBoardScreen(authViewModel, profileViewModel, dashBoardViewModel, navController)
 
         }
-
+        composable(Screens.ResourceScreen.route) {
+            ResourceScreen(resourceViewModel, navController)
+        }
     }
 }

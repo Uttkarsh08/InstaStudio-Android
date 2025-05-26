@@ -1,4 +1,4 @@
-package com.uttkarsh.InstaStudio.presentation.ui.DashBoardPages.util
+package com.uttkarsh.InstaStudio.presentation.ui.DashBoardPages
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable

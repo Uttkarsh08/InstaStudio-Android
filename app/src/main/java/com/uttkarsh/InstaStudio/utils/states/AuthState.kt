@@ -1,6 +1,6 @@
 package com.uttkarsh.InstaStudio.utils.states
 
-import com.uttkarsh.InstaStudio.domain.model.LoginResponseDTO
+import com.uttkarsh.InstaStudio.domain.model.dto.auth.LoginResponseDTO
 
 sealed class AuthState {
         object Idle : AuthState()

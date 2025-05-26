@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
-import com.uttkarsh.InstaStudio.domain.model.LoginRequestDTO
+import com.uttkarsh.InstaStudio.domain.model.dto.auth.LoginRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.UserType
 import com.uttkarsh.InstaStudio.domain.repository.AuthRepository
 import com.uttkarsh.InstaStudio.utils.SharedPref.OnboardingStore

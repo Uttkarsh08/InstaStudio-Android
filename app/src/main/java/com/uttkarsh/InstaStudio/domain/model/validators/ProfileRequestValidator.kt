@@ -1,7 +1,7 @@
 package com.uttkarsh.InstaStudio.domain.model.validators
 
 import android.util.Patterns
-import com.uttkarsh.InstaStudio.domain.model.ProfileRequestDTO
+import com.uttkarsh.InstaStudio.domain.model.dto.user.ProfileRequestDTO
 
 fun ProfileRequestDTO.validate(): String? {
     if (firebaseId.isBlank()) return "Firebase ID can't be blank"

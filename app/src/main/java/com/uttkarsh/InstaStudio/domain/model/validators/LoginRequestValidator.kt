@@ -1,6 +1,6 @@
 package com.uttkarsh.InstaStudio.domain.model.validators
 
-import com.uttkarsh.InstaStudio.domain.model.LoginRequestDTO
+import com.uttkarsh.InstaStudio.domain.model.dto.auth.LoginRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.UserType
 
 

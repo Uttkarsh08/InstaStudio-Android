@@ -1,4 +1,4 @@
-package com.uttkarsh.InstaStudio.domain.model
+package com.uttkarsh.InstaStudio.domain.model.dto.studio
 
 data class StudioResponseDTO(
     val studioId: Long,

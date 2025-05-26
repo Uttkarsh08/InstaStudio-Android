@@ -23,7 +23,6 @@ import com.uttkarsh.InstaStudio.R
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -41,7 +40,7 @@ fun NextEventSection(
             .padding(16.dp)
             .height(78.dp),
         shape = RoundedCornerShape(27.dp),
-        color = colorResource(R.color.darkGrey),
+        color = colorResource(R.color.buttons),
         onClick = onEventClick,
     ) {
         EventCard(clientName = clientName, eventStartDate = eventStartDate)

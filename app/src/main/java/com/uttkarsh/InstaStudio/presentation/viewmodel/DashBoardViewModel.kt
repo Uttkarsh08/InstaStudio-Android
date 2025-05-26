@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.uttkarsh.InstaStudio.domain.repository.ProfileRepository
+import com.uttkarsh.InstaStudio.domain.repository.ResourceRepository
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
 import com.uttkarsh.InstaStudio.utils.states.DashBoardState
@@ -19,7 +20,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DashBoardViewModel @Inject constructor(
-    private val repository: ProfileRepository,
+    private val profileRepository: ProfileRepository,
     private val sessionStore: SessionStore
 
 ) : ViewModel(){
@@ -39,7 +40,7 @@ class DashBoardViewModel @Inject constructor(
 
             try {
                 val response = withContext(Dispatchers.IO) {
-                    repository.getUserProfile()
+                    profileRepository.getUserProfile()
                 }
                 if (response.data == null) {
                     _dashBoardState.value = DashBoardState.Error(

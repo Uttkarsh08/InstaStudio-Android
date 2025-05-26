@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.uttkarsh.InstaStudio.R
-import com.uttkarsh.InstaStudio.domain.model.LoginRequestDTO
+import com.uttkarsh.InstaStudio.domain.model.dto.auth.LoginRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.validators.validate
 import com.uttkarsh.InstaStudio.presentation.navigation.Screens
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AuthViewModel
