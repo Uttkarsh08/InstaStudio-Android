@@ -70,7 +70,7 @@ class AuthViewModel @Inject constructor(
     }
 
     fun signInWithGoogle(context: Context) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _authState.value = AuthState.Loading
             val token = authRepository.signInWithGoogle(context)
             _authState.value = if (token != null) {
@@ -92,7 +92,7 @@ class AuthViewModel @Inject constructor(
     }
 
     fun onFirebaseLoginSuccess(requestDTO: LoginRequestDTO) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _authState.value = AuthState.Loading
             try {
                 val response = authRepository.validateFirebaseToken(requestDTO)

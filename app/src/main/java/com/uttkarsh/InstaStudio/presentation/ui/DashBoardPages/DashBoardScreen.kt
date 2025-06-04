@@ -10,13 +10,17 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -46,6 +50,10 @@ fun DashBoardScreen(
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     val scrollState = rememberScrollState()
 
+    LaunchedEffect(Unit) {
+        dashBoardViewModel.getUserProfile()
+    }
+
     Scaffold(
         topBar = {
             AppTopBar(
@@ -56,32 +64,34 @@ fun DashBoardScreen(
             )
         },
         bottomBar = { BottomBar(navController) }
-    ){
+    ){ paddingValues ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(it)
-                .then(
-                    if (isLandscape) Modifier.verticalScroll(scrollState) else Modifier
-                ),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+            .verticalScroll(scrollState),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
             SearchBar(
-                modifier = Modifier.fillMaxWidth()
-                .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
-                .border(BorderStroke(2.dp, colorResource(R.color.searchBarBorder)),
-                    RoundedCornerShape(14.dp)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
+                    .border(
+                        BorderStroke(2.dp, colorResource(R.color.searchBarBorder)),
+                        RoundedCornerShape(14.dp)
+                    ),
 
                 onSearchChanged = { /* TODO: Update viewModel with new search query */ }
             )
 
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(16.dp))
 
             NextEventSection("Mayank &  Ranjani", "1 Jan, 2025, Wed", {})
 
             Row(
                 modifier = Modifier.fillMaxWidth()
+                    .heightIn(max = 400.dp)
             ) {
                 Column(
                     modifier = Modifier.weight(1f)
@@ -91,14 +101,16 @@ fun DashBoardScreen(
                         "Manager your Events",
                         {},
                         true,
-                        false
+                        false,
+                        modifier = Modifier.weight(.45f)
                     )
                     CommonSectionUi(R.drawable.teamwork,
                         "Team Members",
                         "Add  New or See your work Partners",
-                        {},
+                        {navController.navigate(Screens.MemberScreen.route)},
                         true,
-                        true
+                        true,
+                        modifier = Modifier.weight(.55f)
                     )
                 }
 
@@ -110,17 +122,21 @@ fun DashBoardScreen(
                         "Add  New or See your Customers",
                         {},
                         false,
-                        true
+                        true,
+                        modifier = Modifier.weight(.55f)
                     )
                     CommonSectionUi(R.drawable.resources,
                         "Resources",
                         "Manager your Resources",
                         {navController.navigate(Screens.ResourceScreen.route)},
                         false,
-                        false
+                        false,
+                        modifier = Modifier.weight(.45f)
                     )
                 }
             }
+
+        Spacer(Modifier.height(16.dp))
         }
     }
 

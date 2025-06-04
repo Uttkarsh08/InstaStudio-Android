@@ -8,6 +8,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -81,7 +84,7 @@ fun ProfileCompletionScreen(
 
     LaunchedEffect(state) {
         if (state is ProfileState.Success) {
-            navController.navigate(Screens.DashBoardScreen.route){
+            navController.navigate(Screens.DashBoardScreen.route) {
                 popUpTo(0) { inclusive = true }
                 launchSingleTop = true
             }
@@ -92,120 +95,132 @@ fun ProfileCompletionScreen(
         topBar = {
             AppTopBar("Profile Completion", false, null, {})
         }
-    ){
-        Column(
-            modifier = Modifier.fillMaxSize()
-                .padding(it)
-                .then(
-                    if (isLandscape) Modifier.verticalScroll(scrollState) else Modifier
-                )
+    ) { innerPadding ->
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
         ) {
-            SelectLogoSection(
-                selectedImageUri = selectedImageUri,
-                onImageSelected = { uri: Uri? ->
-                    if (uri != null) {
-                        viewModel.onImageSelected(context, uri)
-                    }
-                }
-            )
-
-            Spacer(Modifier.height(20.dp))
-
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 30.dp, end = 45.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
-            ){
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    .fillMaxSize()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(scrollState)
+                        .padding(horizontal = 30.dp),
+                    verticalArrangement = Arrangement.spacedBy(15.dp)
                 ) {
-                    Icon(painterResource(R.drawable.stidioname),
-                        contentDescription = "Studio Name",
-                        modifier = Modifier.size(25.dp),
-                        colorResource(R.color.darkGrey)
+                    Spacer(Modifier.height(15.dp))
+
+                    SelectLogoSection(
+                        selectedImageUri = selectedImageUri,
+                        onImageSelected = { uri: Uri? ->
+                            uri?.let { viewModel.onImageSelected(context, it) }
+                        }
                     )
 
-                    Spacer(Modifier.width(15.dp))
+                    // Studio Name
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painterResource(R.drawable.stidioname),
+                            contentDescription = "Studio Name",
+                            modifier = Modifier.size(25.dp),
+                            tint = colorResource(R.color.darkGrey)
+                        )
+                        Spacer(Modifier.width(15.dp))
+                        OutlinedTextField(
+                            value = studioName,
+                            onValueChange = viewModel::updateStudioName,
+                            label = {
+                                Text(
+                                    "Studio Name",
+                                    fontFamily = alatsiFont,
+                                    color = colorResource(R.color.grey)
+                                )
+                            },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color.Black,
+                                unfocusedBorderColor = Color.Gray,
+                            ),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                    }
 
-                    OutlinedTextField(
-                        value = studioName,
-                        onValueChange = {viewModel.updateStudioName(it)},
-                        label = { Text("Studio Name", fontFamily = alatsiFont, color = colorResource(R.color.grey)) },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.Black,
-                            unfocusedBorderColor = Color.Gray,
-                        ),
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
+                    // Phone
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painterResource(R.drawable.phone),
+                            contentDescription = "Phone Number",
+                            modifier = Modifier.size(25.dp),
+                            tint = colorResource(R.color.darkGrey)
+                        )
+                        Spacer(Modifier.width(20.dp))
+                        OutlinedTextField(
+                            value = phoneNo,
+                            onValueChange = viewModel::updatePhoneNumber,
+                            label = {
+                                Text(
+                                    "Phone No.",
+                                    fontFamily = alatsiFont,
+                                    color = colorResource(R.color.grey)
+                                )
+                            },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color.Black,
+                                unfocusedBorderColor = Color.Gray,
+                            ),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        )
+                    }
 
-                }
+                    // Address
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painterResource(R.drawable.address),
+                            contentDescription = "Studio Address",
+                            modifier = Modifier.size(25.dp),
+                            tint = colorResource(R.color.darkGrey)
+                        )
+                        Spacer(Modifier.width(20.dp))
+                        OutlinedTextField(
+                            value = address,
+                            onValueChange = viewModel::updateAddress,
+                            label = {
+                                Text(
+                                    "Studio Address",
+                                    fontFamily = alatsiFont,
+                                    color = colorResource(R.color.grey)
+                                )
+                            },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color.Black,
+                                unfocusedBorderColor = Color.Gray,
+                            ),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                    }
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(painterResource(R.drawable.phone),
-                        contentDescription = "Phone Number",
-                        modifier = Modifier.size(25.dp),
-                        colorResource(R.color.darkGrey)
-                    )
-
-                    Spacer(Modifier.width(20.dp))
-
-                    OutlinedTextField(
-                        value = phoneNo,
-                        onValueChange = {viewModel.updatePhoneNumber(it)},
-                        label = { Text("Phone No.", fontFamily = alatsiFont, color = colorResource(R.color.grey)) },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.Black,
-                            unfocusedBorderColor = Color.Gray,
-                        ),
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                    )
-
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(painterResource(R.drawable.address),
-                        contentDescription = "Studio Address",
-                        modifier = Modifier.size(25.dp),
-                        colorResource(R.color.darkGrey)
-                    )
-
-                    Spacer(Modifier.width(20.dp))
-
-                    OutlinedTextField(
-                        value = address,
-                        onValueChange = {viewModel.updateAddress(it)},
-                        label = { Text("Studio Address", fontFamily = alatsiFont, color = colorResource(R.color.grey)) },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.Black,
-                            unfocusedBorderColor = Color.Gray,
-                        ),
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
-
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-
-                    Spacer(Modifier.width(50.dp))
-
+                    // City
                     OutlinedTextField(
                         value = city,
-                        onValueChange = {viewModel.updateCity(it)},
-                        label = { Text("City", fontFamily = alatsiFont, color = colorResource(R.color.grey)) },
+                        onValueChange = viewModel::updateCity,
+                        label = {
+                            Text(
+                                "City",
+                                fontFamily = alatsiFont,
+                                color = colorResource(R.color.grey)
+                            )
+                        },
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = Color.Black,
                             unfocusedBorderColor = Color.Gray,
@@ -215,93 +230,105 @@ fun ProfileCompletionScreen(
                         singleLine = true
                     )
 
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-
-                    Spacer(Modifier.width(50.dp))
-
-                    OutlinedTextField(
-                        value = stateText,
-                        onValueChange = {viewModel.updateState(it)},
-                        label = { Text("State", fontFamily = alatsiFont, color = colorResource(R.color.grey)) },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.Black,
-                            unfocusedBorderColor = Color.Gray,
-                        ),
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.weight(1f),
-                        singleLine = true
-                    )
-
-                    Spacer(Modifier.width(20.dp))
-
-                    OutlinedTextField(
-                        value = pinCode,
-                        onValueChange = {viewModel.updatePinCode(it)},
-                        label = { Text("Pin Code", fontFamily = alatsiFont, color = colorResource(R.color.grey)) },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.Black,
-                            unfocusedBorderColor = Color.Gray,
-                        ),
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.weight(1f),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                    )
-
-
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(painterResource(R.drawable.mail),
-                        contentDescription = "User Mail",
-                        modifier = Modifier.size(25.dp),
-                        colorResource(R.color.darkGrey)
-                    )
-
-                    Spacer(Modifier.width(20.dp))
-
-                    Text(text = email.value,
-                        fontFamily = alatsiFont,
-                        fontSize = 14.sp,
-                        color = colorResource(R.color.darkGrey)
-                    )
-                }
-                if (errorMessage != null) {
-                    Text("Failure: $errorMessage", color = colorResource(R.color.errorRed), fontFamily = alatsiFont)
-                }
-
-                Button(
-                    onClick = { if (!isLoading) viewModel.saveAdminProfile() },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(67.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colorResource(R.color.buttons),
-                        contentColor = Color.White
-                    ),
-                    shape = RoundedCornerShape(19.dp)
-                ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(
-                            color = Color.White,
-                            modifier = Modifier.size(24.dp),
-                            strokeWidth = 2.dp
+                    // State and Pin Code
+                    Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                        OutlinedTextField(
+                            value = stateText,
+                            onValueChange = viewModel::updateState,
+                            label = {
+                                Text(
+                                    "State",
+                                    fontFamily = alatsiFont,
+                                    color = colorResource(R.color.grey)
+                                )
+                            },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color.Black,
+                                unfocusedBorderColor = Color.Gray,
+                            ),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.weight(1f),
+                            singleLine = true
                         )
-                    } else {
-                        Text("Get Started", fontFamily = alatsiFont, fontSize = 18.sp)
+                        Spacer(modifier = Modifier.width(20.dp))
+                        OutlinedTextField(
+                            value = pinCode,
+                            onValueChange = viewModel::updatePinCode,
+                            label = {
+                                Text(
+                                    "Pin Code",
+                                    fontFamily = alatsiFont,
+                                    color = colorResource(R.color.grey)
+                                )
+                            },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color.Black,
+                                unfocusedBorderColor = Color.Gray,
+                            ),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.weight(1f),
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        )
+                    }
+
+                }
+
+                // BUTTON pinned at the bottom
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 30.dp, vertical = 10.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painterResource(R.drawable.mail),
+                            contentDescription = "User Mail",
+                            modifier = Modifier.size(25.dp),
+                            tint = colorResource(R.color.darkGrey)
+                        )
+                        Spacer(Modifier.width(20.dp))
+                        Text(
+                            text = email.value,
+                            fontFamily = alatsiFont,
+                            fontSize = 14.sp,
+                            color = colorResource(R.color.darkGrey)
+                        )
+                    }
+
+                    // Error message
+                    errorMessage?.let {
+                        Text(
+                            "Failure: $it",
+                            color = colorResource(R.color.errorRed),
+                            fontFamily = alatsiFont
+                        )
+                    }
+
+                    Spacer(Modifier.height(10.dp))
+
+                    Button(
+                        onClick = { if (!isLoading) viewModel.saveAdminProfile() },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(67.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = colorResource(R.color.buttons),
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(19.dp)
+                    ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text("Get Started", fontFamily = alatsiFont, fontSize = 18.sp)
+                        }
                     }
                 }
-
-
             }
-
         }
     }
 }

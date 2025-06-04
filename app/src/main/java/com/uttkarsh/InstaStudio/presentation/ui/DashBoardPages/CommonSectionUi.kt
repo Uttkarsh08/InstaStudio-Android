@@ -33,32 +33,51 @@ fun CommonSectionUi(
     description: String,
     onClick: () -> Unit,
     isLeft: Boolean = true,
-    isBig: Boolean = false
+    isBig: Boolean = false,
+    modifier: Modifier = Modifier
 ){
     val alatsiFont = FontFamily(Font(R.font.alatsi))
 
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .height(if(isBig) 230.dp else 180.dp)
-            .padding(top = 8.dp, start = if(isLeft) 16.dp else 8.dp, end = if(isLeft) 8.dp else 16.dp, bottom = 8.dp),
+            .padding(
+                top = 8.dp,
+                start = if (isLeft) 16.dp else 8.dp,
+                end = if (isLeft) 8.dp else 16.dp,
+                bottom = 8.dp
+            ),
         shape = RoundedCornerShape(27.dp),
         color = colorResource(R.color.dashBoardContainer),
         onClick = onClick
     ) {
         Column(
-            modifier = Modifier.fillMaxHeight().fillMaxWidth(0.7f).padding(16.dp),
+            modifier = Modifier
+                .fillMaxHeight()
+                .fillMaxWidth(0.7f)
+                .padding(16.dp),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
-            Image(painter = painterResource(icon),
+            Image(
+                painter = painterResource(icon),
                 contentDescription = null,
                 modifier = Modifier.size(50.dp)
             )
-
-            Text(text = heading, fontFamily = alatsiFont, fontSize = 20.sp, color = Color.Black, fontWeight = FontWeight.Bold)
-            Text(text = description, fontFamily = alatsiFont, fontSize = 14.sp, color = colorResource(R.color.buttons))
+            Text(
+                text = heading,
+                fontFamily = alatsiFont,
+                fontSize = 20.sp,
+                color = Color.Black,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = description,
+                fontFamily = alatsiFont,
+                fontSize = 14.sp,
+                color = colorResource(R.color.buttons)
+            )
         }
     }
-
 }
+

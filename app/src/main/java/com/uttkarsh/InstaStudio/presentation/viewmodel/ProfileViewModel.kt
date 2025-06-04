@@ -217,7 +217,7 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun getStudioImage(){
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val studioId = sessionStore.studioIdFlow.first()
 

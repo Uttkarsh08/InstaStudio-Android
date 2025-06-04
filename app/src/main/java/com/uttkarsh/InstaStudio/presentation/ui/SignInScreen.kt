@@ -87,10 +87,11 @@ fun SignInScreen(
                 if (isLandscape) Modifier.verticalScroll(scrollState) else Modifier
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
+        verticalArrangement = Arrangement.SpaceEvenly
     ) {
         Column(
             modifier = Modifier
+                .padding(top = 60.dp)
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -98,8 +99,6 @@ fun SignInScreen(
                 painter = painterResource(id = R.drawable.camera),
                 contentDescription = null,
                 modifier = Modifier
-                    .padding(45.dp)
-                    .padding(top = 120.dp)
                     .width(240.dp)
                     .height(200.dp),
                 contentScale = ContentScale.Crop,
@@ -110,7 +109,7 @@ fun SignInScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(45.dp)
-                .padding(bottom = 110.dp),
+                .padding(bottom = 50.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 

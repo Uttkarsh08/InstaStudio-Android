@@ -8,5 +8,5 @@ sealed class Screens(val route: String) {
     object ProfileCompletionScreen: Screens("profile_completion_screen")
     object DashBoardScreen: Screens("dashboard_screen")
     object ResourceScreen: Screens("resource_screen")
-
+    object MemberScreen: Screens("member_screen")
 }

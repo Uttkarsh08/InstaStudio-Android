@@ -7,8 +7,12 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -79,11 +83,13 @@ fun BottomBar(
 
     Box(
         modifier = Modifier.fillMaxWidth()
+            .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+            .height(90.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth(0.5f)
-                .height(90.dp)
+                .fillMaxHeight()
                 .background(
                     color = colorResource(id = R.color.mainGreen),
                     shape = RoundedCornerShape(topEnd = 100.dp)
@@ -114,7 +120,7 @@ fun BottomBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth(0.5f)
-                .height(90.dp)
+                .fillMaxHeight()
                 .background(
                     color = colorResource(id = R.color.mainGreen),
                     shape = RoundedCornerShape(topStart = 100.dp)

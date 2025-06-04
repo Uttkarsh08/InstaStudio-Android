@@ -1,6 +1,7 @@
 package com.uttkarsh.InstaStudio.di
 
 import com.uttkarsh.InstaStudio.data.auth.AuthApiService
+import com.uttkarsh.InstaStudio.data.auth.MemberApiService
 import com.uttkarsh.InstaStudio.data.auth.ProfileApiService
 import com.uttkarsh.InstaStudio.data.auth.ResourceApiService
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
@@ -130,5 +131,13 @@ object NetworkModule {
 
     ): ResourceApiService{
         return retrofit.create(ResourceApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMemberApi(
+        @Named("AuthenticatedRetrofit") retrofit: Retrofit
+    ): MemberApiService {
+        return retrofit.create(MemberApiService::class.java)
     }
 }

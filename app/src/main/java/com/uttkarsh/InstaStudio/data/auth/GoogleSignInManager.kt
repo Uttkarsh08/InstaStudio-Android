@@ -6,6 +6,8 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.NoCredentialException
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
@@ -30,6 +32,13 @@ class GoogleSignInManager @Inject constructor() {
             .setFilterByAuthorizedAccounts(false)
             .build()
 
+        val availability = GoogleApiAvailability.getInstance()
+        val resultCode = availability.isGooglePlayServicesAvailable(context)
+        if (resultCode != ConnectionResult.SUCCESS) {
+            Log.e("GoogleSignIn", "Google Play Services not available or outdated")
+            return null
+        }
+
         val request = GetCredentialRequest.Builder()
             .addCredentialOption(googleIdOption)
             .build()
@@ -37,6 +46,7 @@ class GoogleSignInManager @Inject constructor() {
         return try {
             val result = credentialManager.getCredential(context, request)
             val credential = result.credential
+            Log.d("GoogleSignIn", "Got Credentials: $credential" ?: "No Credentials")
             if (credential is CustomCredential &&
                 credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
             ) {

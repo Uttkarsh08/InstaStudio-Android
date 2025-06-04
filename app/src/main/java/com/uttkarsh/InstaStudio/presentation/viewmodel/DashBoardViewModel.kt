@@ -33,7 +33,7 @@ class DashBoardViewModel @Inject constructor(
 
     }
     fun getUserProfile(){
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val currentStudioId = sessionStore.studioIdFlow.first()
             val currentUserId = sessionStore.userIdFlow.first()
             Log.d("DashBoardViewModel", "getUserProfile called. StudioID from session: $currentStudioId, UserID from session: $currentUserId")

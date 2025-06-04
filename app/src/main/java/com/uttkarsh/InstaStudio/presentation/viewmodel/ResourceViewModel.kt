@@ -14,6 +14,7 @@ import com.uttkarsh.InstaStudio.domain.repository.ResourceRepository
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.states.ResourceState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -62,7 +63,7 @@ class ResourceViewModel @Inject constructor(
     }
 
     fun getAllResources(){
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _resourceState.value = ResourceState.Loading
             val id = sessionStore.studioIdFlow.first()
 
@@ -76,13 +77,13 @@ class ResourceViewModel @Inject constructor(
 
 
     fun createNewResource(){
-        viewModelScope.launch{
+        viewModelScope.launch(Dispatchers.IO){
             _resourceState.value = ResourceState.Loading
             try {
                 val studioId = sessionStore.studioIdFlow.first()
                 val resourceRequest = ResourceRequestDTO(
-                    resourceName = _resourceName.value,
-                    resourcePrice = _resourcePrice.value,
+                    resourceName = "a 500",
+                    resourcePrice = 100L,
                     studioId = studioId
                 )
                 val response = resourceRepository.createNewResource(resourceRequest)
@@ -99,7 +100,7 @@ class ResourceViewModel @Inject constructor(
     }
 
     fun updateResourceById(){
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 _resourceState.value = ResourceState.Loading
                 val studioId = sessionStore.studioIdFlow.first()

@@ -7,11 +7,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -58,31 +60,29 @@ fun LoginTypeScreen(
                 if (isLandscape) Modifier.verticalScroll(scrollState) else Modifier
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
+        verticalArrangement = Arrangement.SpaceEvenly
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(top = 60.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Image(
                 painter = painterResource(id = R.drawable.camera),
                 contentDescription = null,
                 modifier = Modifier
-                    .padding(45.dp)
-                    .padding(top = 120.dp)
                     .width(240.dp)
                     .height(200.dp),
                 contentScale = ContentScale.Crop,
             )
         }
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(45.dp)
-                .padding(bottom = 80.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(bottom = 50.dp)
+                .padding(horizontal = 45.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             LoginTypeButton(
                 painter = painterResource(id = R.drawable.admin),
@@ -115,7 +115,6 @@ fun LoginTypeScreen(
                     Log.d("LoginType", viewModel.loginType.value.toString())
                 }
             )
-            Spacer(modifier = Modifier.height(30.dp))
 
         }
     }

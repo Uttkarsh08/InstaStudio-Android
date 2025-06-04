@@ -64,7 +64,7 @@ fun OnBoardingScreen(
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .padding(45.dp)
-                .padding(bottom = 110.dp),
+                .padding(bottom = 50.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
