@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.uttkarsh.InstaStudio.domain.repository.ProfileRepository
-import com.uttkarsh.InstaStudio.domain.repository.ResourceRepository
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
 import com.uttkarsh.InstaStudio.utils.states.DashBoardState

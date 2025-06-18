@@ -40,6 +40,7 @@ fun ResourceSheet(
     name: String,
     price: Long,
     heading: String,
+    errorMessage: String? = null,
     onNameChange: (String) -> Unit,
     onPriceChange: (Long) -> Unit,
     onSave: () -> Unit,
@@ -99,6 +100,16 @@ fun ResourceSheet(
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        if (!errorMessage.isNullOrBlank()) {
+            Text(
+                text = errorMessage,
+                color = colorResource(R.color.errorRed),
+                modifier = Modifier.padding(4.dp)
+            )
+        }
 
         Spacer(modifier = Modifier.height(20.dp))
 

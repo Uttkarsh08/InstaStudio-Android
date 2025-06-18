@@ -31,12 +31,12 @@ import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,6 +56,7 @@ import com.uttkarsh.InstaStudio.presentation.ui.utils.AppTopBar
 import com.uttkarsh.InstaStudio.presentation.ui.utils.SearchBar
 import com.uttkarsh.InstaStudio.presentation.viewmodel.ResourceViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.uttkarsh.InstaStudio.utils.states.ProfileState
 import com.uttkarsh.InstaStudio.utils.states.ResourceState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -73,15 +74,15 @@ fun ResourceScreen(
         mutableStateOf<BottomSheetType>(BottomSheetType.None)
     }
 
-
-    val state = resourceViewModel.resourceState.collectAsState()
+    val state by resourceViewModel.resourceState.collectAsState()
     val name by resourceViewModel.resourceName.collectAsState()
     val price by resourceViewModel.resourcePrice.collectAsState()
 
-    val allResources = if (state.value is ResourceState.ListSuccess) {
-        (state.value as ResourceState.ListSuccess).response.collectAsLazyPagingItems()
+    val allResources = if (state is ResourceState.ListSuccess) {
+        (state as ResourceState.ListSuccess).response.collectAsLazyPagingItems()
     } else null
 
+    val errorMessage = (state as? ResourceState.Error)?.message
 
     Scaffold(
         topBar = {
@@ -117,9 +118,9 @@ fun ResourceScreen(
                 )
             }
         },
-        floatingActionButtonPosition = FabPosition.End,
+        floatingActionButtonPosition = FabPosition.EndOverlay,
     ){
-        when (state.value) {
+        when (state) {
             ResourceState.Loading -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -230,9 +231,7 @@ fun ResourceScreen(
                     )
                 }
             }
-            is ResourceState.Success -> {
-                resourceViewModel.getAllResources()
-            }
+            is ResourceState.Success -> {}
         }
     }
 
@@ -257,18 +256,16 @@ fun ResourceScreen(
                 name = name,
                 price = price,
                 heading = heading,
+                errorMessage = errorMessage,
                 onNameChange = { resourceViewModel.updateResourceName(it) },
                 onPriceChange = { resourceViewModel.updateResourcePrice(it) },
                 onSave = {
                     coroutineScope.launch {
-                        sheetState.hide()
-                        delay(100L)
                         if (bottomSheetType == BottomSheetType.Add) {
                             resourceViewModel.createNewResource()
                         } else if (bottomSheetType == BottomSheetType.Edit) {
                             resourceViewModel.updateResourceById()
                         }
-                        bottomSheetType = BottomSheetType.None
                     }
                 },
                 onCancel = {
@@ -279,6 +276,24 @@ fun ResourceScreen(
                     }
                 }
             )
+        }
+    }
+
+    LaunchedEffect(state) {
+        if (state is ResourceState.Success) {
+            Log.d("ResourceScreen", "Success - Closing sheet and refreshing")
+            coroutineScope.launch {
+                sheetState.hide()
+            }.invokeOnCompletion {
+                bottomSheetType = BottomSheetType.None
+            }
+        }
+    }
+
+    LaunchedEffect(sheetState.isVisible) {
+        if (!sheetState.isVisible) {
+            Log.d("ResourceScreen", "Sheet hidden - refreshing resources")
+            resourceViewModel.getAllResources()
         }
     }
 }
