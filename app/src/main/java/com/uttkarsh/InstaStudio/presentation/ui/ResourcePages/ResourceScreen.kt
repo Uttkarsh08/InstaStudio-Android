@@ -35,7 +35,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -51,7 +50,6 @@ import com.uttkarsh.InstaStudio.presentation.ui.utils.AppTopBar
 import com.uttkarsh.InstaStudio.presentation.ui.utils.SearchBar
 import com.uttkarsh.InstaStudio.presentation.viewmodel.ResourceViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.uttkarsh.InstaStudio.domain.model.dto.resource.ResourceResponseDTO
 import com.uttkarsh.InstaStudio.utils.states.ResourceState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -64,10 +62,15 @@ fun ResourceScreen(
 ){
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
-    var selectedResource by remember { mutableStateOf<ResourceResponseDTO?>(null) }
-    var isSheetOpen by rememberSaveable { mutableStateOf(false) }
+
+    var bottomSheetType by rememberSaveable(stateSaver = BottomSheetTypeSaver) {
+        mutableStateOf<BottomSheetType>(BottomSheetType.None)
+    }
+
 
     val state = resourceViewModel.resourceState.collectAsState()
+    val name by resourceViewModel.resourceName.collectAsState()
+    val price by resourceViewModel.resourcePrice.collectAsState()
 
     val allResources = if (state.value is ResourceState.ListSuccess) {
         (state.value as ResourceState.ListSuccess).response.collectAsLazyPagingItems()
@@ -85,7 +88,13 @@ fun ResourceScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { resourceViewModel.createNewResource() },
+                onClick = {
+                    bottomSheetType = BottomSheetType.Add
+                    resourceViewModel.clearResourceValues()
+                    coroutineScope.launch {
+                        sheetState.show()
+                    }
+                },
                 shape = CircleShape,
                 elevation = FloatingActionButtonDefaults.elevation(6.dp),
                 containerColor = colorResource(id = R.color.dashBoardContainer),
@@ -165,11 +174,9 @@ fun ResourceScreen(
                                 name = resource.resourceName,
                                 price = resource.resourcePrice,
                                 onCLick = {
-                                    selectedResource = resource
                                     Log.d("EDIT_SHEET", "Updating resource: ${resource.resourceId}, ${resource.resourceName}, ${resource.resourcePrice}")
                                     resourceViewModel.prepareEditResource(resource)
-
-                                    isSheetOpen = true
+                                    bottomSheetType = BottomSheetType.Edit
                                     coroutineScope.launch {
                                         sheetState.show()
                                     }
@@ -186,39 +193,50 @@ fun ResourceScreen(
         }
     }
 
-    if (isSheetOpen) {
-
-        val name by resourceViewModel.resourceName.collectAsState()
-        val price by resourceViewModel.resourcePrice.collectAsState()
+    if(bottomSheetType != BottomSheetType.None){
+        val heading = when (bottomSheetType) {
+            BottomSheetType.Edit -> "Edit Resource"
+            BottomSheetType.Add -> "Add Resource"
+            else -> ""
+        }
 
         ModalBottomSheet(
             onDismissRequest = {
                 coroutineScope.launch {
                     sheetState.hide()
                 }.invokeOnCompletion {
-                    isSheetOpen = false
+                    bottomSheetType = BottomSheetType.None
                 }
             },
             sheetState = sheetState
         ) {
-            EditResourceSheet(
+            ResourceSheet(
                 name = name,
                 price = price,
+                heading = heading,
                 onNameChange = { resourceViewModel.updateResourceName(it) },
                 onPriceChange = { resourceViewModel.updateResourcePrice(it) },
                 onSave = {
                     coroutineScope.launch {
                         sheetState.hide()
                         delay(100L)
-                        resourceViewModel.updateResourceById()
-                        isSheetOpen = false
+                        if (bottomSheetType == BottomSheetType.Add) {
+                            resourceViewModel.createNewResource()
+                        } else if (bottomSheetType == BottomSheetType.Edit) {
+                            resourceViewModel.updateResourceById()
+                        }
+                        bottomSheetType = BottomSheetType.None
                     }
                 },
                 onCancel = {
-                    coroutineScope.launch { sheetState.hide() }
-                    isSheetOpen = false
+                    coroutineScope.launch {
+                        sheetState.hide()
+                    }.invokeOnCompletion {
+                        bottomSheetType = BottomSheetType.None
+                    }
                 }
             )
         }
     }
 }
+

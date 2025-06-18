@@ -82,8 +82,8 @@ class ResourceViewModel @Inject constructor(
             try {
                 val studioId = sessionStore.studioIdFlow.first()
                 val resourceRequest = ResourceRequestDTO(
-                    resourceName = "a 500",
-                    resourcePrice = 100L,
+                    resourceName = _resourceName.value,
+                    resourcePrice = _resourcePrice.value,
                     studioId = studioId
                 )
                 val response = resourceRepository.createNewResource(resourceRequest)
@@ -126,6 +126,12 @@ class ResourceViewModel @Inject constructor(
         updateResourceId(resource.resourceId)
         updateResourceName(resource.resourceName)
         updateResourcePrice(resource.resourcePrice)
+    }
+    fun clearResourceValues() {
+        updateResourceId(0L)
+        updateResourceName("")
+        updateResourcePrice(0L)
+
     }
 
 }

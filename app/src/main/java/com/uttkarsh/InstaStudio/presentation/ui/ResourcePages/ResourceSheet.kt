@@ -36,9 +36,10 @@ import androidx.compose.ui.unit.dp
 import com.uttkarsh.InstaStudio.R
 
 @Composable
-fun EditResourceSheet(
+fun ResourceSheet(
     name: String,
     price: Long,
+    heading: String,
     onNameChange: (String) -> Unit,
     onPriceChange: (Long) -> Unit,
     onSave: () -> Unit,
@@ -59,7 +60,7 @@ fun EditResourceSheet(
             .fillMaxWidth()
             .padding(20.dp)
     ) {
-        Text("Edit Resource", style = MaterialTheme.typography.titleLarge)
+        Text(heading, style = MaterialTheme.typography.titleLarge)
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
