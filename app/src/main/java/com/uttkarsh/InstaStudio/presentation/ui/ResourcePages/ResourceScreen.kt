@@ -18,8 +18,12 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,6 +31,7 @@ import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -45,6 +50,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.paging.LoadState
 import com.uttkarsh.InstaStudio.R
 import com.uttkarsh.InstaStudio.presentation.ui.utils.AppTopBar
 import com.uttkarsh.InstaStudio.presentation.ui.utils.SearchBar
@@ -54,7 +60,7 @@ import com.uttkarsh.InstaStudio.utils.states.ResourceState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun ResourceScreen(
     resourceViewModel: ResourceViewModel = hiltViewModel(),
@@ -148,45 +154,82 @@ fun ResourceScreen(
             }
 
             is ResourceState.ListSuccess -> {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier.fillMaxSize().padding(it),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
-                ) {
-                    item(span = { GridItemSpan(2) }) {
-                        SearchBar(
-                            modifier = Modifier.fillMaxWidth()
-                                .padding(0.dp, bottom = 28.dp)
-                                .border(BorderStroke(2.dp, colorResource(R.color.searchBarBorder)),
-                                    RoundedCornerShape(14.dp)),
-                            onSearchChanged = { /* TODO */ }
-                        )
-                    }
+                val isRefreshing = allResources?.loadState?.refresh is LoadState.Loading
+                val pullRefreshState = rememberPullRefreshState(
+                    refreshing = isRefreshing,
+                    onRefresh = { allResources?.refresh() }
+                )
 
-                    items(
-                        count = allResources?.itemCount ?: 0,
-                        key = { index -> allResources?.get(index)?.resourceId ?: index }
-                    ) { index ->
-                        allResources?.get(index)?.let { resource ->
-                            ResourceItem(
-                                name = resource.resourceName,
-                                price = resource.resourcePrice,
-                                onCLick = {
-                                    Log.d("EDIT_SHEET", "Updating resource: ${resource.resourceId}, ${resource.resourceName}, ${resource.resourcePrice}")
-                                    resourceViewModel.prepareEditResource(resource)
-                                    bottomSheetType = BottomSheetType.Edit
-                                    coroutineScope.launch {
-                                        sheetState.show()
-                                    }
-                                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .pullRefresh(pullRefreshState)
+                ) {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        modifier = Modifier.fillMaxSize().padding(it),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
+                    ) {
+                        item(span = { GridItemSpan(2) }) {
+                            SearchBar(
+                                modifier = Modifier.fillMaxWidth()
+                                    .padding(0.dp, bottom = 28.dp)
+                                    .border(
+                                        BorderStroke(2.dp, colorResource(R.color.searchBarBorder)),
+                                        RoundedCornerShape(14.dp)
+                                    ),
+                                onSearchChanged = { /* TODO */ }
                             )
                         }
+
+                        items(
+                            count = allResources?.itemCount ?: 0,
+                            key = { index -> allResources?.get(index)?.resourceId ?: index }
+                        ) { index ->
+                            allResources?.get(index)?.let { resource ->
+                                ResourceItem(
+                                    name = resource.resourceName,
+                                    price = resource.resourcePrice,
+                                    onCLick = {
+                                        Log.d(
+                                            "EDIT_SHEET",
+                                            "Updating resource: ${resource.resourceId}, ${resource.resourceName}, ${resource.resourcePrice}"
+                                        )
+                                        resourceViewModel.prepareEditResource(resource)
+                                        bottomSheetType = BottomSheetType.Edit
+                                        coroutineScope.launch {
+                                            sheetState.show()
+                                        }
+                                    }
+                                )
+                            }
+                        }
+
+                        allResources.apply {
+                            when {
+                                this?.loadState?.append is LoadState.Loading -> {
+                                    items(1) {
+                                        ResourceShimmerShow()
+                                    }
+                                }
+
+                                this?.loadState?.refresh is LoadState.Loading -> {
+                                    items(10) {
+                                        ResourceShimmerShow()
+                                    }
+                                }
+                            }
+                        }
                     }
+                    PullRefreshIndicator(
+                        refreshing = isRefreshing,
+                        state = pullRefreshState,
+                        modifier = Modifier.align(Alignment.TopCenter)
+                    )
                 }
             }
-
             is ResourceState.Success -> {
                 resourceViewModel.getAllResources()
             }

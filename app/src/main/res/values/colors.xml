@@ -8,6 +8,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
+    <color name="shimmer">#32DEDEDE</color>
 
     <color name="GoogleBlue">#5383EC</color>
     <color name="errorRed">#EB6A63</color>
