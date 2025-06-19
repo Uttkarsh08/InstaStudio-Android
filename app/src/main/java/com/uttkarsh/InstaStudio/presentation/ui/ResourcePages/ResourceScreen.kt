@@ -56,9 +56,9 @@ import com.uttkarsh.InstaStudio.presentation.ui.utils.AppTopBar
 import com.uttkarsh.InstaStudio.presentation.ui.utils.SearchBar
 import com.uttkarsh.InstaStudio.presentation.viewmodel.ResourceViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.uttkarsh.InstaStudio.utils.states.ProfileState
+import com.uttkarsh.InstaStudio.presentation.ui.utils.BottomSheetType
+import com.uttkarsh.InstaStudio.presentation.ui.utils.BottomSheetTypeSaver
 import com.uttkarsh.InstaStudio.utils.states.ResourceState
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)

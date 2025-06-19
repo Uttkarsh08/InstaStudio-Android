@@ -35,11 +35,20 @@ class MemberViewModel @Inject constructor(
     private val _memberId = MutableStateFlow(0L)
     val memberId: StateFlow<Long> = _memberId
 
+    private val _memberName = MutableStateFlow("")
+    val memberName: StateFlow<String> = _memberName
+
     private val _memberEmail = MutableStateFlow("")
     val memberEmail: StateFlow<String> = _memberEmail
 
     private val _memberSalary = MutableStateFlow(0L)
     val memberSalary: StateFlow<Long> = _memberSalary
+
+    private val _memberPhone= MutableStateFlow("")
+    val memberPhone: StateFlow<String> = _memberPhone
+
+    private val _memberAvgRating= MutableStateFlow(0L)
+    val memberAvgRating: StateFlow<Long> = _memberAvgRating
 
     private val _memberSpecialization = MutableStateFlow("")
     val memberSpecialization: StateFlow<String> = _memberSpecialization
@@ -53,6 +62,31 @@ class MemberViewModel @Inject constructor(
     private val _eventEndDate = MutableStateFlow(LocalDateTime.now())
     @RequiresApi(Build.VERSION_CODES.O)
     val eventEndDate: StateFlow<LocalDateTime> = _eventEndDate
+
+    fun updateMemberSalary(newSalary: Long) {
+        _memberSalary.value = newSalary
+    }
+
+    fun updateMemberPhone(newPhone: String) {
+        _memberPhone.value = newPhone
+    }
+
+
+    fun updateMemberName(newName: String) {
+        _memberName.value = newName
+    }
+
+    fun updateMemberSpecialization(newSpec: String) {
+        _memberSpecialization.value = newSpec
+    }
+
+    fun updateMemberEmail(newEmail: String) {
+        _memberEmail.value = newEmail
+    }
+
+    fun updateMemberId(newId: Long) {
+        _memberId.value = newId
+    }
 
     init {
         getAllMembers()
@@ -156,6 +190,15 @@ class MemberViewModel @Inject constructor(
             }
         }
     }
+
+    fun clearMemberValues(){
+        updateMemberId(0L)
+        updateMemberEmail("")
+        updateMemberSalary(0L)
+        updateMemberSpecialization("")
+
+    }
+
 
 
 }

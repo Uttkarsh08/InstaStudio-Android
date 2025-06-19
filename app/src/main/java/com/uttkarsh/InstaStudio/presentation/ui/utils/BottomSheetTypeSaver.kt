@@ -1,4 +1,4 @@
-package com.uttkarsh.InstaStudio.presentation.ui.ResourcePages
+package com.uttkarsh.InstaStudio.presentation.ui.utils
 
 import androidx.compose.runtime.saveable.Saver
 
