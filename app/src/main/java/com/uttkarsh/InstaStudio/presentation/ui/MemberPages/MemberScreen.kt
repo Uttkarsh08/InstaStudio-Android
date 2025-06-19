@@ -51,7 +51,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.uttkarsh.InstaStudio.presentation.ui.ResourcePages.ResourceSheet
 import com.uttkarsh.InstaStudio.presentation.ui.ResourcePages.ResourceShimmerShow
 import com.uttkarsh.InstaStudio.presentation.ui.utils.BottomSheetType
 import com.uttkarsh.InstaStudio.presentation.ui.utils.BottomSheetTypeSaver
@@ -86,6 +85,8 @@ fun MemberScreen(
     val allMembers = if(state is MemberState.PageSuccess){
         (state as MemberState.PageSuccess).response.collectAsLazyPagingItems()
     }else null
+
+    val errorMessage = (state as? MemberState.Error)?.message
 
     Scaffold(
         topBar = {
@@ -161,9 +162,7 @@ fun MemberScreen(
 
             }
 
-            is MemberState.Success -> {
-                memberViewModel.getAllMembers()
-            }
+            is MemberState.Success -> {}
 
             is MemberState.PageSuccess -> {
                 val isRefreshing = allMembers?.loadState?.refresh is LoadState.Loading
@@ -261,6 +260,7 @@ fun MemberScreen(
                 email = memberEmail,
                 specialization = memberSpecialization,
                 salary = memberSalary,
+                errorMessage = errorMessage,
                 onSalaryChange = { memberViewModel.updateMemberSalary(it) },
                 onEmailChange = { memberViewModel.updateMemberEmail(it) },
                 onSpecializationChange = { memberViewModel.updateMemberSpecialization(it) },
@@ -285,7 +285,7 @@ fun MemberScreen(
     }
 
     LaunchedEffect(state) {
-        if (state is ResourceState.Success) {
+        if (state is MemberState.Success) {
             Log.d("MemberScreen", "Success - Closing sheet and refreshing")
             coroutineScope.launch {
                 sheetState.hide()

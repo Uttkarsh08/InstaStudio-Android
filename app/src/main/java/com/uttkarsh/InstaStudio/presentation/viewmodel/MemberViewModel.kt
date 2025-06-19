@@ -11,14 +11,18 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.uttkarsh.InstaStudio.domain.model.dto.member.MemberProfileRequestDTO
+import com.uttkarsh.InstaStudio.domain.model.validators.validate
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
+import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
 import com.uttkarsh.InstaStudio.utils.states.MemberState
+import com.uttkarsh.InstaStudio.utils.states.ResourceState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -119,6 +123,12 @@ class MemberViewModel @Inject constructor(
                     studioId = id
                 )
 
+                val requestError = request.validate()
+                if(requestError != null){
+                    _memberState.value = MemberState.Error(requestError)
+                    return@launch
+                }
+
                 val response = memberRepository.createNewMember(request)
                 if(response.data != null){
                     _memberState.value = MemberState.Success(response.data)
@@ -126,7 +136,10 @@ class MemberViewModel @Inject constructor(
                     _memberState.value = MemberState.Error(response.error.message)
                 }
 
-            }catch (e: Exception){
+            }catch (e: HttpException) {
+                val message = ApiErrorExtractor.extractMessage(e)
+                _memberState.value = MemberState.Error(message)
+            } catch (e: Exception) {
                 _memberState.value = MemberState.Error(e.localizedMessage ?: "An unexpected error occurred.")
             }
         }
@@ -145,6 +158,12 @@ class MemberViewModel @Inject constructor(
                     studioId = studioId
                 )
 
+                val requestError = request.validate()
+                if(requestError != null){
+                    _memberState.value = MemberState.Error(requestError)
+                    return@launch
+                }
+
                 val response = memberRepository.updateMemberById(studioId, memberId.value, request)
                 if(response.data != null){
                     _memberState.value = MemberState.Success(response.data)
@@ -152,7 +171,10 @@ class MemberViewModel @Inject constructor(
                     _memberState.value = MemberState.Error(response.error.message)
                 }
 
-            }catch (e: Exception){
+            }catch (e: HttpException) {
+                val message = ApiErrorExtractor.extractMessage(e)
+                _memberState.value = MemberState.Error(message)
+            } catch (e: Exception) {
                 _memberState.value = MemberState.Error(e.localizedMessage ?: "An unexpected error occurred.")
             }
         }
