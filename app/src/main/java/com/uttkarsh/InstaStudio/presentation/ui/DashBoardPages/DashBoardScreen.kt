@@ -99,7 +99,7 @@ fun DashBoardScreen(
                     CommonSectionUi(R.drawable.events,
                         "Events",
                         "Manager your Events",
-                        {},
+                        {navController.navigate(Screens.EventScreen.route)},
                         true,
                         false,
                         modifier = Modifier.weight(.45f)

@@ -1,6 +1,7 @@
 package com.uttkarsh.InstaStudio.di
 
 import com.uttkarsh.InstaStudio.data.auth.AuthApiService
+import com.uttkarsh.InstaStudio.data.auth.EventApiService
 import com.uttkarsh.InstaStudio.data.auth.MemberApiService
 import com.uttkarsh.InstaStudio.data.auth.ProfileApiService
 import com.uttkarsh.InstaStudio.data.auth.ResourceApiService
@@ -139,5 +140,13 @@ object NetworkModule {
         @Named("AuthenticatedRetrofit") retrofit: Retrofit
     ): MemberApiService {
         return retrofit.create(MemberApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideEventApi(
+        @Named("AuthenticatedRetrofit") retrofit: Retrofit
+    ): EventApiService{
+        return retrofit.create(EventApiService::class.java)
     }
 }

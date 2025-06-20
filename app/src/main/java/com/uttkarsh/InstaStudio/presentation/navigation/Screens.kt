@@ -9,4 +9,9 @@ sealed class Screens(val route: String) {
     object DashBoardScreen: Screens("dashboard_screen")
     object ResourceScreen: Screens("resource_screen")
     object MemberScreen: Screens("member_screen")
+    object EventScreen: Screens("event_screen")
+
+    object AddEventNavGraph : Screens("add_event_nav_graph")
+    object AddEventDetailsScreen : Screens("add_event_details")
+    object AddSubEventScreen : Screens("add_sub_event")
 }

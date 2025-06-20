@@ -67,6 +67,10 @@ fun ResourceScreen(
     resourceViewModel: ResourceViewModel = hiltViewModel(),
     navController: NavController
 ){
+
+    LaunchedEffect(Unit) {
+        resourceViewModel.getAllResources()
+    }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
 

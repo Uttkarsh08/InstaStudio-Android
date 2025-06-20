@@ -8,5 +8,6 @@ data class ProfileResponseDTO(
   val userName: String,
   val userEmail: String,
   val userPhoneNo: String,
-  val userType: UserType
+  val userType: UserType,
+  val registrationDate: String
 )

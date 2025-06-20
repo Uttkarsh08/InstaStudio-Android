@@ -67,6 +67,11 @@ fun MemberScreen(
     memberViewModel: MemberViewModel = hiltViewModel(),
     navController: NavController
 ){
+
+    LaunchedEffect(Unit) {
+        memberViewModel.getAllMembers()
+    }
+
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
 
