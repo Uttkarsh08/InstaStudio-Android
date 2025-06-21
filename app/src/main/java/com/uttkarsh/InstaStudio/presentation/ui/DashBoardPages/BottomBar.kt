@@ -149,7 +149,9 @@ fun BottomBar(
         }
 
         FloatingActionButton(
-            onClick = { navController.navigate(Screens.AddEventNavGraph.route) },
+            onClick = { navController.navigate(Screens.AddEventDetailsScreen.route) {
+                launchSingleTop = true
+            } },
             shape = CircleShape,
             elevation = FloatingActionButtonDefaults.elevation(6.dp),
             containerColor = colorResource(id = R.color.dashBoardContainer),

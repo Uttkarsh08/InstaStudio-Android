@@ -1,5 +1,7 @@
 package com.uttkarsh.InstaStudio.presentation.viewmodel
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -8,6 +10,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.uttkarsh.InstaStudio.domain.model.dto.event.EventRequestDTO
 import com.uttkarsh.InstaStudio.domain.repository.EventRepository
+import com.uttkarsh.InstaStudio.domain.model.DatePickerTarget
+import com.uttkarsh.InstaStudio.domain.model.EventType
+import com.uttkarsh.InstaStudio.domain.model.TimePickerTarget
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.states.AddEventState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,8 +21,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.LocalTime
 import javax.inject.Inject
+import androidx.compose.runtime.State
 
+@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class AddEventViewModel @Inject constructor(
     private val eventRepository: EventRepository,
@@ -36,13 +45,16 @@ class AddEventViewModel @Inject constructor(
     var clientPhoneNo by mutableStateOf("")
         private set
 
-    var eventType by mutableStateOf("")
+    var eventStartDate by mutableStateOf(LocalDate.now().toString())
         private set
 
-    var eventStartDate by mutableStateOf("")
+    var eventEndDate by mutableStateOf(LocalDate.now().toString())
         private set
 
-    var eventEndDate by mutableStateOf("")
+    var eventStartTime by mutableStateOf(LocalTime.now().toString())
+        private set
+
+    var eventEndTime by mutableStateOf(LocalTime.now().toString())
         private set
 
     var eventLocation by mutableStateOf("")
@@ -57,9 +69,21 @@ class AddEventViewModel @Inject constructor(
     var eventIsSaved by mutableStateOf(false)
         private set
 
-    fun updateEventId(newId: Long) {
-        eventId = newId
-    }
+    var datePickerTarget by mutableStateOf<DatePickerTarget?>(null)
+        private set
+
+    var timePickerTarget by mutableStateOf<TimePickerTarget?>(null)
+        private set
+
+    private val _eventTypes = EventType.entries
+    val eventTypes: List<EventType> = _eventTypes
+
+    private val _selectedEventType = mutableStateOf(EventType.WEDDING)
+    val selectedEventType: State<EventType> = _selectedEventType
+
+    private val _eventTypeDropdownExpanded = mutableStateOf(false)
+    val eventTypeDropdownExpanded: State<Boolean> = _eventTypeDropdownExpanded
+
 
     fun updateClientName(newName: String) {
         clientName = newName
@@ -69,16 +93,8 @@ class AddEventViewModel @Inject constructor(
         clientPhoneNo = newPhoneNo
     }
 
-    fun updateEventType(newType: String) {
-        eventType = newType
-    }
-
-    fun updateEventStartDate(newStartDate: String) {
-        eventStartDate = newStartDate
-    }
-
-    fun updateEventEndDate(newEndDate: String) {
-        eventEndDate = newEndDate
+    fun updateEventType(eventType: EventType) {
+        _selectedEventType.value = eventType
     }
 
     fun updateEventLocation(newLocation: String) {
@@ -97,6 +113,71 @@ class AddEventViewModel @Inject constructor(
         eventIsSaved = newIsSaved
     }
 
+    fun onDateBoxClick(target: DatePickerTarget) {
+        datePickerTarget = target
+    }
+
+    fun onDatePicked(date: String) {
+        when (datePickerTarget) {
+            DatePickerTarget.START_DATE -> {
+                eventStartDate = date
+                timePickerTarget = TimePickerTarget.START_TIME
+            }
+            DatePickerTarget.END_DATE -> {
+                eventEndDate = date
+                timePickerTarget = TimePickerTarget.END_TIME
+            }
+            null -> {}
+        }
+        datePickerTarget = null
+    }
+
+    fun onTimeBoxClick(target: TimePickerTarget) {
+        timePickerTarget = target
+    }
+
+    fun onTimePicked(date: String) {
+        when (timePickerTarget) {
+            TimePickerTarget.START_TIME -> eventStartTime = date
+            TimePickerTarget.END_TIME -> eventEndTime = date
+            null -> {}
+        }
+        timePickerTarget = null
+    }
+
+    fun resetAddEventState() {
+        _addEventState.value = AddEventState.Idle
+    }
+
+    fun onEventTypeSelected(type: EventType) {
+        _selectedEventType.value = type
+        _eventTypeDropdownExpanded.value = false
+        updateEventType(type)
+    }
+
+    fun toggleEventTypeDropdown() {
+        _eventTypeDropdownExpanded.value = !_eventTypeDropdownExpanded.value
+    }
+
+    fun closeEventTypeDropdown() {
+        _eventTypeDropdownExpanded.value = false
+    }
+
+    fun resetEventDetails(){
+        eventId = 0L
+        clientName = ""
+        clientPhoneNo = ""
+        _selectedEventType.value = EventType.WEDDING
+        eventStartDate = ""
+        eventEndDate = ""
+        eventLocation = ""
+        eventCity = ""
+        eventState = ""
+        eventIsSaved = false
+        datePickerTarget = null
+        timePickerTarget = null
+    }
+
 
     fun createNewEvent(){
         viewModelScope.launch(Dispatchers.IO) {
@@ -104,16 +185,19 @@ class AddEventViewModel @Inject constructor(
 
             _addEventState.value = AddEventState.Loading
 
+            val eventStart = eventStartDate+"T"+eventStartTime
+            val eventEnd = eventEndDate+"T"+eventEndTime
+
             try {
                 val request = EventRequestDTO(
                     clientName = clientName,
                     clientPhoneNo = clientPhoneNo,
-                    eventType = eventType,
+                    eventType = _selectedEventType.value.toString(),
                     subEventsIds = emptyList(),
                     memberIds = emptyList(),
                     resourceIds = emptyList(),
-                    eventStartDate = "2025-06-28T08:00:00",
-                    eventEndDate = "2025-06-28T08:00:00",
+                    eventStartDate = eventStart,
+                    eventEndDate = eventEnd,
                     eventLocation = eventLocation,
                     eventCity = eventCity,
                     eventState = eventState,

@@ -8,6 +8,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import com.uttkarsh.InstaStudio.presentation.navigation.Navigation
 import com.uttkarsh.InstaStudio.presentation.ui.DashBoardPages.DashBoardScreen
+import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventScreen
 import com.uttkarsh.InstaStudio.ui.theme.InstaStudioTheme
 import dagger.hilt.android.AndroidEntryPoint
 
