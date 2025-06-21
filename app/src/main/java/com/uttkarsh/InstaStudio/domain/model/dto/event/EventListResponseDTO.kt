@@ -11,7 +11,7 @@ data class EventListResponseDTO(
     val eventCity: String,
     val eventState: String,
     val eventIsSaved: Boolean,
-    val subEventsIds: List<Long>,
-    val memberIds: List<Long>,
-    val resourceIds: List<Long>
+    val subEventsIds: Set<Long>,
+    val memberIds: Set<Long>,
+    val resourceIds: Set<Long>
 )

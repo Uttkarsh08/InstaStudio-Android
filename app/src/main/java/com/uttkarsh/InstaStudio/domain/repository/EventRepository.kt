@@ -10,6 +10,8 @@ import com.uttkarsh.InstaStudio.domain.model.ApiResponse
 import com.uttkarsh.InstaStudio.domain.model.dto.event.EventListResponseDTO
 import com.uttkarsh.InstaStudio.domain.model.dto.event.EventRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.dto.event.EventResponseDTO
+import com.uttkarsh.InstaStudio.domain.model.dto.event.SubEventRequestDTO
+import com.uttkarsh.InstaStudio.domain.model.dto.event.SubEventResponseDTO
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -23,9 +25,6 @@ class EventRepository @Inject constructor(
         return eventApi.registerEvent(request)
     }
 
-    suspend fun createNewSubEvent(request: EventRequestDTO): ApiResponse<EventResponseDTO> {
-        return eventApi.registerSubEvent(request)
-    }
 
     fun getUpcomingEvents(studioId: Long): Flow<PagingData<EventListResponseDTO>>{
         return Pager(
@@ -40,5 +39,14 @@ class EventRepository @Inject constructor(
             pagingSourceFactory = { CompletedEventPagingSource(eventApi, studioId)}
         ).flow
     }
+
+    suspend fun createNewSubEvent(request: SubEventRequestDTO): ApiResponse<SubEventResponseDTO> {
+        return eventApi.registerSubEvent(request)
+    }
+
+    suspend fun getSubEventById(studioId: Long, eventId: Long): ApiResponse<SubEventResponseDTO> {
+        return eventApi.getSubEventById(studioId, eventId)
+    }
+
 
 }

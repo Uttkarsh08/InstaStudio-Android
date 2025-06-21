@@ -25,6 +25,14 @@ import java.time.LocalDate
 import java.time.LocalTime
 import javax.inject.Inject
 import androidx.compose.runtime.State
+import com.uttkarsh.InstaStudio.domain.model.dto.event.EventResponseDTO
+import com.uttkarsh.InstaStudio.domain.model.dto.event.SubEventResponseDTO
+import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
+import com.uttkarsh.InstaStudio.utils.states.ResourceState
+import kotlinx.coroutines.flow.update
+import retrofit2.HttpException
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
@@ -45,16 +53,20 @@ class AddEventViewModel @Inject constructor(
     var clientPhoneNo by mutableStateOf("")
         private set
 
-    var eventStartDate by mutableStateOf(LocalDate.now().toString())
+    private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US)
+    private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss", Locale.US)
+
+
+    var eventStartDate by mutableStateOf(LocalDate.now().format(dateFormatter))
         private set
 
-    var eventEndDate by mutableStateOf(LocalDate.now().toString())
+    var eventEndDate by mutableStateOf(LocalDate.now().format(dateFormatter))
         private set
 
-    var eventStartTime by mutableStateOf(LocalTime.now().toString())
+    var eventStartTime by mutableStateOf(LocalTime.now().format(timeFormatter))
         private set
 
-    var eventEndTime by mutableStateOf(LocalTime.now().toString())
+    var eventEndTime by mutableStateOf(LocalTime.now().format(timeFormatter))
         private set
 
     var eventLocation by mutableStateOf("")
@@ -84,6 +96,16 @@ class AddEventViewModel @Inject constructor(
     private val _eventTypeDropdownExpanded = mutableStateOf(false)
     val eventTypeDropdownExpanded: State<Boolean> = _eventTypeDropdownExpanded
 
+    private val _subEventsMap = MutableStateFlow<Map<Long, SubEventResponseDTO>>(emptyMap())
+    val subEventsMap: StateFlow<Map<Long, SubEventResponseDTO>> = _subEventsMap
+
+    fun addSubEvent(subEvent: SubEventResponseDTO) {
+        _subEventsMap.update { it + (subEvent.eventId to subEvent) }
+    }
+
+    fun removeSubEvent(subEvent: SubEventResponseDTO) {
+        _subEventsMap.update { it - subEvent.eventId }
+    }
 
     fun updateClientName(newName: String) {
         clientName = newName
@@ -121,13 +143,13 @@ class AddEventViewModel @Inject constructor(
         when (datePickerTarget) {
             DatePickerTarget.START_DATE -> {
                 eventStartDate = date
-                timePickerTarget = TimePickerTarget.START_TIME
             }
             DatePickerTarget.END_DATE -> {
                 eventEndDate = date
-                timePickerTarget = TimePickerTarget.END_TIME
             }
-            null -> {}
+            null -> {
+                timePickerTarget = null
+            }
         }
         datePickerTarget = null
     }
@@ -168,8 +190,10 @@ class AddEventViewModel @Inject constructor(
         clientName = ""
         clientPhoneNo = ""
         _selectedEventType.value = EventType.WEDDING
-        eventStartDate = ""
-        eventEndDate = ""
+        eventStartDate = LocalDate.now().format(dateFormatter)
+        eventEndDate = LocalDate.now().format(dateFormatter)
+        eventStartTime = LocalTime.now().format(timeFormatter)
+        eventEndTime = LocalTime.now().format(timeFormatter)
         eventLocation = ""
         eventCity = ""
         eventState = ""
@@ -188,14 +212,16 @@ class AddEventViewModel @Inject constructor(
             val eventStart = eventStartDate+"T"+eventStartTime
             val eventEnd = eventEndDate+"T"+eventEndTime
 
+            val subEventsIds = _subEventsMap.value.map { it.value.eventId }.toSet()
+
             try {
                 val request = EventRequestDTO(
                     clientName = clientName,
                     clientPhoneNo = clientPhoneNo,
                     eventType = _selectedEventType.value.toString(),
-                    subEventsIds = emptyList(),
-                    memberIds = emptyList(),
-                    resourceIds = emptyList(),
+                    subEventsIds = subEventsIds,
+                    memberIds = emptySet(),
+                    resourceIds = emptySet(),
                     eventStartDate = eventStart,
                     eventEndDate = eventEnd,
                     eventLocation = eventLocation,
@@ -206,13 +232,20 @@ class AddEventViewModel @Inject constructor(
                 )
 
                 val response = eventRepository.createNewEvent(request)
+
                 if(response.data != null){
                     _addEventState.value = AddEventState.Success(response.data)
                 }
+                else {
+                    _addEventState.value = AddEventState.Error(response.error.message)
+                }
 
-            }catch (e: Exception){
-                _addEventState.value = AddEventState.Error(e.localizedMessage ?: "Unknown Error")
+            }catch (e: HttpException) {
+                val message = ApiErrorExtractor.extractMessage(e)
+                _addEventState.value = AddEventState.Error(message)
 
+            } catch (e: Exception) {
+                _addEventState.value = AddEventState.Error(e.localizedMessage ?: "Unexpected error occurred")
             }
         }
     }

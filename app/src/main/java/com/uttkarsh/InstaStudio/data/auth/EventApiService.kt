@@ -5,6 +5,8 @@ import com.uttkarsh.InstaStudio.domain.model.PagedResponse
 import com.uttkarsh.InstaStudio.domain.model.dto.event.EventListResponseDTO
 import com.uttkarsh.InstaStudio.domain.model.dto.event.EventRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.dto.event.EventResponseDTO
+import com.uttkarsh.InstaStudio.domain.model.dto.event.SubEventRequestDTO
+import com.uttkarsh.InstaStudio.domain.model.dto.event.SubEventResponseDTO
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -20,10 +22,6 @@ interface EventApiService {
         @Body request: EventRequestDTO
     ): ApiResponse<EventResponseDTO>
 
-    @POST("/api/v1/register/sub-event")
-    suspend fun registerSubEvent(
-        @Body request: EventRequestDTO
-    ): ApiResponse<EventResponseDTO>
 
     @GET("/api/v1/{studioId}/upcoming-events")
     suspend fun getUpcomingEvents(
@@ -36,5 +34,16 @@ interface EventApiService {
         @Path("studioId") studioId: Long,
         @Query("PageNumber") page: Int,
     ): ApiResponse<PagedResponse<EventListResponseDTO>>
+
+    @POST("/api/v1/register/sub-event")
+    suspend fun registerSubEvent(
+        @Body request: SubEventRequestDTO
+    ): ApiResponse<SubEventResponseDTO>
+
+    @GET("/api/v1/{studioId}/sub-event/{eventId}")
+    suspend fun getSubEventById(
+        @Path("studioId") studioId: Long,
+        @Path("eventId") eventId: Long,
+    ): ApiResponse<SubEventResponseDTO>
 
 }
