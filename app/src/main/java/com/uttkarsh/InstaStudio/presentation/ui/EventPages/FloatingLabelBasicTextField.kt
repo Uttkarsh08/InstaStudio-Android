@@ -20,16 +20,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import com.uttkarsh.InstaStudio.R
 
 @Composable
 fun FloatingLabelBasicTextField(
     value: String,
     onValueChange: (String) -> Unit,
-    label: String
+    label: String,
+    keyboardType: KeyboardType = KeyboardType.Text
 ) {
     val isFocusedOrNotEmpty = value.isNotEmpty()
     val underlineColor = colorResource(R.color.grey)
@@ -77,7 +80,10 @@ fun FloatingLabelBasicTextField(
                     }
                     innerTextField()
                 }
-            }
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = keyboardType
+            )
         )
 
         Canvas(

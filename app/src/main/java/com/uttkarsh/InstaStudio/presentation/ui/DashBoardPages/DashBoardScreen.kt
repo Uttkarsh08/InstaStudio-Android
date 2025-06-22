@@ -39,6 +39,7 @@ import com.uttkarsh.InstaStudio.presentation.ui.utils.SearchBar
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AddEventViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AuthViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.DashBoardViewModel
+import com.uttkarsh.InstaStudio.presentation.viewmodel.EventViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.ProfileViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -46,7 +47,7 @@ import com.uttkarsh.InstaStudio.presentation.viewmodel.ProfileViewModel
 @Composable
 fun DashBoardScreen(
     authViewModel: AuthViewModel = hiltViewModel(),
-    profileViewModel: ProfileViewModel = hiltViewModel(),
+    eventViewModel: EventViewModel = hiltViewModel(),
     addEventViewModel: AddEventViewModel = hiltViewModel(),
     dashBoardViewModel: DashBoardViewModel = hiltViewModel(),
     navController: NavController
@@ -104,7 +105,10 @@ fun DashBoardScreen(
                     CommonSectionUi(R.drawable.events,
                         "Events",
                         "Manager your Events",
-                        {navController.navigate(Screens.EventScreen.route)},
+                        {
+                            eventViewModel.resetHasLoadedFlags()
+                            navController.navigate(Screens.EventScreen.route)
+                        },
                         true,
                         false,
                         modifier = Modifier.weight(.45f)
@@ -148,22 +152,3 @@ fun DashBoardScreen(
 
 
 }
-
-@Preview(showBackground = true)
-@Composable
-fun GetPreview(){
-    DashBoardScreen(navController = NavController(LocalContext.current))
-}
-
-//Button(onClick = {
-//    authViewModel.logout()
-//    profileViewModel.resetProfileState()
-//    dashBoardViewModel.resetDashBoardState()
-//    navController.navigate(Screens.LoginTypeScreen.route){
-//        popUpTo(0) { inclusive = true }
-//        launchSingleTop = true
-//    }
-//
-//}) {
-//    Text("Logout")
-//}

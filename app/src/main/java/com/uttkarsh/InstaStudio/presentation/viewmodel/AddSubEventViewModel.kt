@@ -197,10 +197,16 @@ class AddSubEventViewModel @Inject constructor(
 
                 if(response.data != null){
                     _addSubEventState.value = AddSubEventState.Success(response.data)
+                }else {
+                    _addSubEventState.value = AddSubEventState.Error(response.error.message)
                 }
 
-            }catch (e: Exception){
-                _addSubEventState.value = AddSubEventState.Error(e.localizedMessage ?: "Unknown Error")
+            }catch (e: HttpException) {
+                val message = ApiErrorExtractor.extractMessage(e)
+                _addSubEventState.value = AddSubEventState.Error(message)
+
+            } catch (e: Exception) {
+                _addSubEventState.value = AddSubEventState.Error(e.localizedMessage ?: "Unexpected error occurred")
             }
         }
     }

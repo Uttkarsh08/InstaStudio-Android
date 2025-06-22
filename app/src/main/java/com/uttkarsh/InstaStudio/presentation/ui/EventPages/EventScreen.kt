@@ -17,7 +17,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,11 +33,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.uttkarsh.InstaStudio.R
+import com.uttkarsh.InstaStudio.domain.model.dto.event.EventListResponseDTO
 import com.uttkarsh.InstaStudio.presentation.ui.utils.AppTopBar
 import com.uttkarsh.InstaStudio.presentation.viewmodel.EventViewModel
 import com.uttkarsh.InstaStudio.utils.states.EventState
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 @Composable
@@ -99,14 +101,18 @@ fun EventScreen(
                 modifier = Modifier.fillMaxSize()
             ) { page ->
                 when (page) {
-                    0 -> EventsPage(
-                        loadData = { eventViewModel.getUpcomingEvents() },
-                        eventViewModel = eventViewModel
-                    )
-                    1 -> EventsPage(
-                        loadData = { eventViewModel.getCompletedEvents() },
-                        eventViewModel = eventViewModel
-                    )
+                    0 -> {
+                        LaunchedEffect(Unit) { eventViewModel.loadUpcomingEventsIfNeeded() }
+                        EventsPage(
+                            stateFlow = eventViewModel.upcomingEventState
+                        )
+                    }
+                    1 -> {
+                        LaunchedEffect(Unit) { eventViewModel.loadCompletedEventsIfNeeded() }
+                        EventsPage(
+                            stateFlow = eventViewModel.completedEventState
+                        )
+                    }
                 }
             }
         }
@@ -116,30 +122,20 @@ fun EventScreen(
 
 @Composable
 fun EventsPage(
-    loadData: () -> Unit,
-    eventViewModel: EventViewModel
+    stateFlow: StateFlow<EventState>
 ) {
-    LaunchedEffect(Unit) {
-        loadData()
-    }
-
-    val state by eventViewModel.eventState.collectAsState()
-    val events = if (state is EventState.PagingSuccess) {
-        (state as EventState.PagingSuccess).data.collectAsLazyPagingItems()
-    } else null
+    val state by stateFlow.collectAsState()
 
     when (state) {
         is EventState.Error -> {
+            val errorState = state as EventState.Error
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = "Failed to load resources.")
+                    Text(text = "Failed: ${errorState.message}")
                     Spacer(modifier = Modifier.height(8.dp))
-                    Button(onClick = loadData) {
-                        Text("Retry")
-                    }
                 }
             }
         }
@@ -149,7 +145,7 @@ fun EventsPage(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "No Events loaded yet.")
+                Text("No Events loaded yet.")
             }
         }
 
@@ -162,39 +158,50 @@ fun EventsPage(
             }
         }
 
-        is EventState.PagingSuccess -> {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
-            ) {
-                items(
-                    count = events?.itemCount ?: 0,
-                    key = { events?.get(it)?.eventId ?: it }
-                ) {
-                    events?.get(it)?.let { event ->
-                        EventCard(event = event, onclick = {})
+        is EventState.UpcomingPagingSuccess -> {
+            val items = (state as EventState.UpcomingPagingSuccess).data.collectAsLazyPagingItems()
+            EventLazyList(items)
+        }
+
+        is EventState.CompletedPagingSuccess -> {
+            val items = (state as EventState.CompletedPagingSuccess).data.collectAsLazyPagingItems()
+            EventLazyList(items)
+        }
+
+        else -> {}
+    }
+}
+
+@Composable
+fun EventLazyList(items: LazyPagingItems<EventListResponseDTO>) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
+    ) {
+        items(
+            count = items.itemCount,
+            key = { items[it]?.eventId ?: it }
+        ) {
+            items[it]?.let { event ->
+                EventCard(event = event, onclick = {})
+            }
+        }
+
+        items.apply {
+            when {
+                loadState.append is LoadState.Loading -> {
+                    item {
+                        EventShimmerShow()
                     }
                 }
 
-                events.apply {
-                    when {
-                        this?.loadState?.append is LoadState.Loading -> {
-                            items(1) {
-                                EventShimmerShow()
-                            }
-                        }
-
-                        this?.loadState?.refresh is LoadState.Loading -> {
-                            items(10) {
-                                EventShimmerShow()
-                            }
-                        }
+                loadState.refresh is LoadState.Loading -> {
+                    items(10) {
+                        EventShimmerShow()
                     }
                 }
             }
         }
-
-        else -> {}
     }
 }

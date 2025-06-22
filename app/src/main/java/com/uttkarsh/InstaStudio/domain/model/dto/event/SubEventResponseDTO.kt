@@ -12,6 +12,6 @@ data class SubEventResponseDTO(
     val eventLocation: String,
     val eventCity: String,
     val eventState: String,
-    val members: List<MemberInEventDTO>,
-    val resources: List<ResourceResponseDTO>
+    val members: Set<MemberInEventDTO>,
+    val resources: Set<ResourceResponseDTO>
 )

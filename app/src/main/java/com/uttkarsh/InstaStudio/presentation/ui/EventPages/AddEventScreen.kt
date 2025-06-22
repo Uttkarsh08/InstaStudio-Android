@@ -53,6 +53,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.uttkarsh.InstaStudio.domain.model.DatePickerTarget
@@ -62,6 +63,7 @@ import com.uttkarsh.InstaStudio.presentation.ui.utils.ShowDatePickerDialog
 import com.uttkarsh.InstaStudio.presentation.ui.utils.ShowTimePickerDialog
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AddEventViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AddSubEventViewModel
+import com.uttkarsh.InstaStudio.presentation.viewmodel.EventViewModel
 import com.uttkarsh.InstaStudio.utils.states.AddEventState
 import com.uttkarsh.InstaStudio.utils.states.AddSubEventState
 
@@ -69,7 +71,7 @@ import com.uttkarsh.InstaStudio.utils.states.AddSubEventState
 @Composable
 fun AddEventScreen(
     addEventViewModel: AddEventViewModel = hiltViewModel(),
-    subEventViewModel: AddSubEventViewModel = hiltViewModel(),
+    eventViewModel: EventViewModel = hiltViewModel(),
     navController: NavController
 ) {
 
@@ -446,7 +448,9 @@ fun AddEventScreen(
                         FloatingLabelBasicTextField(
                             value = clientPhoneNo,
                             onValueChange = { addEventViewModel.updateClientPhoneNo(it) },
-                            label = "Contact No."
+                            label = "Contact No.",
+                            keyboardType = KeyboardType.Number
+
                         )
 
                         Column(
@@ -566,6 +570,9 @@ fun AddEventScreen(
 
     LaunchedEffect(state) {
         if (state is AddEventState.Success) {
+
+            eventViewModel.resetHasLoadedFlags()
+
             navController.navigate(Screens.EventScreen.route) {
                 popUpTo(Screens.AddEventDetailsScreen.route) { inclusive = true }
                 launchSingleTop = true

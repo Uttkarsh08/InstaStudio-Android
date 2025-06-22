@@ -16,7 +16,7 @@ data class EventResponseDTO(
     val eventState: String,
     @SerializedName("evenIsSaved")
     val eventIsSaved: Boolean,
-    val subEvents: List<EventResponseDTO>,
-    val members: List<MemberInEventDTO>,
-    val resources: List<ResourceResponseDTO>
+    val subEvents: Set<EventResponseDTO>,
+    val members: Set<MemberInEventDTO>,
+    val resources: Set<ResourceResponseDTO>
 )
