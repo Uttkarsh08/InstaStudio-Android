@@ -25,10 +25,8 @@ import java.time.LocalDate
 import java.time.LocalTime
 import javax.inject.Inject
 import androidx.compose.runtime.State
-import com.uttkarsh.InstaStudio.domain.model.dto.event.EventResponseDTO
 import com.uttkarsh.InstaStudio.domain.model.dto.event.SubEventResponseDTO
 import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
-import com.uttkarsh.InstaStudio.utils.states.ResourceState
 import kotlinx.coroutines.flow.update
 import retrofit2.HttpException
 import java.time.format.DateTimeFormatter
@@ -98,6 +96,21 @@ class AddEventViewModel @Inject constructor(
 
     private val _subEventsMap = MutableStateFlow<Map<Long, SubEventResponseDTO>>(emptyMap())
     val subEventsMap: StateFlow<Map<Long, SubEventResponseDTO>> = _subEventsMap
+
+    var shouldResetAddEventScreen by mutableStateOf(true)
+        private set
+
+    fun resetAddEventScreen(){
+        if(shouldResetAddEventScreen){
+            resetAddEventState()
+            resetEventDetails()
+            shouldResetAddEventScreen = false
+        }
+    }
+
+    fun markAddEventScreenForReset() {
+        shouldResetAddEventScreen = true
+    }
 
     fun addSubEvent(subEvent: SubEventResponseDTO) {
         _subEventsMap.update { it + (subEvent.eventId to subEvent) }
@@ -200,6 +213,7 @@ class AddEventViewModel @Inject constructor(
         eventIsSaved = false
         datePickerTarget = null
         timePickerTarget = null
+        _subEventsMap.value = emptyMap()
     }
 
 

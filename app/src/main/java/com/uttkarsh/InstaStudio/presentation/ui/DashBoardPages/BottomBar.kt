@@ -1,7 +1,9 @@
 package com.uttkarsh.InstaStudio.presentation.ui.DashBoardPages
 
+import android.os.Build
 import android.util.Log
 import androidx.annotation.DrawableRes
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -30,11 +32,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.uttkarsh.InstaStudio.presentation.navigation.Screens
 import com.uttkarsh.InstaStudio.R
+import com.uttkarsh.InstaStudio.presentation.viewmodel.AddEventViewModel
 
 data class NavigationItem(
     val route: String,
@@ -43,8 +47,10 @@ data class NavigationItem(
     val iconContentDescription: String
 )
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun BottomBar(
+    addEventViewModel: AddEventViewModel = hiltViewModel(),
     navController: NavController,
 ){
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -149,7 +155,9 @@ fun BottomBar(
         }
 
         FloatingActionButton(
-            onClick = { navController.navigate(Screens.AddEventDetailsScreen.route) {
+            onClick = {
+                addEventViewModel.markAddEventScreenForReset()
+                navController.navigate(Screens.AddEventDetailsScreen.route) {
                 launchSingleTop = true
             } },
             shape = CircleShape,

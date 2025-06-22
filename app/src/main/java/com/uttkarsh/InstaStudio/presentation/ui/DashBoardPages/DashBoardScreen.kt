@@ -1,6 +1,8 @@
 package com.uttkarsh.InstaStudio.presentation.ui.DashBoardPages
 
 import android.content.res.Configuration
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -34,15 +36,18 @@ import androidx.navigation.NavController
 import com.uttkarsh.InstaStudio.presentation.navigation.Screens
 import com.uttkarsh.InstaStudio.presentation.ui.utils.AppTopBar
 import com.uttkarsh.InstaStudio.presentation.ui.utils.SearchBar
+import com.uttkarsh.InstaStudio.presentation.viewmodel.AddEventViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AuthViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.DashBoardViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.ProfileViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashBoardScreen(
     authViewModel: AuthViewModel = hiltViewModel(),
     profileViewModel: ProfileViewModel = hiltViewModel(),
+    addEventViewModel: AddEventViewModel = hiltViewModel(),
     dashBoardViewModel: DashBoardViewModel = hiltViewModel(),
     navController: NavController
 ){
@@ -63,7 +68,7 @@ fun DashBoardScreen(
                 onNavClick = { /* TODO: Open Drawer */ }
             )
         },
-        bottomBar = { BottomBar(navController) }
+        bottomBar = { BottomBar(addEventViewModel, navController) }
     ){ paddingValues ->
         Column(
         modifier = Modifier

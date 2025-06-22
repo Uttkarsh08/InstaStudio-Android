@@ -111,9 +111,8 @@ fun AddEventScreen(
         )
     }
 
-    LaunchedEffect(Unit) {
-        addEventViewModel.resetAddEventState()
-        addEventViewModel.resetEventDetails()
+    LaunchedEffect(addEventViewModel) {
+        addEventViewModel.resetAddEventScreen()
     }
 
     Scaffold(
