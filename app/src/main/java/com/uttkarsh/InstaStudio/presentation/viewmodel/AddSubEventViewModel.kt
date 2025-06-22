@@ -12,21 +12,17 @@ import androidx.lifecycle.viewModelScope
 import com.uttkarsh.InstaStudio.domain.model.DatePickerTarget
 import com.uttkarsh.InstaStudio.domain.model.SubEventType
 import com.uttkarsh.InstaStudio.domain.model.TimePickerTarget
-import com.uttkarsh.InstaStudio.domain.model.dto.event.EventRequestDTO
-import com.uttkarsh.InstaStudio.domain.model.dto.event.EventResponseDTO
 import com.uttkarsh.InstaStudio.domain.model.dto.event.SubEventRequestDTO
+import com.uttkarsh.InstaStudio.domain.model.validators.validate
 import com.uttkarsh.InstaStudio.domain.repository.EventRepository
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
-import com.uttkarsh.InstaStudio.utils.states.AddEventState
 import com.uttkarsh.InstaStudio.utils.states.AddSubEventState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.time.LocalDate
@@ -192,6 +188,12 @@ class AddSubEventViewModel @Inject constructor(
                     eventState = subEventState,
                     studioId = studioId
                 )
+
+                val validateError = request.validate()
+                if(validateError != null){
+                    _addSubEventState.value = AddSubEventState.Error(validateError)
+                    return@launch
+                }
 
                 val response = evenRepository.createNewSubEvent(request)
 

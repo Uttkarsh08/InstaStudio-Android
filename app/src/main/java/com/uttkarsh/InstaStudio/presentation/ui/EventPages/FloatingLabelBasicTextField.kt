@@ -21,8 +21,11 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import com.uttkarsh.InstaStudio.R
@@ -36,6 +39,7 @@ fun FloatingLabelBasicTextField(
 ) {
     val isFocusedOrNotEmpty = value.isNotEmpty()
     val underlineColor = colorResource(R.color.grey)
+    val alatsiFont = remember { FontFamily(Font(R.font.alatsi)) }
 
     Column(
         modifier = Modifier
@@ -50,6 +54,7 @@ fun FloatingLabelBasicTextField(
             Text(
                 text = label,
                 fontSize = 12.sp,
+                fontFamily = alatsiFont,
                 color = Color.Black,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 2.dp)
@@ -63,6 +68,7 @@ fun FloatingLabelBasicTextField(
             cursorBrush = SolidColor(Color.Black),
             textStyle = TextStyle(
                 color = Color.Black,
+                fontFamily = alatsiFont,
                 fontSize = 16.sp,
             ),
             modifier = Modifier

@@ -26,6 +26,7 @@ import java.time.LocalTime
 import javax.inject.Inject
 import androidx.compose.runtime.State
 import com.uttkarsh.InstaStudio.domain.model.dto.event.SubEventResponseDTO
+import com.uttkarsh.InstaStudio.domain.model.validators.validate
 import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
 import kotlinx.coroutines.flow.update
 import retrofit2.HttpException
@@ -61,10 +62,10 @@ class AddEventViewModel @Inject constructor(
     var eventEndDate by mutableStateOf(LocalDate.now().format(dateFormatter))
         private set
 
-    var eventStartTime by mutableStateOf(LocalTime.now().format(timeFormatter))
+    var eventStartTime by mutableStateOf(LocalTime.now().plusHours(1).format(timeFormatter))
         private set
 
-    var eventEndTime by mutableStateOf(LocalTime.now().format(timeFormatter))
+    var eventEndTime by mutableStateOf(LocalTime.now().plusHours(1).format(timeFormatter))
         private set
 
     var eventLocation by mutableStateOf("")
@@ -244,6 +245,12 @@ class AddEventViewModel @Inject constructor(
                     evenIsSaved = eventIsSaved,
                     studioId = studioId
                 )
+
+                val validateError = request.validate()
+                if(validateError != null){
+                    _addEventState.value = AddEventState.Error(validateError)
+                    return@launch
+                }
 
                 val response = eventRepository.createNewEvent(request)
 

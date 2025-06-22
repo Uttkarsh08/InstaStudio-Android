@@ -86,7 +86,7 @@ fun ResourceScreen(
         (state as ResourceState.ListSuccess).response.collectAsLazyPagingItems()
     } else null
 
-    val errorMessage = (state as? ResourceState.Error)?.message
+    var errorMessage = (state as? ResourceState.Error)?.message
 
     Scaffold(
         topBar = {

@@ -59,6 +59,7 @@ import com.uttkarsh.InstaStudio.presentation.ui.utils.ShowDatePickerDialog
 import com.uttkarsh.InstaStudio.presentation.ui.utils.ShowTimePickerDialog
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AddEventViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AddSubEventViewModel
+import com.uttkarsh.InstaStudio.utils.states.AddEventState
 import com.uttkarsh.InstaStudio.utils.states.AddSubEventState
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -89,6 +90,8 @@ fun AddSubEventScreen(
     val timePickerTarget = addSubEventViewModel.timePickerTarget
 
     val state by addSubEventViewModel.addSubEventState.collectAsState()
+
+    val errorMessage = (state as? AddSubEventState.Error)?.message
 
     if (datePickerTarget != null) {
         ShowDatePickerDialog(
@@ -121,340 +124,347 @@ fun AddSubEventScreen(
             )
         }
     ) {
-        when (state) {
-            is AddSubEventState.Error -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = "Failed to load resources.")
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+                .padding(horizontal = 20.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .verticalScroll(scrollState),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+
+
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "Event Type",
+                        fontFamily = alatsiFont,
+                        color = Color.Black,
+                        fontSize = 16.sp
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(40.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .border(
+                                1.dp,
+                                colorResource(R.color.grey),
+                                RoundedCornerShape(8.dp)
+                            )
+                    ) {
+                        TextButton(
+                            onClick = { addSubEventViewModel.toggleSubEventTypeDropdown() },
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 12.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = selectedSubEventType.displayName,
+                                    color = Color.Black,
+                                    fontFamily = alatsiFont,
+                                    fontSize = 16.sp
+                                )
+                                Icon(
+                                    imageVector = Icons.Default.KeyboardArrowDown,
+                                    contentDescription = "Dropdown Arrow",
+                                    tint = Color.Black
+                                )
+                            }
+                        }
+
+                        DropdownMenu(
+                            expanded = dropdownExpanded,
+                            onDismissRequest = { addSubEventViewModel.closeSubEventTypeDropdown() },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(
+                                    RoundedCornerShape(
+                                        bottomStart = 8.dp,
+                                        bottomEnd = 8.dp
+                                    )
+                                )
+                                .padding(horizontal = 30.dp)
+                                .background(MaterialTheme.colorScheme.background)
+                        ) {
+                            subEventTypes.forEach { type ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = type.displayName,
+                                            color = Color.Black,
+                                            fontFamily = alatsiFont,
+                                            fontSize = 16.sp
+                                        )
+                                    },
+                                    onClick = {
+                                        addSubEventViewModel.onSubEventTypeSelected(type)
+                                    },
+                                    contentPadding = PaddingValues(horizontal = 12.dp)
+                                )
+                            }
+                        }
                     }
                 }
-            }
 
-            AddSubEventState.Idle -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(it)
-                        .padding(horizontal = 20.dp)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .verticalScroll(scrollState),
-                        verticalArrangement = Arrangement.spacedBy(20.dp)
+
+                Column {
+                    Text(
+                        text = "Date & Time",
+                        fontFamily = alatsiFont,
+                        color = Color.Black,
+                        fontSize = 16.sp
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-
-
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Column(
+                            modifier = Modifier.weight(1f),
+                        ) {
                             Text(
-                                text = "Event Type",
+                                text = "From",
                                 fontFamily = alatsiFont,
                                 color = Color.Black,
-                                fontSize = 16.sp
+                                fontSize = 12.sp
                             )
+
+                            Spacer(modifier = Modifier.height(4.dp))
 
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(40.dp)
+                                    .height(35.dp)
+                                    .clickable(onClick = {
+                                        addSubEventViewModel.onDateBoxClick(DatePickerTarget.START_DATE)
+                                    })
                                     .clip(RoundedCornerShape(8.dp))
                                     .border(
                                         1.dp,
                                         colorResource(R.color.grey),
                                         RoundedCornerShape(8.dp)
                                     )
+                                    .padding(horizontal = 12.dp),
                             ) {
-                                TextButton(
-                                    onClick = { addSubEventViewModel.toggleSubEventTypeDropdown() },
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(horizontal = 12.dp)
-                                ) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = selectedSubEventType.displayName,
-                                            color = Color.Black,
-                                            fontFamily = alatsiFont,
-                                            fontSize = 16.sp
-                                        )
-                                        Icon(
-                                            imageVector = Icons.Default.KeyboardArrowDown,
-                                            contentDescription = "Dropdown Arrow",
-                                            tint = Color.Black
-                                        )
-                                    }
-                                }
-
-                                DropdownMenu(
-                                    expanded = dropdownExpanded,
-                                    onDismissRequest = { addSubEventViewModel.closeSubEventTypeDropdown() },
+                                Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .clip(
-                                            RoundedCornerShape(
-                                                bottomStart = 8.dp,
-                                                bottomEnd = 8.dp
-                                            )
-                                        )
-                                        .padding(horizontal = 30.dp)
-                                        .background(MaterialTheme.colorScheme.background)
+                                        .align(Alignment.Center)
+                                        .padding(4.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    subEventTypes.forEach { type ->
-                                        DropdownMenuItem(
-                                            text = {
-                                                Text(
-                                                    text = type.displayName,
-                                                    color = Color.Black,
-                                                    fontFamily = alatsiFont,
-                                                    fontSize = 16.sp
-                                                )
-                                            },
-                                            onClick = {
-                                                addSubEventViewModel.onSubEventTypeSelected(type)
-                                            },
-                                            contentPadding = PaddingValues(horizontal = 12.dp)
-                                        )
-                                    }
+
+                                    Text(text = subEventStartDate)
+
+                                    Icon(
+                                        painter = painterResource(R.drawable.calender),
+                                        contentDescription = null,
+                                        tint = colorResource(R.color.grey),
+                                        modifier = Modifier.size(15.dp)
+                                    )
                                 }
+
                             }
-                        }
 
-
-                        Column {
-                            Text(
-                                text = "Date & Time",
-                                fontFamily = alatsiFont,
-                                color = Color.Black,
-                                fontSize = 16.sp
-                            )
                             Spacer(modifier = Modifier.height(8.dp))
 
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(35.dp)
+                                    .clickable(onClick = {
+                                        addSubEventViewModel.onTimeBoxClick(TimePickerTarget.START_TIME)
+                                    })
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .border(
+                                        1.dp,
+                                        colorResource(R.color.grey),
+                                        RoundedCornerShape(8.dp)
+                                    )
+                                    .padding(horizontal = 12.dp),
                             ) {
-                                Column(
-                                    modifier = Modifier.weight(1f),
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .align(Alignment.Center)
+                                        .padding(4.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text(
-                                        text = "From",
-                                        fontFamily = alatsiFont,
-                                        color = Color.Black,
-                                        fontSize = 12.sp
+
+                                    Text(text = subEventStartTime)
+
+                                    Icon(
+                                        Icons.Default.KeyboardArrowDown,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(15.dp)
                                     )
-
-                                    Spacer(modifier = Modifier.height(4.dp))
-
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(35.dp)
-                                            .clickable(onClick = {
-                                                addSubEventViewModel.onDateBoxClick(DatePickerTarget.START_DATE)
-                                            })
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .border(
-                                                1.dp,
-                                                colorResource(R.color.grey),
-                                                RoundedCornerShape(8.dp)
-                                            )
-                                            .padding(horizontal = 12.dp),
-                                    ) {
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .align(Alignment.Center)
-                                                .padding(4.dp),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-
-                                            Text(text = subEventStartDate)
-
-                                            Icon(
-                                                painter = painterResource(R.drawable.calender),
-                                                contentDescription = null,
-                                                tint = colorResource(R.color.grey),
-                                                modifier = Modifier.size(15.dp)
-                                            )
-                                        }
-
-                                    }
-
-                                    Spacer(modifier = Modifier.height(8.dp))
-
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(35.dp)
-                                            .clickable(onClick = {
-                                                addSubEventViewModel.onTimeBoxClick(TimePickerTarget.START_TIME)
-                                            })
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .border(
-                                                1.dp,
-                                                colorResource(R.color.grey),
-                                                RoundedCornerShape(8.dp)
-                                            )
-                                            .padding(horizontal = 12.dp),
-                                    ) {
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .align(Alignment.Center)
-                                                .padding(4.dp),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-
-                                            Text(text = subEventStartTime)
-
-                                            Icon(
-                                                Icons.Default.KeyboardArrowDown,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(15.dp)
-                                            )
-                                        }
-
-                                    }
-
-                                }
-
-
-                                Column(
-                                    modifier = Modifier.weight(1f),
-                                ) {
-                                    Text(
-                                        text = "To",
-                                        fontFamily = alatsiFont,
-                                        color = Color.Black,
-                                        fontSize = 12.sp
-                                    )
-
-                                    Spacer(modifier = Modifier.height(4.dp))
-
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(35.dp)
-                                            .clickable(onClick = {
-                                                addSubEventViewModel.onDateBoxClick(DatePickerTarget.END_DATE)
-                                            })
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .border(
-                                                1.dp,
-                                                colorResource(R.color.grey),
-                                                RoundedCornerShape(8.dp)
-                                            )
-                                            .padding(horizontal = 12.dp),
-                                    ) {
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .align(Alignment.Center)
-                                                .padding(4.dp),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-
-                                            Text(text = subEventEndDate)
-
-                                            Icon(
-                                                painter = painterResource(R.drawable.calender),
-                                                contentDescription = null,
-                                                tint = colorResource(R.color.grey),
-                                                modifier = Modifier.size(15.dp)
-                                            )
-                                        }
-
-                                    }
-
-                                    Spacer(modifier = Modifier.height(8.dp))
-
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(35.dp)
-                                            .clickable(onClick = {
-                                                addSubEventViewModel.onTimeBoxClick(TimePickerTarget.END_TIME)
-                                            })
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .border(
-                                                1.dp,
-                                                colorResource(R.color.grey),
-                                                RoundedCornerShape(8.dp)
-                                            )
-                                            .padding(horizontal = 12.dp),
-                                    ) {
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .align(Alignment.Center)
-                                                .padding(4.dp),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-
-                                            Text(text = subEventEndTime)
-
-                                            Icon(
-                                                Icons.Default.KeyboardArrowDown,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(15.dp)
-                                            )
-                                        }
-
-                                    }
-
                                 }
 
                             }
+
                         }
 
-                        FloatingLabelBasicTextField(
-                            value = subEveLocation,
-                            onValueChange = { addSubEventViewModel.updateSubEventLocation(it) },
-                            label = "Location"
-                        )
 
-                        FloatingLabelBasicTextField(
-                            value = subEventCity,
-                            onValueChange = { addSubEventViewModel.updateSubEventCity(it) },
-                            label = "City"
-                        )
-
-                        FloatingLabelBasicTextField(
-                            value = subEventState,
-                            onValueChange = { addSubEventViewModel.updateSubEventState(it) },
-                            label = "State"
-                        )
-
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
+                        Column(
+                            modifier = Modifier.weight(1f),
                         ) {
-                            Button(
-                                onClick = {
-                                    addSubEventViewModel.createNewSubEvent()
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = colorResource(R.color.darkGreen),
-                                    contentColor = Color.Black
-                                )
+                            Text(
+                                text = "To",
+                                fontFamily = alatsiFont,
+                                color = Color.Black,
+                                fontSize = 12.sp
+                            )
+
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(35.dp)
+                                    .clickable(onClick = {
+                                        addSubEventViewModel.onDateBoxClick(DatePickerTarget.END_DATE)
+                                    })
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .border(
+                                        1.dp,
+                                        colorResource(R.color.grey),
+                                        RoundedCornerShape(8.dp)
+                                    )
+                                    .padding(horizontal = 12.dp),
                             ) {
-                                Text(text = "Add New")
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .align(Alignment.Center)
+                                        .padding(4.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+
+                                    Text(text = subEventEndDate)
+
+                                    Icon(
+                                        painter = painterResource(R.drawable.calender),
+                                        contentDescription = null,
+                                        tint = colorResource(R.color.grey),
+                                        modifier = Modifier.size(15.dp)
+                                    )
+                                }
+
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(35.dp)
+                                    .clickable(onClick = {
+                                        addSubEventViewModel.onTimeBoxClick(TimePickerTarget.END_TIME)
+                                    })
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .border(
+                                        1.dp,
+                                        colorResource(R.color.grey),
+                                        RoundedCornerShape(8.dp)
+                                    )
+                                    .padding(horizontal = 12.dp),
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .align(Alignment.Center)
+                                        .padding(4.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+
+                                    Text(text = subEventEndTime)
+
+                                    Icon(
+                                        Icons.Default.KeyboardArrowDown,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(15.dp)
+                                    )
+                                }
+
                             }
 
                         }
+
                     }
                 }
+
+                FloatingLabelBasicTextField(
+                    value = subEveLocation,
+                    onValueChange = { addSubEventViewModel.updateSubEventLocation(it) },
+                    label = "Location"
+                )
+
+                FloatingLabelBasicTextField(
+                    value = subEventCity,
+                    onValueChange = { addSubEventViewModel.updateSubEventCity(it) },
+                    label = "City"
+                )
+
+                FloatingLabelBasicTextField(
+                    value = subEventState,
+                    onValueChange = { addSubEventViewModel.updateSubEventState(it) },
+                    label = "State"
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    errorMessage?.let {
+                        Text(
+                            text = it,
+                            color = Color.Red,
+                        )
+                    }
+
+                }
+
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Button(
+                        onClick = {
+                            addSubEventViewModel.createNewSubEvent()
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = colorResource(R.color.darkGreen),
+                            contentColor = Color.Black
+                        )
+                    ) {
+                        Text(text = "Add New")
+                    }
+
+                }
+            }
+        }
+
+        when (state) {
+
+            AddSubEventState.Idle -> {
+                Text(text = "Events Not Loaded Yet",
+                    color = Color.Black,
+                    fontFamily = alatsiFont,
+                    fontSize = 16.sp)
             }
 
             AddSubEventState.Loading -> {
@@ -466,7 +476,12 @@ fun AddSubEventScreen(
                 }
             }
 
-            is AddSubEventState.Success -> {}
+            is AddSubEventState.Success -> {
+                // Success is handled via LaunchedEffect, no UI needed here
+            }
+            is AddSubEventState.Error -> {
+                // Error UI handled separately
+            }
         }
     }
 
