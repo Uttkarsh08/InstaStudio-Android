@@ -12,6 +12,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
@@ -172,36 +176,55 @@ fun EventsPage(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun EventLazyList(items: LazyPagingItems<EventListResponseDTO>) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
+
+    val isRefreshing = items.loadState?.refresh is LoadState.Loading
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isRefreshing,
+        onRefresh = { items.refresh() }
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pullRefresh(pullRefreshState)
     ) {
-        items(
-            count = items.itemCount,
-            key = { items[it]?.eventId ?: it }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
         ) {
-            items[it]?.let { event ->
-                EventCard(event = event, onclick = {})
-            }
-        }
-
-        items.apply {
-            when {
-                loadState.append is LoadState.Loading -> {
-                    item {
-                        EventShimmerShow()
-                    }
-                }
-
-                loadState.refresh is LoadState.Loading -> {
-                    items(10) {
-                        EventShimmerShow()
-                    }
+            items(
+                count = items.itemCount,
+                key = { items[it]?.eventId ?: it }
+            ) {
+                items[it]?.let { event ->
+                    EventCard(event = event, onclick = {})
                 }
             }
+
+            items.apply {
+                when {
+                    loadState.append is LoadState.Loading -> {
+                        item {
+                            EventShimmerShow()
+                        }
+                    }
+
+                    loadState.refresh is LoadState.Loading -> {
+                        items(10) {
+                            EventShimmerShow()
+                        }
+                    }
+                }
+            }
         }
+        PullRefreshIndicator(
+            refreshing = isRefreshing,
+            state = pullRefreshState,
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
     }
 }

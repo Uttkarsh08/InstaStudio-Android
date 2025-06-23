@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.runtime.getValue
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -23,6 +23,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -41,6 +42,7 @@ import com.uttkarsh.InstaStudio.presentation.viewmodel.AuthViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.DashBoardViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.EventViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.ProfileViewModel
+import com.uttkarsh.InstaStudio.utils.states.EventState
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,12 +54,13 @@ fun DashBoardScreen(
     dashBoardViewModel: DashBoardViewModel = hiltViewModel(),
     navController: NavController
 ){
-    val configuration = LocalConfiguration.current
-    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     val scrollState = rememberScrollState()
+
+    val nextEvenState by eventViewModel.eventState.collectAsState()
 
     LaunchedEffect(Unit) {
         dashBoardViewModel.getUserProfile()
+        eventViewModel.getNextUpcomingEvent()
     }
 
     Scaffold(
@@ -93,7 +96,7 @@ fun DashBoardScreen(
 
             Spacer(Modifier.height(16.dp))
 
-            NextEventSection("Mayank &  Ranjani", "1 Jan, 2025, Wed", {})
+            NextEventSection(nextEvenState, {})
 
             Row(
                 modifier = Modifier.fillMaxWidth()

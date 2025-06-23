@@ -16,6 +16,7 @@ import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
@@ -30,10 +31,13 @@ class EventViewModel @Inject constructor(
 ): ViewModel(){
 
     private val _upcomingEventState = MutableStateFlow<EventState>(EventState.Idle)
-    val upcomingEventState = _upcomingEventState.asStateFlow()
+    val upcomingEventState: StateFlow<EventState> = _upcomingEventState.asStateFlow()
 
     private val _completedEventState = MutableStateFlow<EventState>(EventState.Idle)
-    val completedEventState = _completedEventState.asStateFlow()
+    val completedEventState: StateFlow<EventState> = _completedEventState.asStateFlow()
+
+    private val _eventState = MutableStateFlow<EventState>(EventState.Idle)
+    val eventState: StateFlow<EventState> = _eventState.asStateFlow()
 
     var hasLoadedUpcoming by mutableStateOf(false)
         private set
@@ -102,6 +106,32 @@ class EventViewModel @Inject constructor(
 
             } catch (e: Exception) {
                 _completedEventState.value = EventState.Error(e.localizedMessage ?: "Unexpected error occurred")
+            }
+        }
+    }
+
+    fun getNextUpcomingEvent(){
+        viewModelScope.launch {
+            _eventState.value = EventState.Loading
+
+            try {
+                val studioId = sessionStore.studioIdFlow.first()
+
+                val response = eventRepository.getNextUpcomingEvent(studioId)
+
+                Log.d("NextUpcomingEvent", "Data: ${response.data}, Error: ${response.error}")
+
+                if(response.data != null){
+                    _eventState.value = EventState.Success(response.data)
+                }else{
+                    _eventState.value = EventState.Error(response.error.message)
+                }
+            }catch (e: HttpException) {
+                val message = ApiErrorExtractor.extractMessage(e)
+                _eventState.value = EventState.Error(message)
+
+            } catch (e: Exception) {
+                _eventState.value = EventState.Error(e.localizedMessage ?: "Unexpected error occurred")
             }
         }
     }

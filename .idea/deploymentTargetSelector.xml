@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="InstaStudio">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-06-20T19:09:36.317963800Z">
+        <DropdownSelection timestamp="2025-06-23T09:04:35.683684700Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=b6bb6ae" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\uttka\.android\avd\Pixel_9_Pro_Fold.avd" />
             </handle>
           </Target>
         </DropdownSelection>

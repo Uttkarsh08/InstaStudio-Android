@@ -35,6 +35,11 @@ interface EventApiService {
         @Query("PageNumber") page: Int,
     ): ApiResponse<PagedResponse<EventListResponseDTO>>
 
+    @GET("/api/v1/{studioId}/next-event")
+    suspend fun getNextUpcomingEvent(
+        @Path("studioId") studioId: Long,
+    ): ApiResponse<EventResponseDTO>
+
     @POST("/api/v1/register/sub-event")
     suspend fun registerSubEvent(
         @Body request: SubEventRequestDTO

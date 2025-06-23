@@ -40,6 +40,10 @@ class EventRepository @Inject constructor(
         ).flow
     }
 
+    suspend fun getNextUpcomingEvent(studioId: Long): ApiResponse<EventResponseDTO>{
+        return eventApi.getNextUpcomingEvent(studioId)
+    }
+
     suspend fun createNewSubEvent(request: SubEventRequestDTO): ApiResponse<SubEventResponseDTO> {
         return eventApi.registerSubEvent(request)
     }
