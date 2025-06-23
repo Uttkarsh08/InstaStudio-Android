@@ -1,6 +1,7 @@
 package com.uttkarsh.InstaStudio.presentation.viewmodel
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -218,18 +219,23 @@ class AddEventViewModel @Inject constructor(
     }
 
 
-    fun createNewEvent(){
+    fun createNewEvent() {
         viewModelScope.launch(Dispatchers.IO) {
-            val studioId = sessionStore.studioIdFlow.first()
-
-            _addEventState.value = AddEventState.Loading
-
-            val eventStart = eventStartDate+"T"+eventStartTime
-            val eventEnd = eventEndDate+"T"+eventEndTime
-
-            val subEventsIds = _subEventsMap.value.map { it.value.eventId }.toSet()
-
             try {
+                Log.d("AddEventVM", "createNewEvent() called")
+
+                val studioId = sessionStore.studioIdFlow.first()
+                Log.d("AddEventVM", "Studio ID: $studioId")
+
+                _addEventState.value = AddEventState.Loading
+
+                val eventStart = eventStartDate + "T" + eventStartTime
+                val eventEnd = eventEndDate + "T" + eventEndTime
+                Log.d("AddEventVM", "Event Start: $eventStart | Event End: $eventEnd")
+
+                val subEventsIds = _subEventsMap.value.map { it.value.eventId }.toSet()
+                Log.d("AddEventVM", "SubEvent IDs: $subEventsIds")
+
                 val request = EventRequestDTO(
                     clientName = clientName,
                     clientPhoneNo = clientPhoneNo,
@@ -246,28 +252,38 @@ class AddEventViewModel @Inject constructor(
                     studioId = studioId
                 )
 
+                Log.d("AddEventVM", "EventRequestDTO: $request")
+
                 val validateError = request.validate()
-                if(validateError != null){
+                if (validateError != null) {
+                    Log.e("AddEventVM", "Validation failed: $validateError")
                     _addEventState.value = AddEventState.Error(validateError)
                     return@launch
                 }
 
+                Log.d("AddEventVM", "Sending request to create event")
                 val response = eventRepository.createNewEvent(request)
 
-                if(response.data != null){
+                Log.d("AddEventVM", "Response received: $response")
+
+                if (response.data != null) {
+                    Log.d("AddEventVM", "Event created successfully: ${response.data}")
                     _addEventState.value = AddEventState.Success(response.data)
-                }
-                else {
+                } else {
+                    Log.e("AddEventVM", "Error from backend: ${response.error.message}")
                     _addEventState.value = AddEventState.Error(response.error.message)
                 }
 
-            }catch (e: HttpException) {
+            } catch (e: HttpException) {
                 val message = ApiErrorExtractor.extractMessage(e)
+                Log.e("AddEventVM", "HTTP Exception: $message", e)
                 _addEventState.value = AddEventState.Error(message)
 
             } catch (e: Exception) {
+                Log.e("AddEventVM", "Unexpected Exception: ${e.localizedMessage}", e)
                 _addEventState.value = AddEventState.Error(e.localizedMessage ?: "Unexpected error occurred")
             }
         }
     }
+
 }

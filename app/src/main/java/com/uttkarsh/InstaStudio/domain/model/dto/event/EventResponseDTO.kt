@@ -6,8 +6,8 @@ import com.uttkarsh.InstaStudio.domain.model.dto.resource.ResourceResponseDTO
 
 data class EventResponseDTO(
     val eventId: Long,
-    val clientName: String,
-    val clientPhoneNo: String,
+    val clientName: String?,
+    val clientPhoneNo: String?,
     val eventType: String,
     val eventStartDate: String,
     val eventEndDate: String,

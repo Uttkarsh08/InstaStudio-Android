@@ -41,8 +41,7 @@ import com.uttkarsh.InstaStudio.presentation.viewmodel.AddEventViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AuthViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.DashBoardViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.EventViewModel
-import com.uttkarsh.InstaStudio.presentation.viewmodel.ProfileViewModel
-import com.uttkarsh.InstaStudio.utils.states.EventState
+import kotlinx.coroutines.delay
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,7 +59,8 @@ fun DashBoardScreen(
 
     LaunchedEffect(Unit) {
         dashBoardViewModel.getUserProfile()
-        eventViewModel.getNextUpcomingEvent()
+        delay(1000L)
+        eventViewModel.loadNextUpcomingEventIfNeeded()
     }
 
     Scaffold(

@@ -41,6 +41,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.uttkarsh.InstaStudio.R
 import com.uttkarsh.InstaStudio.domain.model.dto.event.EventListResponseDTO
+import com.uttkarsh.InstaStudio.presentation.navigation.Screens
 import com.uttkarsh.InstaStudio.presentation.ui.utils.AppTopBar
 import com.uttkarsh.InstaStudio.presentation.viewmodel.EventViewModel
 import com.uttkarsh.InstaStudio.utils.states.EventState
@@ -108,13 +109,17 @@ fun EventScreen(
                     0 -> {
                         LaunchedEffect(Unit) { eventViewModel.loadUpcomingEventsIfNeeded() }
                         EventsPage(
-                            stateFlow = eventViewModel.upcomingEventState
+                            eventViewModel,
+                            stateFlow = eventViewModel.upcomingEventState,
+                            navController
                         )
                     }
                     1 -> {
                         LaunchedEffect(Unit) { eventViewModel.loadCompletedEventsIfNeeded() }
                         EventsPage(
-                            stateFlow = eventViewModel.completedEventState
+                            eventViewModel,
+                            stateFlow = eventViewModel.completedEventState,
+                            navController
                         )
                     }
                 }
@@ -126,7 +131,9 @@ fun EventScreen(
 
 @Composable
 fun EventsPage(
-    stateFlow: StateFlow<EventState>
+    eventViewModel: EventViewModel,
+    stateFlow: StateFlow<EventState>,
+    navController: NavController
 ) {
     val state by stateFlow.collectAsState()
 
@@ -164,12 +171,12 @@ fun EventsPage(
 
         is EventState.UpcomingPagingSuccess -> {
             val items = (state as EventState.UpcomingPagingSuccess).data.collectAsLazyPagingItems()
-            EventLazyList(items)
+            EventLazyList(eventViewModel, items, navController)
         }
 
         is EventState.CompletedPagingSuccess -> {
             val items = (state as EventState.CompletedPagingSuccess).data.collectAsLazyPagingItems()
-            EventLazyList(items)
+            EventLazyList(eventViewModel, items, navController)
         }
 
         else -> {}
@@ -178,7 +185,11 @@ fun EventsPage(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun EventLazyList(items: LazyPagingItems<EventListResponseDTO>) {
+fun EventLazyList(
+    eventViewModel: EventViewModel,
+    items: LazyPagingItems<EventListResponseDTO>,
+    navController: NavController
+) {
 
     val isRefreshing = items.loadState?.refresh is LoadState.Loading
     val pullRefreshState = rememberPullRefreshState(
@@ -201,7 +212,10 @@ fun EventLazyList(items: LazyPagingItems<EventListResponseDTO>) {
                 key = { items[it]?.eventId ?: it }
             ) {
                 items[it]?.let { event ->
-                    EventCard(event = event, onclick = {})
+                    EventCard(event = event, onclick = {
+                        eventViewModel.updateEventId(event.eventId)
+                        navController.navigate(Screens.EventDetailScreen.route)
+                    })
                 }
             }
 

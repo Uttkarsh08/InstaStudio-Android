@@ -11,6 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import com.uttkarsh.InstaStudio.presentation.ui.DashBoardPages.DashBoardScreen
 import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventScreen
 import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddSubEventScreen
+import com.uttkarsh.InstaStudio.presentation.ui.EventPages.EventDetailsScreen
 import com.uttkarsh.InstaStudio.presentation.ui.EventPages.EventScreen
 import com.uttkarsh.InstaStudio.presentation.ui.LoginTypeScreen
 import com.uttkarsh.InstaStudio.presentation.ui.MemberPages.MemberScreen
@@ -73,6 +74,9 @@ fun Navigation(
         }
         composable(Screens.EventScreen.route) {
             EventScreen(eventViewModel, navController)
+        }
+        composable(Screens.EventDetailScreen.route) {
+            EventDetailsScreen(eventViewModel, navController)
         }
 
         navigation(

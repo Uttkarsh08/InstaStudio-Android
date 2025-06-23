@@ -2,6 +2,7 @@ package com.uttkarsh.InstaStudio.presentation.viewmodel
 
 import android.util.Log
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -45,6 +46,22 @@ class EventViewModel @Inject constructor(
     var hasLoadedCompleted by mutableStateOf(false)
         private set
 
+    var hasLoadedNextUpcomingEvent by mutableStateOf(false)
+        private set
+
+    var eventId by mutableLongStateOf(0L)
+        private set
+
+    fun updateEventId(newId: Long){
+        eventId = newId
+    }
+
+    fun loadNextUpcomingEventIfNeeded(){
+        if(!hasLoadedNextUpcomingEvent){
+            hasLoadedNextUpcomingEvent = true
+            getNextUpcomingEvent()
+        }
+    }
 
     fun loadUpcomingEventsIfNeeded() {
         if (!hasLoadedUpcoming) {
@@ -63,6 +80,10 @@ class EventViewModel @Inject constructor(
     fun resetHasLoadedFlags() {
         hasLoadedUpcoming = false
         hasLoadedCompleted = false
+    }
+
+    fun resetHasLoadedNextUpcomingEvent(){
+        hasLoadedNextUpcomingEvent = false
     }
 
     fun getUpcomingEvents() {
@@ -111,7 +132,7 @@ class EventViewModel @Inject constructor(
     }
 
     fun getNextUpcomingEvent(){
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _eventState.value = EventState.Loading
 
             try {
@@ -132,6 +153,41 @@ class EventViewModel @Inject constructor(
 
             } catch (e: Exception) {
                 _eventState.value = EventState.Error(e.localizedMessage ?: "Unexpected error occurred")
+            }
+        }
+    }
+
+    fun getEventById() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _eventState.value = EventState.Loading
+            Log.d("EventById", "Loading state set")
+
+            try {
+                val studioId = sessionStore.studioIdFlow.first()
+                Log.d("EventById", "Studio ID: $studioId, Event ID: $eventId")
+
+                val response = eventRepository.getEventById(studioId, eventId)
+
+                Log.d("EventById", "Raw response: $response")
+                Log.d("EventById", "Response data: ${response.data}")
+                Log.d("EventById", "Response error: ${response.error}")
+
+                if (response.data != null) {
+                    _eventState.value = EventState.Success(response.data)
+                    Log.d("EventById", "EventState set to Success")
+                } else {
+                    _eventState.value = EventState.Error(response.error?.message ?: "Unknown error")
+                    Log.d("EventById", "EventState set to Error with error: ${response.error?.message}")
+                }
+
+            } catch (e: HttpException) {
+                val message = ApiErrorExtractor.extractMessage(e)
+                _eventState.value = EventState.Error(message)
+                Log.d("EventById", "HttpException: $message")
+
+            } catch (e: Exception) {
+                _eventState.value = EventState.Error(e.localizedMessage ?: "Unexpected error occurred")
+                Log.d("EventById", "Exception: ${e.localizedMessage}")
             }
         }
     }

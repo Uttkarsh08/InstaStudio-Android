@@ -31,10 +31,8 @@ import androidx.compose.ui.unit.sp
 import com.uttkarsh.InstaStudio.R
 import com.uttkarsh.InstaStudio.domain.model.dto.event.EventResponseDTO
 import com.uttkarsh.InstaStudio.presentation.ui.EventPages.EventShimmerShow
+import com.uttkarsh.InstaStudio.presentation.ui.utils.dateFormatter
 import com.uttkarsh.InstaStudio.utils.states.EventState
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterialApi::class)
@@ -61,6 +59,7 @@ fun NextEventSection(
                 EventCard(event)
 
             }
+
         }
 
         is EventState.Loading -> {
@@ -81,8 +80,9 @@ fun NextEventSection(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
+
                     Text(
-                        text = "Its Us, Please bear with it!",
+                        text = eventState.message,
                         fontFamily = alatsiFont,
                         fontSize = 20.sp,
                         color = Color.White
@@ -108,7 +108,6 @@ fun EventCard(
     event: EventResponseDTO?
 ){
     val alatsiFont = FontFamily(Font(R.font.alatsi))
-    val formatter = DateTimeFormatter.ofPattern("d MMM, yyyy, E", Locale.ENGLISH)
     Column(
         modifier = Modifier
             .padding(
@@ -135,18 +134,10 @@ fun EventCard(
                     fontSize = 20.sp,
                     color = Color.White
                 )
-                val rawDate = event?.eventStartDate
-                val formattedDate = rawDate?.let {
-                    try {
-                        val dateTime = LocalDateTime.parse(it)
-                        dateTime.format(formatter)
-                    } catch (e: Exception) {
-                        "Invalid Date"
-                    }
-                } ?: "No Upcoming Event"
+                val formattedDate = dateFormatter(event?.eventStartDate ?: "Invalid Date")
 
                 Text(
-                    text = formattedDate,
+                    text = formattedDate.toString(),
                     fontFamily = alatsiFont,
                     fontSize = 20.sp,
                     color = Color.White

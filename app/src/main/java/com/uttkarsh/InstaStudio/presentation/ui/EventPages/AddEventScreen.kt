@@ -585,6 +585,7 @@ fun AddEventScreen(
         if (state is AddEventState.Success) {
 
             eventViewModel.resetHasLoadedFlags()
+            eventViewModel.resetHasLoadedNextUpcomingEvent()
 
             navController.navigate(Screens.EventScreen.route) {
                 popUpTo(Screens.AddEventDetailsScreen.route) { inclusive = true }

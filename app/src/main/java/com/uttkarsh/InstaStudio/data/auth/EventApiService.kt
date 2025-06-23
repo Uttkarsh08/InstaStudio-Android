@@ -40,6 +40,13 @@ interface EventApiService {
         @Path("studioId") studioId: Long,
     ): ApiResponse<EventResponseDTO>
 
+    @GET("/api/v1/{studioId}/event/{eventId}")
+    suspend fun getEventById(
+        @Path("studioId") studioId: Long,
+        @Path("eventId") eventId: Long,
+    ): ApiResponse<EventResponseDTO>
+
+
     @POST("/api/v1/register/sub-event")
     suspend fun registerSubEvent(
         @Body request: SubEventRequestDTO

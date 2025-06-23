@@ -10,6 +10,7 @@ sealed class Screens(val route: String) {
     object ResourceScreen: Screens("resource_screen")
     object MemberScreen: Screens("member_screen")
     object EventScreen: Screens("event_screen")
+    object EventDetailScreen: Screens("event_detail_screen")
 
     object AddEventNavGraph : Screens("add_event_nav_graph")
     object AddEventDetailsScreen : Screens("add_event_details")
