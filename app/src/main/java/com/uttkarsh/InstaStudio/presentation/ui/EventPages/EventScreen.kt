@@ -1,17 +1,21 @@
 package com.uttkarsh.InstaStudio.presentation.ui.EventPages
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -43,6 +47,7 @@ import com.uttkarsh.InstaStudio.R
 import com.uttkarsh.InstaStudio.domain.model.dto.event.EventListResponseDTO
 import com.uttkarsh.InstaStudio.presentation.navigation.Screens
 import com.uttkarsh.InstaStudio.presentation.ui.utils.AppTopBar
+import com.uttkarsh.InstaStudio.presentation.ui.utils.SearchBar
 import com.uttkarsh.InstaStudio.presentation.viewmodel.EventViewModel
 import com.uttkarsh.InstaStudio.utils.states.EventState
 import kotlinx.coroutines.flow.StateFlow
@@ -71,6 +76,8 @@ fun EventScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+
+
             val tabTitles = listOf("Upcoming", "Completed")
 
             TabRow(
@@ -171,12 +178,12 @@ fun EventsPage(
 
         is EventState.UpcomingPagingSuccess -> {
             val items = (state as EventState.UpcomingPagingSuccess).data.collectAsLazyPagingItems()
-            EventLazyList(eventViewModel, items, navController)
+            EventLazyList(eventViewModel, items, navController, true)
         }
 
         is EventState.CompletedPagingSuccess -> {
             val items = (state as EventState.CompletedPagingSuccess).data.collectAsLazyPagingItems()
-            EventLazyList(eventViewModel, items, navController)
+            EventLazyList(eventViewModel, items, navController, false)
         }
 
         else -> {}
@@ -188,57 +195,76 @@ fun EventsPage(
 fun EventLazyList(
     eventViewModel: EventViewModel,
     items: LazyPagingItems<EventListResponseDTO>,
-    navController: NavController
+    navController: NavController,
+    isForUpcomingEvents: Boolean
 ) {
 
-    val isRefreshing = items.loadState?.refresh is LoadState.Loading
+    val isRefreshing = items.loadState.refresh is LoadState.Loading
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isRefreshing,
         onRefresh = { items.refresh() }
     )
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .pullRefresh(pullRefreshState)
+
+    Column(
+        modifier = Modifier.fillMaxSize()
     ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
-        ) {
-            items(
-                count = items.itemCount,
-                key = { items[it]?.eventId ?: it }
-            ) {
-                items[it]?.let { event ->
-                    EventCard(event = event, onclick = {
-                        eventViewModel.updateEventId(event.eventId)
-                        navController.navigate(Screens.EventDetailScreen.route)
-                    })
-                }
-            }
+        SearchBar(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .border(
+                    BorderStroke(2.dp, colorResource(R.color.searchBarBorder)),
+                    RoundedCornerShape(14.dp)
+                ),
 
-            items.apply {
-                when {
-                    loadState.append is LoadState.Loading -> {
-                        item {
-                            EventShimmerShow()
-                        }
-                    }
-
-                    loadState.refresh is LoadState.Loading -> {
-                        items(10) {
-                            EventShimmerShow()
-                        }
-                    }
-                }
-            }
-        }
-        PullRefreshIndicator(
-            refreshing = isRefreshing,
-            state = pullRefreshState,
-            modifier = Modifier.align(Alignment.TopCenter)
+            onSearchChanged = { /* TODO: Update viewModel with new search query
+            if(isForUpcomingEvents) Search in Upcoming else Completed
+            */ }
         )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .pullRefresh(pullRefreshState)
+        ) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
+            ) {
+                items(
+                    count = items.itemCount,
+                    key = { items[it]?.eventId ?: it }
+                ) {
+                    items[it]?.let { event ->
+                        EventCard(event = event, onclick = {
+                            eventViewModel.updateEventId(event.eventId)
+                            navController.navigate(Screens.EventDetailScreen.route)
+                        })
+                    }
+                }
+
+                items.apply {
+                    when {
+                        loadState.append is LoadState.Loading -> {
+                            item {
+                                EventShimmerShow()
+                            }
+                        }
+
+                        loadState.refresh is LoadState.Loading -> {
+                            items(10) {
+                                EventShimmerShow()
+                            }
+                        }
+                    }
+                }
+            }
+            PullRefreshIndicator(
+                refreshing = isRefreshing,
+                state = pullRefreshState,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
+        }
     }
 }

@@ -96,7 +96,9 @@ fun DashBoardScreen(
 
             Spacer(Modifier.height(16.dp))
 
-            NextEventSection(nextEvenState, {})
+            NextEventSection(eventViewModel, nextEvenState, {
+                navController.navigate(Screens.EventDetailScreen.route)
+            })
 
             Row(
                 modifier = Modifier.fillMaxWidth()

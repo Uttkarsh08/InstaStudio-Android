@@ -32,12 +32,14 @@ import com.uttkarsh.InstaStudio.R
 import com.uttkarsh.InstaStudio.domain.model.dto.event.EventResponseDTO
 import com.uttkarsh.InstaStudio.presentation.ui.EventPages.EventShimmerShow
 import com.uttkarsh.InstaStudio.presentation.ui.utils.dateFormatter
+import com.uttkarsh.InstaStudio.presentation.viewmodel.EventViewModel
 import com.uttkarsh.InstaStudio.utils.states.EventState
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun NextEventSection(
+    eventViewModel: EventViewModel,
     eventState: EventState,
     onEventClick: () -> Unit
 ){
@@ -54,7 +56,10 @@ fun NextEventSection(
                     .height(78.dp),
                 shape = RoundedCornerShape(27.dp),
                 color = colorResource(R.color.buttons),
-                onClick = onEventClick,
+                onClick = {
+                    eventViewModel.updateEventId(event.eventId)
+                    onEventClick()
+                },
             ) {
                 EventCard(event)
 
