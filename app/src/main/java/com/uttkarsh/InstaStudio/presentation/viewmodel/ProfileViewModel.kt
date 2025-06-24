@@ -9,38 +9,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.uttkarsh.InstaStudio.domain.model.dto.admin.AdminProfileSetupRequestDTO
-import com.uttkarsh.InstaStudio.domain.model.dto.user.ProfileRequestDTO
-import com.uttkarsh.InstaStudio.domain.model.dto.studio.StudioRequestDTO
-import com.uttkarsh.InstaStudio.domain.model.dto.auth.TokenRefreshRequestDTO
-import com.uttkarsh.InstaStudio.domain.model.UserType
-import com.uttkarsh.InstaStudio.domain.model.validators.validate
-import com.uttkarsh.InstaStudio.domain.repository.AuthRepository
-import com.uttkarsh.InstaStudio.domain.repository.ProfileRepository
-import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
-import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
+import com.uttkarsh.InstaStudio.domain.usecase.profile.ProfileUseCases
 import com.uttkarsh.InstaStudio.utils.image.ImageUtils
-import com.uttkarsh.InstaStudio.utils.session.SessionManager
 import com.uttkarsh.InstaStudio.utils.states.ProfileState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import retrofit2.HttpException
 import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val profileRepository: ProfileRepository,
-    private val authRepository: AuthRepository,
-    private val sessionStore: SessionStore,
-    private val sessionManager: SessionManager
+    private val profileUseCases: ProfileUseCases
 ) : ViewModel() {
 
     private val _profileState = MutableStateFlow<ProfileState>(ProfileState.Idle)
@@ -102,7 +84,7 @@ class ProfileViewModel @Inject constructor(
 
     fun fetchLatestEmail() {
         viewModelScope.launch {
-            sessionStore.emailFlow.collectLatest {
+            profileUseCases.fetchLatestEmail().collectLatest {
                 _userEmail.value = it.toString()
             }
 
@@ -137,78 +119,16 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             _profileState.value = ProfileState.Loading
             try {
-
-                val firebaseId = sessionStore.firebaseIdFlow.firstOrNull().orEmpty()
-                val userName = sessionStore.nameFlow.firstOrNull().orEmpty()
-                val userEmail = sessionStore.emailFlow.firstOrNull().orEmpty()
-                val userType = sessionStore.userTypeFlow.firstOrNull() ?: UserType.ADMIN
-
-                val profileRequest = ProfileRequestDTO(
-                    firebaseId = firebaseId,
-                    userName = userName,
-                    userPhoneNo = phoneNumber,
-                    userEmail = userEmail,
-                    userType = userType
-                )
-
-                val profileError = profileRequest.validate()
-                if (profileError != null) {
-                    _profileState.value = ProfileState.Error(profileError)
-                    return@launch
-                }
-
-                val studioRequest = StudioRequestDTO(
+                val response = profileUseCases.saveAdminProfile(
+                    phoneNumber = phoneNumber,
                     studioName = studioName,
-                    studioAddress = address,
-                    studioCity = city,
-                    studioState = state,
-                    studioPinCode = pinCode,
-                    imageDataBase64 = selectedStudioImageBase64
+                    address = address,
+                    city = city,
+                    state = state,
+                    pinCode = pinCode,
+                    selectedStudioImageBase64 = selectedStudioImageBase64
                 )
-
-                val studioError = studioRequest.validate()
-                if (studioError != null) {
-                    _profileState.value = ProfileState.Error(studioError)
-                    return@launch
-                }
-
-                val adminProfileSetupRequestDTO = AdminProfileSetupRequestDTO(
-                    user = profileRequest,
-                    studio = studioRequest
-                )
-
-                val profileResponse = profileRepository.adminProfileSetup(adminProfileSetupRequestDTO)
-                if (profileResponse.data == null) {
-                    _profileState.value = ProfileState.Error(
-                        (profileResponse.error.message + ": " + profileResponse.error.subErrors.joinToString())
-                    )
-                    return@launch
-                }
-
-                val refreshToken = sessionStore.refreshTokenFlow.firstOrNull().orEmpty()
-                val requestDTO = TokenRefreshRequestDTO(refreshToken)
-
-                val networkResponse = authRepository.refreshToken(requestDTO)
-
-                if(networkResponse.data != null){
-                    sessionStore.saveTokens(networkResponse.data.accessToken, networkResponse.data.refreshToken)
-                    Log.d("ProfileViewModel", "New Tokens Saved")
-                }
-
-                _profileState.value = ProfileState.Success(profileResponse.data.studioId, profileResponse.data.userId)
-                Log.d("Profile Saved", profileResponse.data.studioId.toString())
-                Log.d("Studio Saved", profileResponse.data.userId.toString())
-
-                sessionStore.updateIsRegistered()
-                Log.d("sessionManager", "API Response in profileVM: ${sessionManager.getStudioId()}")
-                sessionManager.updateStudioAndUserId(
-                    profileResponse.data.studioId,
-                    profileResponse.data.userId
-                )
-
-            } catch (e: HttpException) {
-                val errorMessage = ApiErrorExtractor.extractMessage(e)
-                Log.e("ProfileViewModel", "API Error: $errorMessage")
+                _profileState.value = ProfileState.Success(response.studioId, response.userId)
 
             } catch (e: Exception) {
                 Log.e("ProfileViewModel", "Unexpected error in saveAdminProfile", e)
@@ -221,19 +141,13 @@ class ProfileViewModel @Inject constructor(
     fun getStudioImage(){
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val studioId = sessionManager.getStudioId()
 
-                val response = profileRepository.getStudioImage(studioId)
-                if(response.data != null) {
-                    StudioImageBitMap = ImageUtils.base64ToBitmap(response.data)
-                }
+                val base64 = profileUseCases.getStudioImage()
+                StudioImageBitMap = ImageUtils.base64ToBitmap(base64)
+                _profileState.value = ProfileState.Idle
 
-            } catch (e: HttpException) {
-                val errorMessage = ApiErrorExtractor.extractMessage(e)
-                Log.e("ProfileViewModel", "API Error: $errorMessage")
-
-            } catch (e: Exception){
-                Log.e("ProfileViewModel", "Unexpected error in getStudioImage", e)
+            }catch (e: Exception) {
+                _profileState.value = ProfileState.Error(e.localizedMessage ?: "Failed to load image")
             }
 
         }
