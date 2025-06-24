@@ -8,6 +8,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.uttkarsh.InstaStudio.domain.model.dto.auth.LoginRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.UserType
 import com.uttkarsh.InstaStudio.domain.repository.AuthRepository
+import com.uttkarsh.InstaStudio.domain.usecase.auth.AuthUseCases
 import com.uttkarsh.InstaStudio.utils.SharedPref.OnboardingStore
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.states.AuthState
@@ -23,10 +24,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authRepository: AuthRepository,
-    private val sessionStore: SessionStore,
-    private val onboardingStore: OnboardingStore,
-    private val firebaseAuth: FirebaseAuth
+    private val authUseCases: AuthUseCases
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
@@ -45,84 +43,94 @@ class AuthViewModel @Inject constructor(
     val isOnBoardingShown: StateFlow<Boolean> = _isOnBoardingShown.asStateFlow()
 
     init {
-        Log.d("AuthViewModel", "SessionStore collector started")
+        observeOnboardingStatus()
+        observeRegistrationStatus()
+        checkIfUserIsLoggedIn()
+    }
+    private fun observeOnboardingStatus() {
         viewModelScope.launch {
-            Log.d("AuthViewModel", "SessionStore collector started for onBoarding")
-            onboardingStore.isOnboardingShownFlow.collectLatest {
+            authUseCases.observeOnboardingShown().collectLatest {
                 _isOnBoardingShown.value = it
+                Log.d("AuthViewModel", "Onboarding shown: $it")
             }
-        }
-
-        viewModelScope.launch {
-            Log.d("AuthViewModel", "SessionStore collector started for isRegistered")
-            sessionStore.isRegisteredFlow.collectLatest {
-                Log.d("AuthViewModel", "Read isRegistered: $it")
-                _isRegistered.value = it
-            }
-        }
-
-        viewModelScope.launch {
-            _isLoggedIn.value = isUserLoggedIn()
         }
     }
+
+    private fun observeRegistrationStatus() {
+        viewModelScope.launch {
+            authUseCases.observeRegistrationStatus().collectLatest {
+                _isRegistered.value = it
+                Log.d("AuthViewModel", "Registration status: $it")
+            }
+        }
+    }
+
+    private fun checkIfUserIsLoggedIn() {
+        viewModelScope.launch {
+            val loggedIn = authUseCases.checkUserLoggedIn()
+            _isLoggedIn.value = loggedIn
+            Log.d("AuthViewModel", "User logged in: $loggedIn")
+        }
+    }
+
     fun setLoginType(type: UserType) {
         _loginType.value = type
     }
 
     fun signInWithGoogle(context: Context) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             _authState.value = AuthState.Loading
-            val token = authRepository.signInWithGoogle(context)
-            _authState.value = if (token != null) {
-                AuthState.Success(token)
-            } else {
-                AuthState.Error("Sign-in failed")
+            try {
+                val token = authUseCases.signInWithGoogle(context)
+                if (token != null) {
+                    _authState.value = AuthState.Success(token)
+                } else {
+                    _authState.value = AuthState.Error("Sign-in failed")
+                }
+            } catch (e: Exception) {
+                Log.e("AuthViewModel", "Sign-in error", e)
+                _authState.value = AuthState.Error(e.localizedMessage ?: "Unexpected sign-in error")
+            }
+        }
+    }
+
+    fun onFirebaseLoginSuccess(requestDTO: LoginRequestDTO) {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+            try {
+                val response = authUseCases.validateFirebaseToken(requestDTO)
+                _authState.value = AuthState.BackendSuccess(response)
+            } catch (e: Exception) {
+                Log.e("AuthViewModel", "Validate token error", e)
+                _authState.value = AuthState.Error(e.localizedMessage ?: "Token validation failed")
             }
         }
     }
 
     fun logout() {
         viewModelScope.launch {
-            authRepository.signOut()
-            sessionStore.clear()
-            _isLoggedIn.value = false
-            _isRegistered.value = false
-            _authState.value = AuthState.Idle
-        }
-    }
-
-    fun onFirebaseLoginSuccess(requestDTO: LoginRequestDTO) {
-        viewModelScope.launch(Dispatchers.IO) {
-            _authState.value = AuthState.Loading
             try {
-                val response = authRepository.validateFirebaseToken(requestDTO)
-
-                sessionStore.saveTokens(response.accessToken, response.refreshToken)
-                sessionStore.saveUserInfo(response.userName, response.userEmail, response.firebaseId, response.userType, response.isRegistered)
-
-                Log.d("SessionStore", "Saving email: ${response.userEmail}")
-                Log.d("AuthViewModel", "Saving isRegistered: ${response.isRegistered}")
-
-                _authState.value = AuthState.BackendSuccess(response)
+                authUseCases.logout()
+                _authState.value = AuthState.Idle
+                _isLoggedIn.value = false
+                _isRegistered.value = false
+                Log.d("AuthViewModel", "Logged out successfully")
             } catch (e: Exception) {
-                _authState.value = AuthState.Error("Backend login failed")
+                Log.e("AuthViewModel", "Logout failed", e)
+                _authState.value = AuthState.Error(e.localizedMessage ?: "Logout failed")
             }
         }
     }
 
-    suspend fun isUserLoggedIn(): Boolean = withContext(Dispatchers.IO) { firebaseAuth.currentUser != null }
-
     fun setOnBoardingShown() {
         viewModelScope.launch {
             try {
-                onboardingStore.setOnboardingShown()
+                authUseCases.setOnboardingShown()
+                Log.d("AuthViewModel", "Onboarding marked as shown")
             } catch (e: Exception) {
                 Log.e("AuthViewModel", "Failed to set onboarding shown", e)
             }
         }
     }
-
-
-
 
 }
