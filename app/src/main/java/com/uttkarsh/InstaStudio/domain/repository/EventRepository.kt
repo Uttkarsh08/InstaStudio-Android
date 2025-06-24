@@ -21,6 +21,8 @@ class EventRepository @Inject constructor(
     private val eventApi: EventApiService
 ) {
 
+    //Events
+
     suspend fun createNewEvent(request: EventRequestDTO): ApiResponse<EventResponseDTO> {
         return eventApi.registerEvent(request)
     }
@@ -47,6 +49,8 @@ class EventRepository @Inject constructor(
     suspend fun getEventById(studioId: Long, eventId: Long): ApiResponse<EventResponseDTO>{
         return eventApi.getEventById(studioId, eventId)
     }
+
+    //Sub-Events
 
     suspend fun createNewSubEvent(request: SubEventRequestDTO): ApiResponse<SubEventResponseDTO> {
         return eventApi.registerSubEvent(request)

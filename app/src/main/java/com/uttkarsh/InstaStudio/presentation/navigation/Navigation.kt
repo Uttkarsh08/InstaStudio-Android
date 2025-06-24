@@ -13,6 +13,7 @@ import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventScreen
 import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddSubEventScreen
 import com.uttkarsh.InstaStudio.presentation.ui.EventPages.EventDetailsScreen
 import com.uttkarsh.InstaStudio.presentation.ui.EventPages.EventScreen
+import com.uttkarsh.InstaStudio.presentation.ui.EventPages.SubEventDetailScreen
 import com.uttkarsh.InstaStudio.presentation.ui.LoginTypeScreen
 import com.uttkarsh.InstaStudio.presentation.ui.MemberPages.MemberScreen
 import com.uttkarsh.InstaStudio.presentation.ui.OnBoardingScreen
@@ -28,6 +29,7 @@ import com.uttkarsh.InstaStudio.presentation.viewmodel.EventViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.MemberViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.ProfileViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.ResourceViewModel
+import com.uttkarsh.InstaStudio.presentation.viewmodel.SubEventViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -38,6 +40,7 @@ fun Navigation(
     resourceViewModel: ResourceViewModel = hiltViewModel(),
     memberViewModel: MemberViewModel = hiltViewModel(),
     eventViewModel: EventViewModel = hiltViewModel(),
+    subEventViewModel: SubEventViewModel = hiltViewModel(),
     addEventViewModel: AddEventViewModel = hiltViewModel(),
     addSubEventViewModel: AddSubEventViewModel = hiltViewModel()
 ) {
@@ -76,7 +79,10 @@ fun Navigation(
             EventScreen(eventViewModel, navController)
         }
         composable(Screens.EventDetailScreen.route) {
-            EventDetailsScreen(eventViewModel, navController)
+            EventDetailsScreen(eventViewModel, subEventViewModel, navController)
+        }
+        composable(Screens.SubEventDetailScreen.route) {
+            SubEventDetailScreen(subEventViewModel, navController)
         }
 
         navigation(

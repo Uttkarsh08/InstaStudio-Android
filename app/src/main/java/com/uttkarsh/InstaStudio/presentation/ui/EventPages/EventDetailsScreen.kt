@@ -46,6 +46,7 @@ import androidx.navigation.NavController
 import com.uttkarsh.InstaStudio.R
 import com.uttkarsh.InstaStudio.presentation.ui.utils.AppTopBar
 import com.uttkarsh.InstaStudio.presentation.viewmodel.EventViewModel
+import com.uttkarsh.InstaStudio.presentation.viewmodel.SubEventViewModel
 import com.uttkarsh.InstaStudio.utils.states.EventState
 import kotlinx.coroutines.launch
 
@@ -53,6 +54,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun EventDetailsScreen(
     eventViewModel: EventViewModel = hiltViewModel(),
+    subEventViewModel: SubEventViewModel = hiltViewModel(),
     navController: NavController
 ) {
     val scrollState = rememberScrollState()
@@ -147,7 +149,7 @@ fun EventDetailsScreen(
                     ) { page ->
                         when (page) {
                             0 -> {
-                                EventSchedulePage(event)
+                                EventSchedulePage(subEventViewModel, event, navController)
                             }
                             1 -> {
 

@@ -15,6 +15,7 @@ import androidx.paging.cachedIn
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
 import androidx.lifecycle.viewModelScope
+import com.uttkarsh.InstaStudio.utils.states.SubEventState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -176,8 +177,8 @@ class EventViewModel @Inject constructor(
                     _eventState.value = EventState.Success(response.data)
                     Log.d("EventById", "EventState set to Success")
                 } else {
-                    _eventState.value = EventState.Error(response.error?.message ?: "Unknown error")
-                    Log.d("EventById", "EventState set to Error with error: ${response.error?.message}")
+                    _eventState.value = EventState.Error(response.error.message)
+                    Log.d("EventById", "EventState set to Error with error: ${response.error.message}")
                 }
 
             } catch (e: HttpException) {

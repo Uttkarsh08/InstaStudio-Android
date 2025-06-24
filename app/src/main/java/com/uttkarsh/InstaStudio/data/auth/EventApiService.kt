@@ -17,6 +17,8 @@ import javax.inject.Singleton
 @Singleton
 interface EventApiService {
 
+    //Events
+
     @POST("/api/v1/register/event")
     suspend fun registerEvent(
         @Body request: EventRequestDTO
@@ -45,6 +47,9 @@ interface EventApiService {
         @Path("studioId") studioId: Long,
         @Path("eventId") eventId: Long,
     ): ApiResponse<EventResponseDTO>
+
+
+    //Sub-Events
 
 
     @POST("/api/v1/register/sub-event")
