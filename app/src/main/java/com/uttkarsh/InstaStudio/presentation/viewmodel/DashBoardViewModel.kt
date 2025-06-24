@@ -1,6 +1,9 @@
 package com.uttkarsh.InstaStudio.presentation.viewmodel
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.uttkarsh.InstaStudio.domain.repository.ProfileRepository
@@ -26,6 +29,20 @@ class DashBoardViewModel @Inject constructor(
 
     private val _dashBoardState = MutableStateFlow<DashBoardState>(DashBoardState.Idle)
     val dashBoardState = _dashBoardState.asStateFlow()
+
+    var hasLoadedUserProfile by mutableStateOf(false)
+        private set
+
+    fun loadUserProfileIfNeeded() {
+        if (!hasLoadedUserProfile) {
+            hasLoadedUserProfile = true
+            getUserProfile()
+        }
+    }
+
+    fun resetHasLoadedUserProfile() { // use when Sign out
+        hasLoadedUserProfile = false
+    }
 
     fun resetDashBoardState(){
         _dashBoardState.value = DashBoardState.Idle

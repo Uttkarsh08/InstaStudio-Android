@@ -87,7 +87,7 @@ fun NextEventSection(
                 ) {
 
                     Text(
-                        text = eventState.message,
+                        text = "No Upcoming Event",
                         fontFamily = alatsiFont,
                         fontSize = 20.sp,
                         color = Color.White

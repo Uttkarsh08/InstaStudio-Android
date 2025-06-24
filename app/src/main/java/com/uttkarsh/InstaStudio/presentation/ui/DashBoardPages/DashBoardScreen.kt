@@ -58,7 +58,7 @@ fun DashBoardScreen(
     val nextEvenState by eventViewModel.eventState.collectAsState()
 
     LaunchedEffect(Unit) {
-        dashBoardViewModel.getUserProfile()
+        dashBoardViewModel.loadUserProfileIfNeeded()
         delay(1000L)
         eventViewModel.loadNextUpcomingEventIfNeeded()
     }
