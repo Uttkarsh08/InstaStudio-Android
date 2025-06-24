@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.uttkarsh.InstaStudio.domain.repository.ProfileRepository
+import com.uttkarsh.InstaStudio.domain.usecase.dashboard.DashboardUseCases
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
 import com.uttkarsh.InstaStudio.utils.session.SessionManager
@@ -23,8 +24,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DashBoardViewModel @Inject constructor(
-    private val profileRepository: ProfileRepository,
-    private val sessionManager: SessionManager
+    private val dashboardUseCases: DashboardUseCases
 
 ) : ViewModel(){
 
@@ -53,26 +53,13 @@ class DashBoardViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             _dashBoardState.value = DashBoardState.Loading
             try {
-                val response = profileRepository.getUserProfile()
+                val response = dashboardUseCases.getUserProfile()
+                _dashBoardState.value = DashBoardState.Success(response.studioId, response.userId)
 
-                if (response.data == null) {
-                    _dashBoardState.value = DashBoardState.Error(
-                        (response.error.message + ": " + response.error.subErrors.joinToString())
-                    )
-                    return@launch
-                }
-                _dashBoardState.value = DashBoardState.Success(response.data.studioId, response.data.userId)
 
-                sessionManager.updateStudioAndUserId(
-                    response.data.studioId,
-                    response.data.userId
-                )
-
-            } catch (e: HttpException) {
-                val errorMessage = ApiErrorExtractor.extractMessage(e)
-                Log.e("ProfileViewModel", "API Error: $errorMessage")
 
             } catch (e: Exception) {
+                _dashBoardState.value = DashBoardState.Error(e.localizedMessage ?: "An unexpected error occurred")
                 Log.e("ProfileViewModel", "Unexpected error in saveAdminProfile", e)
             }
         }
