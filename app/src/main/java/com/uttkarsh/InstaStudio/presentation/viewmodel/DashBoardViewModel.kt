@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.uttkarsh.InstaStudio.domain.repository.ProfileRepository
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
+import com.uttkarsh.InstaStudio.utils.session.SessionManager
 import com.uttkarsh.InstaStudio.utils.states.DashBoardState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 class DashBoardViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
-    private val sessionStore: SessionStore
+    private val sessionManager: SessionManager
 
 ) : ViewModel(){
 
@@ -50,14 +51,10 @@ class DashBoardViewModel @Inject constructor(
     }
     fun getUserProfile(){
         viewModelScope.launch(Dispatchers.IO) {
-            val currentStudioId = sessionStore.studioIdFlow.first()
-            val currentUserId = sessionStore.userIdFlow.first()
-            Log.d("DashBoardViewModel", "getUserProfile called. StudioID from session: $currentStudioId, UserID from session: $currentUserId")
-
+            _dashBoardState.value = DashBoardState.Loading
             try {
-                val response = withContext(Dispatchers.IO) {
-                    profileRepository.getUserProfile()
-                }
+                val response = profileRepository.getUserProfile()
+
                 if (response.data == null) {
                     _dashBoardState.value = DashBoardState.Error(
                         (response.error.message + ": " + response.error.subErrors.joinToString())
@@ -66,11 +63,10 @@ class DashBoardViewModel @Inject constructor(
                 }
                 _dashBoardState.value = DashBoardState.Success(response.data.studioId, response.data.userId)
 
-                withContext(Dispatchers.IO) {
-
-                    sessionStore.saveStudioId(response.data.studioId)
-                    sessionStore.saveUserId(response.data.userId)
-                }
+                sessionManager.updateStudioAndUserId(
+                    response.data.studioId,
+                    response.data.userId
+                )
 
             } catch (e: HttpException) {
                 val errorMessage = ApiErrorExtractor.extractMessage(e)

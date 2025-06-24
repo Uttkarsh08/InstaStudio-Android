@@ -14,6 +14,7 @@ import com.uttkarsh.InstaStudio.domain.model.validators.validate
 import com.uttkarsh.InstaStudio.domain.repository.ResourceRepository
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
+import com.uttkarsh.InstaStudio.utils.session.SessionManager
 import com.uttkarsh.InstaStudio.utils.states.ResourceState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -31,7 +32,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ResourceViewModel @Inject constructor(
     private val resourceRepository: ResourceRepository,
-    private val sessionStore: SessionStore
+    private val sessionManager: SessionManager
 ): ViewModel() {
 
     private val _resourceState = MutableStateFlow<ResourceState>(ResourceState.Idle)
@@ -69,7 +70,7 @@ class ResourceViewModel @Inject constructor(
     fun getAllResources(){
         viewModelScope.launch(Dispatchers.IO) {
             _resourceState.value = ResourceState.Loading
-            val id = sessionStore.studioIdFlow.first()
+            val id = sessionManager.getStudioId()
 
             try {
                 val response = resourceRepository.getAllResources(id)
@@ -91,7 +92,7 @@ class ResourceViewModel @Inject constructor(
 
     fun createNewResource() {
         viewModelScope.launch {
-            val studioId = sessionStore.studioIdFlow.first()
+            val studioId = sessionManager.getStudioId()
             val resourceRequest = ResourceRequestDTO(
                 resourceName = _resourceName.value,
                 resourcePrice = _resourcePrice.value,
@@ -130,7 +131,7 @@ class ResourceViewModel @Inject constructor(
     fun updateResourceById(){
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val studioId = sessionStore.studioIdFlow.first()
+                val studioId = sessionManager.getStudioId()
                 val request = ResourceRequestDTO(
                     resourceName = _resourceName.value,
                     resourcePrice = _resourcePrice.value,

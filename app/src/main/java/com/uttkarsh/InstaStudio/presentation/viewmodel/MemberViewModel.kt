@@ -14,6 +14,7 @@ import com.uttkarsh.InstaStudio.domain.model.dto.member.MemberProfileRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.validators.validate
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
+import com.uttkarsh.InstaStudio.utils.session.SessionManager
 import com.uttkarsh.InstaStudio.utils.states.MemberState
 import com.uttkarsh.InstaStudio.utils.states.ResourceState
 import kotlinx.coroutines.Dispatchers
@@ -29,7 +30,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MemberViewModel @Inject constructor(
     private val memberRepository: MemberRepository,
-    private val sessionStore: SessionStore
+    private val sessionManager: SessionManager
 
 ): ViewModel() {
 
@@ -99,7 +100,7 @@ class MemberViewModel @Inject constructor(
     fun getAllMembers(){
         viewModelScope.launch(Dispatchers.IO) {
             _memberState.value = MemberState.Loading
-            val id = sessionStore.studioIdFlow.first()
+            val id = sessionManager.getStudioId()
 
             val response = memberRepository.getAllMembers(id)
                 .cachedIn(viewModelScope)
@@ -114,7 +115,7 @@ class MemberViewModel @Inject constructor(
             try {
                 _memberState.value = MemberState.Loading
 
-                val id = sessionStore.studioIdFlow.first()
+                val id = sessionManager.getStudioId()
 
                 val request = MemberProfileRequestDTO(
                     memberEmail = _memberEmail.value,
@@ -150,7 +151,8 @@ class MemberViewModel @Inject constructor(
             try {
                 _memberState.value = MemberState.Loading
 
-                val studioId = sessionStore.studioIdFlow.first()
+                val studioId = sessionManager.getStudioId()
+
                 val request = MemberProfileRequestDTO(
                     memberEmail = _memberEmail.value,
                     salary = _memberSalary.value,
@@ -183,7 +185,8 @@ class MemberViewModel @Inject constructor(
     fun getMemberById(){
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val studioId = sessionStore.studioIdFlow.first()
+                val studioId = sessionManager.getStudioId()
+
                 val response = memberRepository.getMemberById(studioId, memberId.value)
                 if(response.data != null){
                     _memberState.value = MemberState.Success(response.data)
@@ -200,7 +203,8 @@ class MemberViewModel @Inject constructor(
     fun getAvailableMembers(){
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val studioId = sessionStore.studioIdFlow.first()
+                val studioId = sessionManager.getStudioId()
+
                 val response = memberRepository.getAvailableMembers(studioId, _eventStartDate.value, _eventEndDate.value)
                 if(response.data != null){
                     _memberState.value = MemberState.ListSuccess(response.data)

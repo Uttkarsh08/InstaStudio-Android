@@ -17,6 +17,7 @@ import com.uttkarsh.InstaStudio.domain.model.validators.validate
 import com.uttkarsh.InstaStudio.domain.repository.EventRepository
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
+import com.uttkarsh.InstaStudio.utils.session.SessionManager
 import com.uttkarsh.InstaStudio.utils.states.AddSubEventState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +36,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AddSubEventViewModel @Inject constructor(
     private val evenRepository: EventRepository,
-    private val sessionStore: SessionStore
+    private val sessionManager: SessionManager
 ): ViewModel(){
 
     private val _addSubEventState = MutableStateFlow<AddSubEventState>(AddSubEventState.Idle)
@@ -169,7 +170,7 @@ class AddSubEventViewModel @Inject constructor(
 
     fun createNewSubEvent(){
         viewModelScope.launch(Dispatchers.IO) {
-            val studioId = sessionStore.studioIdFlow.first()
+            val studioId = sessionManager.getStudioId()
 
             _addSubEventState.value = AddSubEventState.Loading
 
@@ -215,7 +216,7 @@ class AddSubEventViewModel @Inject constructor(
 
     fun getSubEventById(){
         viewModelScope.launch(Dispatchers.IO) {
-            val studioId = sessionStore.studioIdFlow.first()
+            val studioId = sessionManager.getStudioId()
 
             _addSubEventState.value = AddSubEventState.Loading
 

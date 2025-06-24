@@ -15,6 +15,7 @@ import androidx.paging.cachedIn
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
 import androidx.lifecycle.viewModelScope
+import com.uttkarsh.InstaStudio.utils.session.SessionManager
 import com.uttkarsh.InstaStudio.utils.states.SubEventState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,7 +30,8 @@ import javax.inject.Inject
 @HiltViewModel
 class EventViewModel @Inject constructor(
     private val eventRepository: EventRepository,
-    private val sessionStore: SessionStore
+    private val sessionManager: SessionManager
+
 ): ViewModel(){
 
     private val _upcomingEventState = MutableStateFlow<EventState>(EventState.Idle)
@@ -93,7 +95,7 @@ class EventViewModel @Inject constructor(
             _upcomingEventState.value = EventState.Loading
 
             try {
-                val studioId = sessionStore.studioIdFlow.first()
+                val studioId = sessionManager.getStudioId()
                 val response = eventRepository.getUpcomingEvents(studioId)
                     .cachedIn(viewModelScope)
                     .stateIn(viewModelScope, SharingStarted.Lazily, PagingData.empty())
@@ -115,7 +117,7 @@ class EventViewModel @Inject constructor(
             _completedEventState.value = EventState.Loading
 
             try {
-                val studioId = sessionStore.studioIdFlow.first()
+                val studioId = sessionManager.getStudioId()
                 val response = eventRepository.getCompletedEvents(studioId)
                     .cachedIn(viewModelScope)
                     .stateIn(viewModelScope, SharingStarted.Lazily, PagingData.empty())
@@ -137,7 +139,7 @@ class EventViewModel @Inject constructor(
             _eventState.value = EventState.Loading
 
             try {
-                val studioId = sessionStore.studioIdFlow.first()
+                val studioId = sessionManager.getStudioId()
 
                 val response = eventRepository.getNextUpcomingEvent(studioId)
 
@@ -164,7 +166,7 @@ class EventViewModel @Inject constructor(
             Log.d("EventById", "Loading state set")
 
             try {
-                val studioId = sessionStore.studioIdFlow.first()
+                val studioId = sessionManager.getStudioId()
                 Log.d("EventById", "Studio ID: $studioId, Event ID: $eventId")
 
                 val response = eventRepository.getEventById(studioId, eventId)

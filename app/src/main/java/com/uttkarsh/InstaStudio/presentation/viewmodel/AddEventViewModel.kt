@@ -29,6 +29,7 @@ import androidx.compose.runtime.State
 import com.uttkarsh.InstaStudio.domain.model.dto.event.SubEventResponseDTO
 import com.uttkarsh.InstaStudio.domain.model.validators.validate
 import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
+import com.uttkarsh.InstaStudio.utils.session.SessionManager
 import kotlinx.coroutines.flow.update
 import retrofit2.HttpException
 import java.time.format.DateTimeFormatter
@@ -38,7 +39,7 @@ import java.util.Locale
 @HiltViewModel
 class AddEventViewModel @Inject constructor(
     private val eventRepository: EventRepository,
-    private val sessionStore: SessionStore
+    private val sessionManager: SessionManager
 ): ViewModel(){
 
     private val _addEventState = MutableStateFlow<AddEventState>(AddEventState.Idle)
@@ -224,7 +225,7 @@ class AddEventViewModel @Inject constructor(
             try {
                 Log.d("AddEventVM", "createNewEvent() called")
 
-                val studioId = sessionStore.studioIdFlow.first()
+                val studioId = sessionManager.getStudioId()
                 Log.d("AddEventVM", "Studio ID: $studioId")
 
                 _addEventState.value = AddEventState.Loading

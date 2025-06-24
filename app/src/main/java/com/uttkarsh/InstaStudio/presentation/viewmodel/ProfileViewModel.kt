@@ -20,6 +20,7 @@ import com.uttkarsh.InstaStudio.domain.repository.ProfileRepository
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
 import com.uttkarsh.InstaStudio.utils.image.ImageUtils
+import com.uttkarsh.InstaStudio.utils.session.SessionManager
 import com.uttkarsh.InstaStudio.utils.states.ProfileState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +39,8 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val authRepository: AuthRepository,
-    private val sessionStore: SessionStore
+    private val sessionStore: SessionStore,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _profileState = MutableStateFlow<ProfileState>(ProfileState.Idle)
@@ -132,7 +134,7 @@ class ProfileViewModel @Inject constructor(
         }
     }
     fun saveAdminProfile() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _profileState.value = ProfileState.Loading
             try {
 
@@ -175,21 +177,19 @@ class ProfileViewModel @Inject constructor(
                     studio = studioRequest
                 )
 
-                val profileResponse = withContext(Dispatchers.IO) {
-                    profileRepository.adminProfileSetup(adminProfileSetupRequestDTO)
-                }
+                val profileResponse = profileRepository.adminProfileSetup(adminProfileSetupRequestDTO)
                 if (profileResponse.data == null) {
                     _profileState.value = ProfileState.Error(
                         (profileResponse.error.message + ": " + profileResponse.error.subErrors.joinToString())
                     )
                     return@launch
                 }
+
                 val refreshToken = sessionStore.refreshTokenFlow.firstOrNull().orEmpty()
                 val requestDTO = TokenRefreshRequestDTO(refreshToken)
 
-                val networkResponse = withContext(Dispatchers.IO) {
-                    authRepository.refreshToken(requestDTO)
-                }
+                val networkResponse = authRepository.refreshToken(requestDTO)
+
                 if(networkResponse.data != null){
                     sessionStore.saveTokens(networkResponse.data.accessToken, networkResponse.data.refreshToken)
                     Log.d("ProfileViewModel", "New Tokens Saved")
@@ -200,10 +200,11 @@ class ProfileViewModel @Inject constructor(
                 Log.d("Studio Saved", profileResponse.data.userId.toString())
 
                 sessionStore.updateIsRegistered()
-                sessionStore.saveStudioId(profileResponse.data.studioId)
-                sessionStore.saveUserId(profileResponse.data.userId)
-
-                Log.d("isRegistered Changed", sessionStore.isRegisteredFlow.firstOrNull().toString())
+                Log.d("sessionManager", "API Response in profileVM: ${sessionManager.getStudioId()}")
+                sessionManager.updateStudioAndUserId(
+                    profileResponse.data.studioId,
+                    profileResponse.data.userId
+                )
 
             } catch (e: HttpException) {
                 val errorMessage = ApiErrorExtractor.extractMessage(e)
@@ -220,7 +221,7 @@ class ProfileViewModel @Inject constructor(
     fun getStudioImage(){
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val studioId = sessionStore.studioIdFlow.first()
+                val studioId = sessionManager.getStudioId()
 
                 val response = profileRepository.getStudioImage(studioId)
                 if(response.data != null) {
