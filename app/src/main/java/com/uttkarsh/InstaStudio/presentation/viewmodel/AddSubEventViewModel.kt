@@ -1,7 +1,5 @@
 package com.uttkarsh.InstaStudio.presentation.viewmodel
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -14,6 +12,7 @@ import com.uttkarsh.InstaStudio.domain.model.SubEventType
 import com.uttkarsh.InstaStudio.domain.model.TimePickerTarget
 import com.uttkarsh.InstaStudio.domain.usecase.event.addSubEvent.AddSubEventUseCases
 import com.uttkarsh.InstaStudio.utils.states.AddSubEventState
+import com.uttkarsh.InstaStudio.utils.time.TimeProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,31 +25,29 @@ import java.util.Locale
 import javax.inject.Inject
 import kotlin.Long
 
-@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class AddSubEventViewModel @Inject constructor(
-    private val addSubEventUseCases: AddSubEventUseCases
+    private val addSubEventUseCases: AddSubEventUseCases,
+    private val timeProvider: TimeProvider
 ): ViewModel(){
 
     private val _addSubEventState = MutableStateFlow<AddSubEventState>(AddSubEventState.Idle)
     val addSubEventState: StateFlow<AddSubEventState> = _addSubEventState
 
-    private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US)
-    private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss", Locale.US)
 
     var subEventId by mutableLongStateOf(0L)
         private set
 
-    var subEventStartDate by mutableStateOf(LocalDate.now().format(dateFormatter))
+    var subEventStartDate by mutableStateOf(timeProvider.nowDate())
         private set
 
-    var subEventEndDate by mutableStateOf(LocalDate.now().format(dateFormatter))
+    var subEventEndDate by mutableStateOf(timeProvider.nowDate())
         private set
 
-    var subEventStartTime by mutableStateOf(LocalTime.now().format(timeFormatter))
+    var subEventStartTime by mutableStateOf(timeProvider.nowTime())
         private set
 
-    var subEventEndTime by mutableStateOf(LocalTime.now().format(timeFormatter))
+    var subEventEndTime by mutableStateOf(timeProvider.nowTime())
         private set
 
     var datePickerTarget by mutableStateOf<DatePickerTarget?>(null)
@@ -150,10 +147,10 @@ class AddSubEventViewModel @Inject constructor(
     fun resetSubEventDetails(){
         subEventId =0L
         _selectedSubEventType.value = SubEventType.WEDDING
-        subEventStartDate = LocalDate.now().format(dateFormatter)
-        subEventEndDate = LocalDate.now().format(dateFormatter)
-        subEventStartTime = LocalTime.now().format(timeFormatter)
-        subEventEndTime = LocalTime.now().format(timeFormatter)
+        subEventStartDate = timeProvider.nowDate()
+        subEventEndDate = timeProvider.nowDate()
+        subEventStartTime = timeProvider.nowTime()
+        subEventEndTime = timeProvider.nowTime()
         subEventLocation = ""
         subEventCity = ""
         subEventState = ""

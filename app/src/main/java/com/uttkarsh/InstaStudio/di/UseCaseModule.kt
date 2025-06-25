@@ -35,6 +35,7 @@ import com.uttkarsh.InstaStudio.domain.usecase.resource.ResourceUseCases
 import com.uttkarsh.InstaStudio.domain.usecase.resource.UpdateResourceUseCase
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.session.SessionManager
+import com.uttkarsh.InstaStudio.utils.time.TimeProvider
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -93,10 +94,11 @@ object UseCaseModule {
     @Provides
     fun provideAddEventUseCases(
         eventRepository: EventRepository,
-        sessionManager: SessionManager
+        sessionManager: SessionManager,
+        timeProvider: TimeProvider
     ): AddEventUseCases {
         return AddEventUseCases(
-            createNewEvent = CreateNewEventUseCase(eventRepository, sessionManager)
+            createNewEvent = CreateNewEventUseCase(eventRepository, sessionManager, timeProvider)
         )
     }
 
@@ -104,10 +106,11 @@ object UseCaseModule {
     @Provides
     fun provideAddSubEventUseCases(
         eventRepository: EventRepository,
-        sessionManager: SessionManager
+        sessionManager: SessionManager,
+        timeProvider: TimeProvider
     ): AddSubEventUseCases {
         return AddSubEventUseCases(
-            createNewSubEvent = CreateNewSubEventUseCase(eventRepository, sessionManager)
+            createNewSubEvent = CreateNewSubEventUseCase(eventRepository, sessionManager, timeProvider)
         )
     }
     

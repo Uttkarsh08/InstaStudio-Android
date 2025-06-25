@@ -1,9 +1,6 @@
 package com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages
 
-
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -61,7 +58,6 @@ import com.uttkarsh.InstaStudio.presentation.viewmodel.AddEventViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AddSubEventViewModel
 import com.uttkarsh.InstaStudio.utils.states.AddSubEventState
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AddSubEventScreen(
     addSubEventViewModel: AddSubEventViewModel = hiltViewModel(),

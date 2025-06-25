@@ -1,9 +1,7 @@
 package com.uttkarsh.InstaStudio.presentation.ui.DashBoardPages
 
-import android.os.Build
 import android.util.Log
 import androidx.annotation.DrawableRes
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -47,7 +45,6 @@ data class NavigationItem(
     val iconContentDescription: String
 )
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun BottomBar(
     addEventViewModel: AddEventViewModel = hiltViewModel(),

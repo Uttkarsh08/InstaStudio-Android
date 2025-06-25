@@ -1,7 +1,5 @@
 package com.uttkarsh.InstaStudio.presentation.viewmodel
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,6 +9,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.uttkarsh.InstaStudio.domain.usecase.member.MemberUseCases
 import com.uttkarsh.InstaStudio.utils.states.MemberState
+import com.uttkarsh.InstaStudio.utils.time.TimeProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,7 +20,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MemberViewModel @Inject constructor(
-    private val memberUseCases: MemberUseCases
+    private val memberUseCases: MemberUseCases,
+    private val timeProvider: TimeProvider
 
 ): ViewModel() {
 
@@ -49,15 +49,11 @@ class MemberViewModel @Inject constructor(
     private val _memberSpecialization = MutableStateFlow("")
     val memberSpecialization: StateFlow<String> = _memberSpecialization
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    private val _eventStartDate = MutableStateFlow(LocalDateTime.now())
-    @RequiresApi(Build.VERSION_CODES.O)
-    val eventStartDate: StateFlow<LocalDateTime> = _eventStartDate
+    private val _eventStartDate = MutableStateFlow(timeProvider.nowLocalDateTime())
+    val eventStartDate: StateFlow<LocalDateTime?> = _eventStartDate
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    private val _eventEndDate = MutableStateFlow(LocalDateTime.now())
-    @RequiresApi(Build.VERSION_CODES.O)
-    val eventEndDate: StateFlow<LocalDateTime> = _eventEndDate
+    private val _eventEndDate = MutableStateFlow(timeProvider.nowLocalDateTime())
+    val eventEndDate: StateFlow<LocalDateTime?> = _eventEndDate
 
     fun updateMemberSalary(newSalary: Long) {
         _memberSalary.value = newSalary
@@ -159,13 +155,20 @@ class MemberViewModel @Inject constructor(
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun getAvailableMembers() {
         viewModelScope.launch(Dispatchers.IO) {
+            val start = _eventStartDate.value
+            val end = _eventEndDate.value
+
+            if (start == null || end == null) {
+                _memberState.value = MemberState.Error("Start or End date is not set properly.")
+                return@launch
+            }
+
             try {
                 val response = memberUseCases.getAvailableMembers(
-                    startDate = _eventStartDate.value,
-                    endDate = _eventEndDate.value
+                    startDate = start,
+                    endDate = end
                 )
                 _memberState.value = MemberState.ListSuccess(response)
             } catch (e: Exception) {
@@ -173,5 +176,6 @@ class MemberViewModel @Inject constructor(
             }
         }
     }
+
 
 }

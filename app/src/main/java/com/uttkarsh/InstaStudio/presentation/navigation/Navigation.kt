@@ -1,7 +1,5 @@
 package com.uttkarsh.InstaStudio.presentation.navigation
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
@@ -31,7 +29,6 @@ import com.uttkarsh.InstaStudio.presentation.viewmodel.ProfileViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.ResourceViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.SubEventViewModel
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Navigation(
     authViewModel: AuthViewModel = hiltViewModel(),

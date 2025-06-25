@@ -1,7 +1,5 @@
 package com.uttkarsh.InstaStudio.presentation.ui.EventPages.EventDetailPages
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,10 +34,10 @@ import com.uttkarsh.InstaStudio.R
 import com.uttkarsh.InstaStudio.domain.model.EventType
 import com.uttkarsh.InstaStudio.domain.model.dto.event.EventResponseDTO
 import com.uttkarsh.InstaStudio.presentation.navigation.Screens
-import com.uttkarsh.InstaStudio.presentation.ui.utils.dateFormatter
+import com.uttkarsh.InstaStudio.presentation.ui.utils.rememberTimeProvider
 import com.uttkarsh.InstaStudio.presentation.viewmodel.SubEventViewModel
+import com.uttkarsh.InstaStudio.utils.time.TimeProvider
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun EventSchedulePage(
     subEventViewModel: SubEventViewModel,
@@ -63,19 +61,18 @@ fun EventSchedulePage(
                 key = { subEvents[it].eventId }
             ) {
                 subEvents[it].let { event ->
-                    SubEventCardInEventDetails(event , {
-                        //on SubEventClicked
-                        subEventViewModel.updateSubEventId(event.eventId)
-                        navController.navigate(Screens.SubEventDetailScreen.route)
-                    })
+                    SubEventCardInEventDetails(
+                        event, {
+                            //on SubEventClicked
+                            subEventViewModel.updateSubEventId(event.eventId)
+                            navController.navigate(Screens.SubEventDetailScreen.route)
+                        })
                 }
             }
 
         }
     }
 }
-
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SubEventCardInEventDetails(
     event: EventResponseDTO,
@@ -137,9 +134,9 @@ fun SubEventCardInEventDetails(
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
                 )
-                val formattedDate = dateFormatter(event.eventStartDate)
+                val timeProvider = rememberTimeProvider()
                 Text(
-                    text = formattedDate.toString(),
+                    text = timeProvider.formatDate(event.eventStartDate).toString(),
                     fontFamily = alatsiFont,
                     fontSize = 16.sp,
                     color = colorResource(R.color.grey)

@@ -1,7 +1,5 @@
 package com.uttkarsh.InstaStudio.presentation.viewmodel
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -17,20 +15,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.LocalTime
 import javax.inject.Inject
 import androidx.compose.runtime.State
 import com.uttkarsh.InstaStudio.domain.model.dto.event.SubEventResponseDTO
 import com.uttkarsh.InstaStudio.domain.usecase.event.addEvent.AddEventUseCases
+import com.uttkarsh.InstaStudio.utils.time.TimeProvider
 import kotlinx.coroutines.flow.update
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
-@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class AddEventViewModel @Inject constructor(
-    private val eventUseCases: AddEventUseCases
+    private val eventUseCases: AddEventUseCases,
+    private val timeProvider: TimeProvider
 ): ViewModel(){
 
     private val _addEventState = MutableStateFlow<AddEventState>(AddEventState.Idle)
@@ -45,20 +40,17 @@ class AddEventViewModel @Inject constructor(
     var clientPhoneNo by mutableStateOf("")
         private set
 
-    private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US)
-    private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss", Locale.US)
 
-
-    var eventStartDate by mutableStateOf(LocalDate.now().format(dateFormatter))
+    var eventStartDate by mutableStateOf(timeProvider.nowDate())
         private set
 
-    var eventEndDate by mutableStateOf(LocalDate.now().format(dateFormatter))
+    var eventEndDate by mutableStateOf(timeProvider.nowDate())
         private set
 
-    var eventStartTime by mutableStateOf(LocalTime.now().plusHours(1).format(timeFormatter))
+    var eventStartTime by mutableStateOf(timeProvider.nowTime())
         private set
 
-    var eventEndTime by mutableStateOf(LocalTime.now().plusHours(1).format(timeFormatter))
+    var eventEndTime by mutableStateOf(timeProvider.nowTime())
         private set
 
     var eventLocation by mutableStateOf("")
@@ -197,10 +189,10 @@ class AddEventViewModel @Inject constructor(
         clientName = ""
         clientPhoneNo = ""
         _selectedEventType.value = EventType.WEDDING
-        eventStartDate = LocalDate.now().format(dateFormatter)
-        eventEndDate = LocalDate.now().format(dateFormatter)
-        eventStartTime = LocalTime.now().format(timeFormatter)
-        eventEndTime = LocalTime.now().format(timeFormatter)
+        eventStartDate = timeProvider.nowDate()
+        eventEndDate = timeProvider.nowDate()
+        eventStartTime = timeProvider.nowTime()
+        eventEndTime = timeProvider.nowTime()
         eventLocation = ""
         eventCity = ""
         eventState = ""

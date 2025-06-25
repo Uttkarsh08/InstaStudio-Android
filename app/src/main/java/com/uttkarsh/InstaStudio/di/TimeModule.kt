@@ -1,7 +1,6 @@
 package com.uttkarsh.InstaStudio.di
 
 import TimeProviderImpl
-import com.google.firebase.auth.FirebaseAuth
 import com.uttkarsh.InstaStudio.utils.time.TimeProvider
 import dagger.Module
 import dagger.Provides
@@ -11,9 +10,9 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object AppModule {
+object TimeModule {
 
     @Provides
     @Singleton
-    fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
+    fun provideTimeProvider(): TimeProvider = TimeProviderImpl()
 }

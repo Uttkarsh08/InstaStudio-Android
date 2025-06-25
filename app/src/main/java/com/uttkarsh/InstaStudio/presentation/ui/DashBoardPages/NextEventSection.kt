@@ -1,7 +1,5 @@
 package com.uttkarsh.InstaStudio.presentation.ui.DashBoardPages
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,7 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -31,11 +29,10 @@ import androidx.compose.ui.unit.sp
 import com.uttkarsh.InstaStudio.R
 import com.uttkarsh.InstaStudio.domain.model.dto.event.EventResponseDTO
 import com.uttkarsh.InstaStudio.presentation.ui.EventPages.EventListPages.EventShimmerShow
-import com.uttkarsh.InstaStudio.presentation.ui.utils.dateFormatter
+import com.uttkarsh.InstaStudio.presentation.ui.utils.rememberTimeProvider
 import com.uttkarsh.InstaStudio.presentation.viewmodel.EventViewModel
 import com.uttkarsh.InstaStudio.utils.states.EventState
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun NextEventSection(
@@ -107,7 +104,6 @@ fun NextEventSection(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun EventCard(
     event: EventResponseDTO?
@@ -139,10 +135,9 @@ fun EventCard(
                     fontSize = 20.sp,
                     color = Color.White
                 )
-                val formattedDate = dateFormatter(event?.eventStartDate ?: "Invalid Date")
-
+                val timeProvider = rememberTimeProvider()
                 Text(
-                    text = formattedDate.toString(),
+                    text = timeProvider.formatDate(event?.eventStartDate.toString()).toString(),
                     fontFamily = alatsiFont,
                     fontSize = 20.sp,
                     color = Color.White

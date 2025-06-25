@@ -1,7 +1,5 @@
 package com.uttkarsh.InstaStudio.presentation.ui.EventPages.EventDetailPages
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -48,7 +46,6 @@ import com.uttkarsh.InstaStudio.presentation.viewmodel.SubEventViewModel
 import com.uttkarsh.InstaStudio.utils.states.EventState
 import kotlinx.coroutines.launch
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun EventDetailsScreen(
     eventViewModel: EventViewModel = hiltViewModel(),

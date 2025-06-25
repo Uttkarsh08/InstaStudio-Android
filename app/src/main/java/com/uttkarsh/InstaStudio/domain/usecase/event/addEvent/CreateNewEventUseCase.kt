@@ -1,20 +1,19 @@
 package com.uttkarsh.InstaStudio.domain.usecase.event.addEvent
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.uttkarsh.InstaStudio.domain.model.dto.event.EventRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.dto.event.EventResponseDTO
 import com.uttkarsh.InstaStudio.domain.model.validators.validate
 import com.uttkarsh.InstaStudio.domain.repository.EventRepository
 import com.uttkarsh.InstaStudio.utils.session.SessionManager
+import com.uttkarsh.InstaStudio.utils.time.TimeProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class CreateNewEventUseCase(
     private val eventRepository: EventRepository,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val timeProvider: TimeProvider
 ) {
-    @RequiresApi(Build.VERSION_CODES.O)
     suspend operator fun invoke(
         clientName: String,
         clientPhoneNo: String,
@@ -45,7 +44,7 @@ class CreateNewEventUseCase(
             studioId = studioId
         )
 
-        request.validate()?.let {
+        request.validate(timeProvider)?.let {
             throw IllegalArgumentException(it)
         }
 

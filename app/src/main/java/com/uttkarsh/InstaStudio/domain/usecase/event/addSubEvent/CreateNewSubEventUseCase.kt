@@ -1,21 +1,20 @@
 package com.uttkarsh.InstaStudio.domain.usecase.event.addSubEvent
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.uttkarsh.InstaStudio.domain.model.dto.event.SubEventRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.dto.event.SubEventResponseDTO
 import com.uttkarsh.InstaStudio.domain.model.validators.validate
 import com.uttkarsh.InstaStudio.domain.repository.EventRepository
 import com.uttkarsh.InstaStudio.utils.session.SessionManager
+import com.uttkarsh.InstaStudio.utils.time.TimeProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class CreateNewSubEventUseCase(
     private val eveRepository: EventRepository,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val timeProvider: TimeProvider
 ) {
 
-    @RequiresApi(Build.VERSION_CODES.O)
     suspend operator fun invoke(
         eventType: String,
         memberIds: Set<Long>,
@@ -39,7 +38,7 @@ class CreateNewSubEventUseCase(
             eventState = eventState,
             studioId = studioId
         )
-        request.validate()?.let {
+        request.validate(timeProvider)?.let {
             throw IllegalArgumentException(it)
         }
         val response = eveRepository.createNewSubEvent(request)

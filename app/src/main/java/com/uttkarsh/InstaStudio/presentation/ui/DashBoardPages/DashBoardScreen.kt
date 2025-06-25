@@ -1,7 +1,5 @@
 package com.uttkarsh.InstaStudio.presentation.ui.DashBoardPages
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -36,9 +34,9 @@ import com.uttkarsh.InstaStudio.presentation.viewmodel.AddEventViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AuthViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.DashBoardViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.EventViewModel
+import com.uttkarsh.InstaStudio.utils.time.TimeProvider
 import kotlinx.coroutines.delay
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashBoardScreen(
@@ -91,9 +89,11 @@ fun DashBoardScreen(
 
             Spacer(Modifier.height(16.dp))
 
-            NextEventSection(eventViewModel, nextEvenState, {
-                navController.navigate(Screens.EventDetailScreen.route)
-            })
+            NextEventSection(
+                eventViewModel, nextEvenState, {
+                    navController.navigate(Screens.EventDetailScreen.route)
+                }
+            )
 
             Row(
                 modifier = Modifier.fillMaxWidth()
