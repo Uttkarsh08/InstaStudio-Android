@@ -9,11 +9,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.uttkarsh.InstaStudio.presentation.ui.DashBoardPages.DashBoardScreen
-import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventScreen
-import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddSubEventScreen
-import com.uttkarsh.InstaStudio.presentation.ui.EventPages.EventDetailsScreen
-import com.uttkarsh.InstaStudio.presentation.ui.EventPages.EventScreen
-import com.uttkarsh.InstaStudio.presentation.ui.EventPages.SubEventDetailScreen
+import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages.AddEventScreen
+import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages.AddSubEventScreen
+import com.uttkarsh.InstaStudio.presentation.ui.EventPages.EventDetailPages.EventDetailsScreen
+import com.uttkarsh.InstaStudio.presentation.ui.EventPages.EventListPages.EventScreen
+import com.uttkarsh.InstaStudio.presentation.ui.EventPages.SubEventDetailPages.SubEventDetailScreen
 import com.uttkarsh.InstaStudio.presentation.ui.LoginTypeScreen
 import com.uttkarsh.InstaStudio.presentation.ui.MemberPages.MemberScreen
 import com.uttkarsh.InstaStudio.presentation.ui.OnBoardingScreen

@@ -1,12 +1,10 @@
 package com.uttkarsh.InstaStudio.utils.SharedPref
 
 import android.content.Context
-import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Log
 import android.util.Base64
-import androidx.annotation.RequiresApi
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import com.uttkarsh.InstaStudio.domain.model.UserType

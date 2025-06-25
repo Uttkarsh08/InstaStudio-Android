@@ -1,4 +1,4 @@
-package com.uttkarsh.InstaStudio.presentation.ui.EventPages
+package com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn

@@ -1,6 +1,5 @@
 package com.uttkarsh.InstaStudio.domain.model.dto.event
 
-import com.google.gson.annotations.SerializedName
 import com.uttkarsh.InstaStudio.domain.model.dto.member.MemberInEventDTO
 import com.uttkarsh.InstaStudio.domain.model.dto.resource.ResourceResponseDTO
 

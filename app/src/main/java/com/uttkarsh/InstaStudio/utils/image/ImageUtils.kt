@@ -9,7 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
-import android.util.Log // Added for logging
+import android.util.Log
 import androidx.core.graphics.scale
 
 object ImageUtils{

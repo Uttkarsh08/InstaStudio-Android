@@ -4,22 +4,16 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
 import com.uttkarsh.InstaStudio.domain.model.dto.auth.LoginRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.UserType
-import com.uttkarsh.InstaStudio.domain.repository.AuthRepository
 import com.uttkarsh.InstaStudio.domain.usecase.auth.AuthUseCases
-import com.uttkarsh.InstaStudio.utils.SharedPref.OnboardingStore
-import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.states.AuthState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel

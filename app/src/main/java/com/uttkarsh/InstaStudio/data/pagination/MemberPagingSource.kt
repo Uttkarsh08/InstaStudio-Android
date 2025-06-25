@@ -4,7 +4,6 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.uttkarsh.InstaStudio.data.auth.MemberApiService
 import com.uttkarsh.InstaStudio.domain.model.dto.member.MemberProfileResponseDTO
-import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import javax.inject.Inject
 
 class MemberPagingSource @Inject constructor(

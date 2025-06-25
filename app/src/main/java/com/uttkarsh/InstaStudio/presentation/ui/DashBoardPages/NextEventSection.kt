@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.uttkarsh.InstaStudio.R
 import com.uttkarsh.InstaStudio.domain.model.dto.event.EventResponseDTO
-import com.uttkarsh.InstaStudio.presentation.ui.EventPages.EventShimmerShow
+import com.uttkarsh.InstaStudio.presentation.ui.EventPages.EventListPages.EventShimmerShow
 import com.uttkarsh.InstaStudio.presentation.ui.utils.dateFormatter
 import com.uttkarsh.InstaStudio.presentation.viewmodel.EventViewModel
 import com.uttkarsh.InstaStudio.utils.states.EventState

@@ -58,7 +58,6 @@ import com.uttkarsh.InstaStudio.presentation.ui.utils.AppTopBar
 import com.uttkarsh.InstaStudio.presentation.ui.utils.SearchBar
 import com.uttkarsh.InstaStudio.presentation.viewmodel.MemberViewModel
 import com.uttkarsh.InstaStudio.utils.states.MemberState
-import com.uttkarsh.InstaStudio.utils.states.ResourceState
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)

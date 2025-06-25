@@ -4,7 +4,6 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.uttkarsh.InstaStudio.data.auth.EventApiService
 import com.uttkarsh.InstaStudio.domain.model.dto.event.EventListResponseDTO
-import com.uttkarsh.InstaStudio.domain.model.dto.event.EventResponseDTO
 import javax.inject.Inject
 
 class UpcomingEventPagingSource @Inject constructor(

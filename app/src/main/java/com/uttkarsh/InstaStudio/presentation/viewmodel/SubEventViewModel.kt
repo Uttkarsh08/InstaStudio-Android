@@ -6,20 +6,14 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.uttkarsh.InstaStudio.domain.repository.EventRepository
 import com.uttkarsh.InstaStudio.domain.usecase.event.subEvent.SubEventUseCases
-import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
-import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
-import com.uttkarsh.InstaStudio.utils.session.SessionManager
 import com.uttkarsh.InstaStudio.utils.states.SubEventState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import retrofit2.HttpException
 import javax.inject.Inject
 
 @HiltViewModel

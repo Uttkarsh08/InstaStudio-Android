@@ -1,6 +1,5 @@
 package com.uttkarsh.InstaStudio.utils.session
 
-import android.util.Log
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject

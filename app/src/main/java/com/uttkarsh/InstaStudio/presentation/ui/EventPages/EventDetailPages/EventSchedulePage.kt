@@ -1,4 +1,4 @@
-package com.uttkarsh.InstaStudio.presentation.ui.EventPages
+package com.uttkarsh.InstaStudio.presentation.ui.EventPages.EventDetailPages
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -37,7 +37,6 @@ import com.uttkarsh.InstaStudio.domain.model.EventType
 import com.uttkarsh.InstaStudio.domain.model.dto.event.EventResponseDTO
 import com.uttkarsh.InstaStudio.presentation.navigation.Screens
 import com.uttkarsh.InstaStudio.presentation.ui.utils.dateFormatter
-import com.uttkarsh.InstaStudio.presentation.viewmodel.EventViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.SubEventViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)

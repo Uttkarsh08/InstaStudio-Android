@@ -1,4 +1,4 @@
-package com.uttkarsh.InstaStudio.presentation.ui.EventPages
+package com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages
 
 
 import android.os.Build
@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,9 +40,11 @@ import androidx.compose.ui.unit.sp
 import com.uttkarsh.InstaStudio.R
 import com.uttkarsh.InstaStudio.presentation.ui.utils.AppTopBar
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -50,6 +53,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.uttkarsh.InstaStudio.domain.model.DatePickerTarget
@@ -58,45 +63,45 @@ import com.uttkarsh.InstaStudio.presentation.navigation.Screens
 import com.uttkarsh.InstaStudio.presentation.ui.utils.ShowDatePickerDialog
 import com.uttkarsh.InstaStudio.presentation.ui.utils.ShowTimePickerDialog
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AddEventViewModel
-import com.uttkarsh.InstaStudio.presentation.viewmodel.AddSubEventViewModel
+import com.uttkarsh.InstaStudio.presentation.viewmodel.EventViewModel
 import com.uttkarsh.InstaStudio.utils.states.AddEventState
-import com.uttkarsh.InstaStudio.utils.states.AddSubEventState
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun AddSubEventScreen(
-    addSubEventViewModel: AddSubEventViewModel = hiltViewModel(),
-    addEventsViewModel: AddEventViewModel = hiltViewModel(),
+fun AddEventScreen(
+    addEventViewModel: AddEventViewModel = hiltViewModel(),
+    eventViewModel: EventViewModel = hiltViewModel(),
     navController: NavController
 ) {
 
     val scrollState = rememberScrollState()
     val alatsiFont = remember { FontFamily(Font(R.font.alatsi)) }
 
-    val subEventTypes = addSubEventViewModel.subEventTypes
-    val selectedSubEventType by addSubEventViewModel.selectedSubEventType
-    val dropdownExpanded by addSubEventViewModel.subEventTypeDropdownExpanded
+    val eventTypes = addEventViewModel.eventTypes
+    val selectedEventType by addEventViewModel.selectedEventType
+    val dropdownExpanded by addEventViewModel.eventTypeDropdownExpanded
 
-    val subEventStartDate = addSubEventViewModel.subEventStartDate
-    val subEventEndDate = addSubEventViewModel.subEventEndDate
-    val subEventStartTime = addSubEventViewModel.subEventStartTime
-    val subEventEndTime = addSubEventViewModel.subEventEndTime
+    val clientName = addEventViewModel.clientName
+    val clientPhoneNo = addEventViewModel.clientPhoneNo
+    val eventStartDate = addEventViewModel.eventStartDate
+    val eventEndDate = addEventViewModel.eventEndDate
+    val eventStartTime = addEventViewModel.eventStartTime
+    val eventEndTime = addEventViewModel.eventEndTime
+    val eveLocation = addEventViewModel.eventLocation
+    val eventCity = addEventViewModel.eventCity
+    val eventState = addEventViewModel.eventState
+    val datePickerTarget = addEventViewModel.datePickerTarget
+    val timePickerTarget = addEventViewModel.timePickerTarget
 
-    val subEveLocation = addSubEventViewModel.subEventLocation
-    val subEventCity = addSubEventViewModel.subEventCity
-    val subEventState = addSubEventViewModel.subEventState
+    val state by addEventViewModel.addEventState.collectAsState()
+    val subEventsMap by addEventViewModel.subEventsMap.collectAsState()
 
-    val datePickerTarget = addSubEventViewModel.datePickerTarget
-    val timePickerTarget = addSubEventViewModel.timePickerTarget
-
-    val state by addSubEventViewModel.addSubEventState.collectAsState()
-
-    val errorMessage = (state as? AddSubEventState.Error)?.message
+    val errorMessage = (state as? AddEventState.Error)?.message
 
     if (datePickerTarget != null) {
         ShowDatePickerDialog(
             onDateSelected = { date ->
-                addSubEventViewModel.onDatePicked(date)
+                addEventViewModel.onDatePicked(date)
             }
         )
     }
@@ -104,14 +109,13 @@ fun AddSubEventScreen(
     if (timePickerTarget != null) {
         ShowTimePickerDialog(
             onTimeSelected = { time ->
-                addSubEventViewModel.onTimePicked(time)
+                addEventViewModel.onTimePicked(time)
             }
         )
     }
 
-    LaunchedEffect(Unit) {
-        addSubEventViewModel.resetAddSubEventState()
-        addSubEventViewModel.resetSubEventDetails()
+    LaunchedEffect(addEventViewModel) {
+        addEventViewModel.resetAddEventScreen()
     }
 
     Scaffold(
@@ -135,7 +139,11 @@ fun AddSubEventScreen(
                     .verticalScroll(scrollState),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-
+                FloatingLabelBasicTextField(
+                    value = clientName,
+                    onValueChange = { addEventViewModel.updateClientName(it) },
+                    label = "Client Name"
+                )
 
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
@@ -157,7 +165,7 @@ fun AddSubEventScreen(
                             )
                     ) {
                         TextButton(
-                            onClick = { addSubEventViewModel.toggleSubEventTypeDropdown() },
+                            onClick = { addEventViewModel.toggleEventTypeDropdown() },
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(horizontal = 12.dp)
@@ -168,7 +176,7 @@ fun AddSubEventScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = selectedSubEventType.displayName,
+                                    text = selectedEventType.displayName,
                                     color = Color.Black,
                                     fontFamily = alatsiFont,
                                     fontSize = 16.sp
@@ -183,7 +191,7 @@ fun AddSubEventScreen(
 
                         DropdownMenu(
                             expanded = dropdownExpanded,
-                            onDismissRequest = { addSubEventViewModel.closeSubEventTypeDropdown() },
+                            onDismissRequest = { addEventViewModel.closeEventTypeDropdown() },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(
@@ -195,7 +203,7 @@ fun AddSubEventScreen(
                                 .padding(horizontal = 30.dp)
                                 .background(MaterialTheme.colorScheme.background)
                         ) {
-                            subEventTypes.forEach { type ->
+                            eventTypes.forEach { type ->
                                 DropdownMenuItem(
                                     text = {
                                         Text(
@@ -206,7 +214,7 @@ fun AddSubEventScreen(
                                         )
                                     },
                                     onClick = {
-                                        addSubEventViewModel.onSubEventTypeSelected(type)
+                                        addEventViewModel.onEventTypeSelected(type)
                                     },
                                     contentPadding = PaddingValues(horizontal = 12.dp)
                                 )
@@ -246,7 +254,7 @@ fun AddSubEventScreen(
                                     .fillMaxWidth()
                                     .height(35.dp)
                                     .clickable(onClick = {
-                                        addSubEventViewModel.onDateBoxClick(DatePickerTarget.START_DATE)
+                                        addEventViewModel.onDateBoxClick(DatePickerTarget.START_DATE)
                                     })
                                     .clip(RoundedCornerShape(8.dp))
                                     .border(
@@ -265,7 +273,7 @@ fun AddSubEventScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
 
-                                    Text(text = subEventStartDate)
+                                    Text(text = eventStartDate)
 
                                     Icon(
                                         painter = painterResource(R.drawable.calender),
@@ -284,7 +292,7 @@ fun AddSubEventScreen(
                                     .fillMaxWidth()
                                     .height(35.dp)
                                     .clickable(onClick = {
-                                        addSubEventViewModel.onTimeBoxClick(TimePickerTarget.START_TIME)
+                                        addEventViewModel.onTimeBoxClick(TimePickerTarget.START_TIME)
                                     })
                                     .clip(RoundedCornerShape(8.dp))
                                     .border(
@@ -303,7 +311,7 @@ fun AddSubEventScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
 
-                                    Text(text = subEventStartTime)
+                                    Text(text = eventStartTime)
 
                                     Icon(
                                         Icons.Default.KeyboardArrowDown,
@@ -334,7 +342,7 @@ fun AddSubEventScreen(
                                     .fillMaxWidth()
                                     .height(35.dp)
                                     .clickable(onClick = {
-                                        addSubEventViewModel.onDateBoxClick(DatePickerTarget.END_DATE)
+                                        addEventViewModel.onDateBoxClick(DatePickerTarget.END_DATE)
                                     })
                                     .clip(RoundedCornerShape(8.dp))
                                     .border(
@@ -353,7 +361,7 @@ fun AddSubEventScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
 
-                                    Text(text = subEventEndDate)
+                                    Text(text = eventEndDate)
 
                                     Icon(
                                         painter = painterResource(R.drawable.calender),
@@ -372,7 +380,7 @@ fun AddSubEventScreen(
                                     .fillMaxWidth()
                                     .height(35.dp)
                                     .clickable(onClick = {
-                                        addSubEventViewModel.onTimeBoxClick(TimePickerTarget.END_TIME)
+                                        addEventViewModel.onTimeBoxClick(TimePickerTarget.END_TIME)
                                     })
                                     .clip(RoundedCornerShape(8.dp))
                                     .border(
@@ -391,7 +399,7 @@ fun AddSubEventScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
 
-                                    Text(text = subEventEndTime)
+                                    Text(text = eventEndTime)
 
                                     Icon(
                                         Icons.Default.KeyboardArrowDown,
@@ -408,22 +416,98 @@ fun AddSubEventScreen(
                 }
 
                 FloatingLabelBasicTextField(
-                    value = subEveLocation,
-                    onValueChange = { addSubEventViewModel.updateSubEventLocation(it) },
+                    value = eveLocation,
+                    onValueChange = { addEventViewModel.updateEventLocation(it) },
                     label = "Location"
                 )
 
                 FloatingLabelBasicTextField(
-                    value = subEventCity,
-                    onValueChange = { addSubEventViewModel.updateSubEventCity(it) },
+                    value = eventCity,
+                    onValueChange = { addEventViewModel.updateEventCity(it) },
                     label = "City"
                 )
 
                 FloatingLabelBasicTextField(
-                    value = subEventState,
-                    onValueChange = { addSubEventViewModel.updateSubEventState(it) },
+                    value = eventState,
+                    onValueChange = { addEventViewModel.updateEventState(it) },
                     label = "State"
                 )
+
+                FloatingLabelBasicTextField(
+                    value = clientPhoneNo,
+                    onValueChange = { addEventViewModel.updateClientPhoneNo(it) },
+                    label = "Contact No.",
+                    keyboardType = KeyboardType.Number
+
+                )
+
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+
+                    Text(
+                        text = "Sub-Events",
+                        fontFamily = alatsiFont,
+                        color = Color.Black,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .border(
+                                1.dp,
+                                colorResource(R.color.grey),
+                                RoundedCornerShape(8.dp)
+                            )
+                            .padding(horizontal = 12.dp)
+                    ) {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .defaultMinSize(minHeight = 60.dp)
+                                .heightIn(max = 300.dp)
+                                .padding(bottom = 56.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+
+                            val subEventsList =  subEventsMap.toList()
+
+                            items(subEventsList.size) { index ->
+                                val subEventId = subEventsList[index].first
+                                val subEvent = subEventsMap[subEventId]
+
+                                Log.d("SubEvent", "SubEvent: $subEventId")
+
+                                if (subEvent != null) {
+                                    SubEventCard(
+                                        subEvent = subEvent,
+                                        onDeleteClick = { addEventViewModel.removeSubEvent(subEvent) }
+                                    )
+                                } else {
+                                    Text("Loading sub event...", fontFamily = alatsiFont)
+                                }
+                            }
+                        }
+
+                        Button(
+                            onClick = {
+                                navController.navigate(Screens.AddSubEventDetailsScreen.route)
+                            },
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(bottom = 4.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = colorResource(R.color.darkGrey),
+                                contentColor = Color.Black
+                            )
+                        ) {
+                            Text(text = "Add New", fontFamily = alatsiFont)
+                        }
+                    }
+                }
 
                 Row(
                     modifier = Modifier.fillMaxWidth()
@@ -436,22 +520,34 @@ fun AddSubEventScreen(
                     }
 
                 }
-
-
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Button(
                         onClick = {
-                            addSubEventViewModel.createNewSubEvent()
+                            addEventViewModel.updateEventIsSaved(true)
+                            addEventViewModel.createNewEvent()
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = colorResource(R.color.darkGreen),
                             contentColor = Color.Black
                         )
                     ) {
-                        Text(text = "Add New")
+                        Text(text = "Add New", fontFamily = alatsiFont,)
+                    }
+
+                    Button(
+                        onClick = {
+                            addEventViewModel.updateEventIsSaved(false)
+                            addEventViewModel.createNewEvent()
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = colorResource(R.color.darkGrey),
+                            contentColor = Color.Black
+                        )
+                    ) {
+                        Text(text = "Draft", fontFamily = alatsiFont,)
                     }
 
                 }
@@ -460,14 +556,14 @@ fun AddSubEventScreen(
 
         when (state) {
 
-            AddSubEventState.Idle -> {
+            AddEventState.Idle -> {
                 Text(text = "Events Not Loaded Yet",
                     color = Color.Black,
                     fontFamily = alatsiFont,
                     fontSize = 16.sp)
             }
 
-            AddSubEventState.Loading -> {
+            AddEventState.Loading -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -476,29 +572,28 @@ fun AddSubEventScreen(
                 }
             }
 
-            is AddSubEventState.Success -> {
+            is AddEventState.Success -> {
                 // Success is handled via LaunchedEffect, no UI needed here
             }
-            is AddSubEventState.Error -> {
+            is AddEventState.Error -> {
                 // Error UI handled separately
             }
         }
     }
 
     LaunchedEffect(state) {
-        if (state is AddSubEventState.Success) {
+        if (state is AddEventState.Success) {
 
-            val subEvent = (state as AddSubEventState.Success).response
+            eventViewModel.resetHasLoadedFlags()
+            eventViewModel.resetHasLoadedNextUpcomingEvent()
 
-            addEventsViewModel.addSubEvent(subEvent)
-            Log.d("AddSubEventScreen", "Adding SubEvent: ${subEvent.eventId}")
-
-            navController.navigate(Screens.AddEventDetailsScreen.route) {
-                popUpTo(Screens.AddSubEventDetailsScreen.route) { inclusive = true }
+            navController.navigate(Screens.EventScreen.route) {
+                popUpTo(Screens.AddEventDetailsScreen.route) { inclusive = true }
                 launchSingleTop = true
             }
-            addSubEventViewModel.resetAddSubEventState()
-            addSubEventViewModel.resetSubEventDetails()
+            addEventViewModel.resetAddEventState()
+            addEventViewModel.resetEventDetails()
         }
     }
 }
+

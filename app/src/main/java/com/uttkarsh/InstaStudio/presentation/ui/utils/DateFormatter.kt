@@ -2,7 +2,6 @@ package com.uttkarsh.InstaStudio.presentation.ui.utils
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.uttkarsh.InstaStudio.domain.model.dto.event.EventResponseDTO
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale

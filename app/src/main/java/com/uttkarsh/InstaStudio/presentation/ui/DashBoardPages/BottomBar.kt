@@ -39,7 +39,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.uttkarsh.InstaStudio.presentation.navigation.Screens
 import com.uttkarsh.InstaStudio.R
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AddEventViewModel
-import com.uttkarsh.InstaStudio.presentation.viewmodel.EventViewModel
 
 data class NavigationItem(
     val route: String,
