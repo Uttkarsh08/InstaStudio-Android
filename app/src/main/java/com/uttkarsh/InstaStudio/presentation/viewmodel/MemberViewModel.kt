@@ -12,6 +12,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.uttkarsh.InstaStudio.domain.model.dto.member.MemberProfileRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.validators.validate
+import com.uttkarsh.InstaStudio.domain.usecase.member.MemberUseCases
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
 import com.uttkarsh.InstaStudio.utils.session.SessionManager
@@ -29,8 +30,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MemberViewModel @Inject constructor(
-    private val memberRepository: MemberRepository,
-    private val sessionManager: SessionManager
+    private val memberUseCases: MemberUseCases
 
 ): ViewModel() {
 
@@ -93,6 +93,14 @@ class MemberViewModel @Inject constructor(
         _memberId.value = newId
     }
 
+    fun clearMemberValues(){
+        updateMemberId(0L)
+        updateMemberEmail("")
+        updateMemberSalary(0L)
+        updateMemberSpecialization("")
+
+    }
+
     init {
         getAllMembers()
     }
@@ -100,9 +108,8 @@ class MemberViewModel @Inject constructor(
     fun getAllMembers(){
         viewModelScope.launch(Dispatchers.IO) {
             _memberState.value = MemberState.Loading
-            val id = sessionManager.getStudioId()
 
-            val response = memberRepository.getAllMembers(id)
+            val response = memberUseCases.getAllMembers()
                 .cachedIn(viewModelScope)
                 .stateIn(viewModelScope, SharingStarted.Lazily, PagingData.empty())
 
@@ -112,119 +119,68 @@ class MemberViewModel @Inject constructor(
 
     fun createNewUser(){
         viewModelScope.launch(Dispatchers.IO) {
-            try {
-                _memberState.value = MemberState.Loading
+            _memberState.value = MemberState.Loading
+            try{
 
-                val id = sessionManager.getStudioId()
-
-                val request = MemberProfileRequestDTO(
-                    memberEmail = _memberEmail.value,
+                val response = memberUseCases.createMember(
+                    email = _memberEmail.value,
                     salary = _memberSalary.value,
-                    specialization = _memberSpecialization.value,
-                    studioId = id
+                    specialization = _memberSpecialization.value
                 )
 
-                val requestError = request.validate()
-                if(requestError != null){
-                    _memberState.value = MemberState.Error(requestError)
-                    return@launch
-                }
+                _memberState.value = MemberState.Success(response)
 
-                val response = memberRepository.createNewMember(request)
-                if(response.data != null){
-                    _memberState.value = MemberState.Success(response.data)
-                }else{
-                    _memberState.value = MemberState.Error(response.error.message)
-                }
 
-            }catch (e: HttpException) {
-                val message = ApiErrorExtractor.extractMessage(e)
-                _memberState.value = MemberState.Error(message)
-            } catch (e: Exception) {
+            }catch(e: Exception) {
                 _memberState.value = MemberState.Error(e.localizedMessage ?: "An unexpected error occurred.")
             }
         }
     }
 
-    fun updateMemberById(){
+    fun updateMemberById() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 _memberState.value = MemberState.Loading
 
-                val studioId = sessionManager.getStudioId()
-
-                val request = MemberProfileRequestDTO(
-                    memberEmail = _memberEmail.value,
+                val response = memberUseCases.updateMemberById(
+                    memberId = _memberId.value,
+                    email = _memberEmail.value,
                     salary = _memberSalary.value,
-                    specialization = _memberSpecialization.value,
-                    studioId = studioId
+                    specialization = _memberSpecialization.value
                 )
 
-                val requestError = request.validate()
-                if(requestError != null){
-                    _memberState.value = MemberState.Error(requestError)
-                    return@launch
-                }
+                _memberState.value = MemberState.Success(response)
 
-                val response = memberRepository.updateMemberById(studioId, memberId.value, request)
-                if(response.data != null){
-                    _memberState.value = MemberState.Success(response.data)
-                }else{
-                    _memberState.value = MemberState.Error(response.error.message)
-                }
-
-            }catch (e: HttpException) {
-                val message = ApiErrorExtractor.extractMessage(e)
-                _memberState.value = MemberState.Error(message)
             } catch (e: Exception) {
-                _memberState.value = MemberState.Error(e.localizedMessage ?: "An unexpected error occurred.")
+                _memberState.value = MemberState.Error(e.localizedMessage ?: "Unexpected error")
             }
         }
     }
 
-    fun getMemberById(){
+    fun getMemberById() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val studioId = sessionManager.getStudioId()
-
-                val response = memberRepository.getMemberById(studioId, memberId.value)
-                if(response.data != null){
-                    _memberState.value = MemberState.Success(response.data)
-                }else{
-                    _memberState.value = MemberState.Error(response.error.message)
-                }
-            }catch (e: Exception){
-                _memberState.value = MemberState.Error(e.localizedMessage ?: "An unexpected error occurred.")
+                val response = memberUseCases.getMemberById(_memberId.value)
+                _memberState.value = MemberState.Success(response)
+            } catch (e: Exception) {
+                _memberState.value = MemberState.Error(e.localizedMessage ?: "Unexpected error")
             }
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun getAvailableMembers(){
+    fun getAvailableMembers() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val studioId = sessionManager.getStudioId()
-
-                val response = memberRepository.getAvailableMembers(studioId, _eventStartDate.value, _eventEndDate.value)
-                if(response.data != null){
-                    _memberState.value = MemberState.ListSuccess(response.data)
-                }else{
-                    _memberState.value = MemberState.Error(response.error.message)
-                }
-            }catch (e: Exception){
-                _memberState.value = MemberState.Error(e.localizedMessage ?: "An unexpected error occurred.")
+                val response = memberUseCases.getAvailableMembers(
+                    startDate = _eventStartDate.value,
+                    endDate = _eventEndDate.value
+                )
+                _memberState.value = MemberState.ListSuccess(response)
+            } catch (e: Exception) {
+                _memberState.value = MemberState.Error(e.localizedMessage ?: "Unexpected error")
             }
         }
     }
-
-    fun clearMemberValues(){
-        updateMemberId(0L)
-        updateMemberEmail("")
-        updateMemberSalary(0L)
-        updateMemberSpecialization("")
-
-    }
-
-
 
 }

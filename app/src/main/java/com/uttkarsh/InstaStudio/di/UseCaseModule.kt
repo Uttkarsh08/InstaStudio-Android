@@ -2,6 +2,7 @@ package com.uttkarsh.InstaStudio.di
 
 import com.uttkarsh.InstaStudio.domain.repository.AuthRepository
 import com.uttkarsh.InstaStudio.domain.repository.EventRepository
+import com.uttkarsh.InstaStudio.domain.repository.MemberRepository
 import com.uttkarsh.InstaStudio.domain.repository.ProfileRepository
 import com.uttkarsh.InstaStudio.domain.repository.ResourceRepository
 import com.uttkarsh.InstaStudio.domain.usecase.auth.*
@@ -12,6 +13,12 @@ import com.uttkarsh.InstaStudio.domain.usecase.event.addEvent.CreateNewEventUseC
 import com.uttkarsh.InstaStudio.domain.usecase.event.addSubEvent.AddSubEventUseCases
 import com.uttkarsh.InstaStudio.domain.usecase.event.addSubEvent.CreateNewSubEventUseCase
 import com.uttkarsh.InstaStudio.domain.usecase.event.addSubEvent.GetSubEventByIdUseCase
+import com.uttkarsh.InstaStudio.domain.usecase.member.CreateMemberUseCase
+import com.uttkarsh.InstaStudio.domain.usecase.member.GetAllMembersUseCase
+import com.uttkarsh.InstaStudio.domain.usecase.member.GetAvailableMembersUseCase
+import com.uttkarsh.InstaStudio.domain.usecase.member.GetMemberByIdUseCase
+import com.uttkarsh.InstaStudio.domain.usecase.member.MemberUseCases
+import com.uttkarsh.InstaStudio.domain.usecase.member.UpdateMemberByIdUseCase
 import com.uttkarsh.InstaStudio.domain.usecase.profile.FetchLatestEmailUseCase
 import com.uttkarsh.InstaStudio.domain.usecase.profile.GetStudioImageUseCase
 import com.uttkarsh.InstaStudio.domain.usecase.profile.ProfileUseCases
@@ -108,6 +115,20 @@ object UseCaseModule {
             createResource = CreateResourceUseCase(resourceRepository, sessionManager),
             updateResource = UpdateResourceUseCase(resourceRepository, sessionManager),
             getAllResources = GetAllResourcesUseCase(resourceRepository, sessionManager)
+        )
+    }
+
+    @Provides
+    fun provideMemberUseCases(
+        memberRepository: MemberRepository,
+        sessionManager: SessionManager
+    ): MemberUseCases {
+        return MemberUseCases(
+            getAllMembers = GetAllMembersUseCase(memberRepository, sessionManager),
+            createMember = CreateMemberUseCase(memberRepository, sessionManager),
+            updateMemberById = UpdateMemberByIdUseCase(memberRepository, sessionManager),
+            getMemberById = GetMemberByIdUseCase(memberRepository, sessionManager),
+            getAvailableMembers = GetAvailableMembersUseCase(memberRepository, sessionManager)
         )
     }
 }
