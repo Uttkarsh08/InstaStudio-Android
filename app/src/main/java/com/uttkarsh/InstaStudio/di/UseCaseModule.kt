@@ -1,10 +1,16 @@
 package com.uttkarsh.InstaStudio.di
 
 import com.uttkarsh.InstaStudio.domain.repository.AuthRepository
+import com.uttkarsh.InstaStudio.domain.repository.EventRepository
 import com.uttkarsh.InstaStudio.domain.repository.ProfileRepository
 import com.uttkarsh.InstaStudio.domain.usecase.auth.*
 import com.uttkarsh.InstaStudio.domain.usecase.dashboard.DashboardUseCases
 import com.uttkarsh.InstaStudio.domain.usecase.dashboard.GetUserProfileUseCase
+import com.uttkarsh.InstaStudio.domain.usecase.event.addEvent.AddEventUseCases
+import com.uttkarsh.InstaStudio.domain.usecase.event.addEvent.CreateNewEventUseCase
+import com.uttkarsh.InstaStudio.domain.usecase.event.addSubEvent.AddSubEventUseCases
+import com.uttkarsh.InstaStudio.domain.usecase.event.addSubEvent.CreateNewSubEventUseCase
+import com.uttkarsh.InstaStudio.domain.usecase.event.addSubEvent.GetSubEventByIdUseCase
 import com.uttkarsh.InstaStudio.domain.usecase.profile.FetchLatestEmailUseCase
 import com.uttkarsh.InstaStudio.domain.usecase.profile.GetStudioImageUseCase
 import com.uttkarsh.InstaStudio.domain.usecase.profile.ProfileUseCases
@@ -63,6 +69,28 @@ object UseCaseModule {
             fetchLatestEmail = FetchLatestEmailUseCase(sessionStore),
             saveAdminProfile = SaveAdminProfileUseCase(profileRepository, authRepository, sessionStore, sessionManager),
             getStudioImage = GetStudioImageUseCase(profileRepository, sessionManager)
+        )
+    }
+
+    @Provides
+    fun provideEventUseCases(
+        eventRepository: EventRepository,
+        sessionManager: SessionManager
+    ): AddEventUseCases {
+        return AddEventUseCases(
+            createNewEvent = CreateNewEventUseCase(eventRepository, sessionManager)
+        )
+    }
+
+
+    @Provides
+    fun provideAddSubEventUseCases(
+        eventRepository: EventRepository,
+        sessionManager: SessionManager
+    ): AddSubEventUseCases {
+        return AddSubEventUseCases(
+            createNewSubEvent = CreateNewSubEventUseCase(eventRepository, sessionManager),
+            getSubEventById = GetSubEventByIdUseCase(eventRepository, sessionManager)
         )
     }
 }

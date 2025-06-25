@@ -12,31 +12,24 @@ import androidx.lifecycle.viewModelScope
 import com.uttkarsh.InstaStudio.domain.model.DatePickerTarget
 import com.uttkarsh.InstaStudio.domain.model.SubEventType
 import com.uttkarsh.InstaStudio.domain.model.TimePickerTarget
-import com.uttkarsh.InstaStudio.domain.model.dto.event.SubEventRequestDTO
-import com.uttkarsh.InstaStudio.domain.model.validators.validate
-import com.uttkarsh.InstaStudio.domain.repository.EventRepository
-import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
-import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
-import com.uttkarsh.InstaStudio.utils.session.SessionManager
+import com.uttkarsh.InstaStudio.domain.usecase.event.addSubEvent.AddSubEventUseCases
 import com.uttkarsh.InstaStudio.utils.states.AddSubEventState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import retrofit2.HttpException
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import javax.inject.Inject
+import kotlin.Long
 
 @RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class AddSubEventViewModel @Inject constructor(
-    private val evenRepository: EventRepository,
-    private val sessionManager: SessionManager
+    private val addSubEventUseCases: AddSubEventUseCases
 ): ViewModel(){
 
     private val _addSubEventState = MutableStateFlow<AddSubEventState>(AddSubEventState.Idle)
@@ -170,7 +163,6 @@ class AddSubEventViewModel @Inject constructor(
 
     fun createNewSubEvent(){
         viewModelScope.launch(Dispatchers.IO) {
-            val studioId = sessionManager.getStudioId()
 
             _addSubEventState.value = AddSubEventState.Loading
 
@@ -178,35 +170,20 @@ class AddSubEventViewModel @Inject constructor(
             val subEventEnd = subEventEndDate+"T"+subEventEndTime
 
             try {
-                val request = SubEventRequestDTO(
-                    eventType = selectedSubEventType.value.toString(),
-                    memberIds = emptySet(),
-                    resourceIds = emptySet(),
-                    eventStartDate = subEventStart,
-                    eventEndDate = subEventEnd,
-                    eventLocation = subEventLocation,
-                    eventCity = subEventCity,
-                    eventState = subEventState,
-                    studioId = studioId
+
+
+                val response = addSubEventUseCases.createNewSubEvent(
+                    eventType= _selectedSubEventType.value.toString(),
+                    memberIds= emptySet(),
+                    resourceIds= emptySet(),
+                    eventStartDate= subEventStart,
+                    eventEndDate= subEventEnd,
+                    eventLocation= subEventLocation,
+                    eventCity= subEventCity,
+                    eventState= subEventState
                 )
 
-                val validateError = request.validate()
-                if(validateError != null){
-                    _addSubEventState.value = AddSubEventState.Error(validateError)
-                    return@launch
-                }
-
-                val response = evenRepository.createNewSubEvent(request)
-
-                if(response.data != null){
-                    _addSubEventState.value = AddSubEventState.Success(response.data)
-                }else {
-                    _addSubEventState.value = AddSubEventState.Error(response.error.message)
-                }
-
-            }catch (e: HttpException) {
-                val message = ApiErrorExtractor.extractMessage(e)
-                _addSubEventState.value = AddSubEventState.Error(message)
+                _addSubEventState.value = AddSubEventState.Success(response)
 
             } catch (e: Exception) {
                 _addSubEventState.value = AddSubEventState.Error(e.localizedMessage ?: "Unexpected error occurred")
@@ -216,22 +193,12 @@ class AddSubEventViewModel @Inject constructor(
 
     fun getSubEventById(){
         viewModelScope.launch(Dispatchers.IO) {
-            val studioId = sessionManager.getStudioId()
-
             _addSubEventState.value = AddSubEventState.Loading
 
             try {
-                val response = evenRepository.getSubEventById(studioId, subEventId)
+                val response = addSubEventUseCases.getSubEventById(subEventId)
 
-                if(response.data != null){
-
-                    _addSubEventState.value = AddSubEventState.Success(response.data)
-                }else {
-                    _addSubEventState.value = AddSubEventState.Error(response.error.message)
-                }
-            }catch (e: HttpException) {
-                val message = ApiErrorExtractor.extractMessage(e)
-                _addSubEventState.value = AddSubEventState.Error(message)
+                _addSubEventState.value = AddSubEventState.Success(response)
 
             } catch (e: Exception) {
                 _addSubEventState.value = AddSubEventState.Error(e.localizedMessage ?: "Unexpected error occurred")

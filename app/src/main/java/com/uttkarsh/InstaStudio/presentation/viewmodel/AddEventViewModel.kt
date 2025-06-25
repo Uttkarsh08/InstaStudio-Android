@@ -1,7 +1,6 @@
 package com.uttkarsh.InstaStudio.presentation.viewmodel
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -9,37 +8,29 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.uttkarsh.InstaStudio.domain.model.dto.event.EventRequestDTO
-import com.uttkarsh.InstaStudio.domain.repository.EventRepository
 import com.uttkarsh.InstaStudio.domain.model.DatePickerTarget
 import com.uttkarsh.InstaStudio.domain.model.EventType
 import com.uttkarsh.InstaStudio.domain.model.TimePickerTarget
-import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.states.AddEventState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
 import javax.inject.Inject
 import androidx.compose.runtime.State
 import com.uttkarsh.InstaStudio.domain.model.dto.event.SubEventResponseDTO
-import com.uttkarsh.InstaStudio.domain.model.validators.validate
-import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
-import com.uttkarsh.InstaStudio.utils.session.SessionManager
+import com.uttkarsh.InstaStudio.domain.usecase.event.addEvent.AddEventUseCases
 import kotlinx.coroutines.flow.update
-import retrofit2.HttpException
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class AddEventViewModel @Inject constructor(
-    private val eventRepository: EventRepository,
-    private val sessionManager: SessionManager
+    private val eventUseCases: AddEventUseCases
 ): ViewModel(){
 
     private val _addEventState = MutableStateFlow<AddEventState>(AddEventState.Idle)
@@ -223,66 +214,30 @@ class AddEventViewModel @Inject constructor(
     fun createNewEvent() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                Log.d("AddEventVM", "createNewEvent() called")
-
-                val studioId = sessionManager.getStudioId()
-                Log.d("AddEventVM", "Studio ID: $studioId")
-
                 _addEventState.value = AddEventState.Loading
 
                 val eventStart = eventStartDate + "T" + eventStartTime
                 val eventEnd = eventEndDate + "T" + eventEndTime
-                Log.d("AddEventVM", "Event Start: $eventStart | Event End: $eventEnd")
+                val subEventsIds = subEventsMap.value.map { it.value.eventId }.toSet()
 
-                val subEventsIds = _subEventsMap.value.map { it.value.eventId }.toSet()
-                Log.d("AddEventVM", "SubEvent IDs: $subEventsIds")
-
-                val request = EventRequestDTO(
+                val response = eventUseCases.createNewEvent(
                     clientName = clientName,
                     clientPhoneNo = clientPhoneNo,
-                    eventType = _selectedEventType.value.toString(),
-                    subEventsIds = subEventsIds,
-                    memberIds = emptySet(),
-                    resourceIds = emptySet(),
-                    eventStartDate = eventStart,
-                    eventEndDate = eventEnd,
+                    eventType = selectedEventType.value.toString(),
+                    subEventIds = subEventsIds,
+                    eventStart = eventStart,
+                    eventEnd = eventEnd,
                     eventLocation = eventLocation,
                     eventCity = eventCity,
                     eventState = eventState,
-                    evenIsSaved = eventIsSaved,
-                    studioId = studioId
+                    evenIsSaved = eventIsSaved
                 )
 
-                Log.d("AddEventVM", "EventRequestDTO: $request")
-
-                val validateError = request.validate()
-                if (validateError != null) {
-                    Log.e("AddEventVM", "Validation failed: $validateError")
-                    _addEventState.value = AddEventState.Error(validateError)
-                    return@launch
-                }
-
-                Log.d("AddEventVM", "Sending request to create event")
-                val response = eventRepository.createNewEvent(request)
-
-                Log.d("AddEventVM", "Response received: $response")
-
-                if (response.data != null) {
-                    Log.d("AddEventVM", "Event created successfully: ${response.data}")
-                    _addEventState.value = AddEventState.Success(response.data)
-                } else {
-                    Log.e("AddEventVM", "Error from backend: ${response.error.message}")
-                    _addEventState.value = AddEventState.Error(response.error.message)
-                }
-
-            } catch (e: HttpException) {
-                val message = ApiErrorExtractor.extractMessage(e)
-                Log.e("AddEventVM", "HTTP Exception: $message", e)
-                _addEventState.value = AddEventState.Error(message)
-
+                _addEventState.value = AddEventState.Success(response)
+            } catch (e: IllegalArgumentException) {
+                _addEventState.value = AddEventState.Error(e.message ?: "Invalid input")
             } catch (e: Exception) {
-                Log.e("AddEventVM", "Unexpected Exception: ${e.localizedMessage}", e)
-                _addEventState.value = AddEventState.Error(e.localizedMessage ?: "Unexpected error occurred")
+                _addEventState.value = AddEventState.Error(e.localizedMessage ?: "Unexpected error")
             }
         }
     }
