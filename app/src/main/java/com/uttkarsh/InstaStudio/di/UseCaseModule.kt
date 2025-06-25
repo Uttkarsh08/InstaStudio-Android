@@ -8,11 +8,17 @@ import com.uttkarsh.InstaStudio.domain.repository.ResourceRepository
 import com.uttkarsh.InstaStudio.domain.usecase.auth.*
 import com.uttkarsh.InstaStudio.domain.usecase.dashboard.DashboardUseCases
 import com.uttkarsh.InstaStudio.domain.usecase.dashboard.GetUserProfileUseCase
+import com.uttkarsh.InstaStudio.domain.usecase.event.Event.EventUseCases
+import com.uttkarsh.InstaStudio.domain.usecase.event.Event.GetCompletedEventsUseCase
+import com.uttkarsh.InstaStudio.domain.usecase.event.Event.GetEventByIdUseCase
+import com.uttkarsh.InstaStudio.domain.usecase.event.Event.GetNextUpcomingEventUseCase
+import com.uttkarsh.InstaStudio.domain.usecase.event.Event.GetUpcomingEventsUseCase
 import com.uttkarsh.InstaStudio.domain.usecase.event.addEvent.AddEventUseCases
 import com.uttkarsh.InstaStudio.domain.usecase.event.addEvent.CreateNewEventUseCase
 import com.uttkarsh.InstaStudio.domain.usecase.event.addSubEvent.AddSubEventUseCases
 import com.uttkarsh.InstaStudio.domain.usecase.event.addSubEvent.CreateNewSubEventUseCase
-import com.uttkarsh.InstaStudio.domain.usecase.event.addSubEvent.GetSubEventByIdUseCase
+import com.uttkarsh.InstaStudio.domain.usecase.event.subEvent.GetSubEventByIdUseCase
+import com.uttkarsh.InstaStudio.domain.usecase.event.subEvent.SubEventUseCases
 import com.uttkarsh.InstaStudio.domain.usecase.member.CreateMemberUseCase
 import com.uttkarsh.InstaStudio.domain.usecase.member.GetAllMembersUseCase
 import com.uttkarsh.InstaStudio.domain.usecase.member.GetAvailableMembersUseCase
@@ -85,7 +91,7 @@ object UseCaseModule {
     }
 
     @Provides
-    fun provideEventUseCases(
+    fun provideAddEventUseCases(
         eventRepository: EventRepository,
         sessionManager: SessionManager
     ): AddEventUseCases {
@@ -101,8 +107,7 @@ object UseCaseModule {
         sessionManager: SessionManager
     ): AddSubEventUseCases {
         return AddSubEventUseCases(
-            createNewSubEvent = CreateNewSubEventUseCase(eventRepository, sessionManager),
-            getSubEventById = GetSubEventByIdUseCase(eventRepository, sessionManager)
+            createNewSubEvent = CreateNewSubEventUseCase(eventRepository, sessionManager)
         )
     }
     
@@ -131,4 +136,28 @@ object UseCaseModule {
             getAvailableMembers = GetAvailableMembersUseCase(memberRepository, sessionManager)
         )
     }
+
+    @Provides
+    fun provideSubEventUseCases(
+        eventRepository: EventRepository,
+        sessionManager: SessionManager
+    ): SubEventUseCases {
+        return SubEventUseCases(
+            getSubEventById = GetSubEventByIdUseCase(eventRepository, sessionManager)
+        )
+    }
+
+    @Provides
+    fun provideEventUseCases(
+        eventRepository: EventRepository,
+        sessionManager: SessionManager
+    ): EventUseCases {
+        return EventUseCases(
+            getUpcomingEvents = GetUpcomingEventsUseCase(eventRepository, sessionManager),
+            getCompletedEvents = GetCompletedEventsUseCase(eventRepository, sessionManager),
+            getNextUpcomingEvent = GetNextUpcomingEventUseCase(eventRepository, sessionManager),
+            getEventById = GetEventByIdUseCase(eventRepository, sessionManager)
+        )
+    }
+
 }

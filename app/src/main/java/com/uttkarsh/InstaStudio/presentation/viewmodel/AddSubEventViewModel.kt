@@ -191,20 +191,4 @@ class AddSubEventViewModel @Inject constructor(
         }
     }
 
-    fun getSubEventById(){
-        viewModelScope.launch(Dispatchers.IO) {
-            _addSubEventState.value = AddSubEventState.Loading
-
-            try {
-                val response = addSubEventUseCases.getSubEventById(subEventId)
-
-                _addSubEventState.value = AddSubEventState.Success(response)
-
-            } catch (e: Exception) {
-                _addSubEventState.value = AddSubEventState.Error(e.localizedMessage ?: "Unexpected error occurred")
-            }
-        }
-    }
-
-
 }

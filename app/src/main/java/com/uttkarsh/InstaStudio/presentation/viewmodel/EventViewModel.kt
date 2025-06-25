@@ -15,6 +15,8 @@ import androidx.paging.cachedIn
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
 import androidx.lifecycle.viewModelScope
+import com.uttkarsh.InstaStudio.domain.usecase.event.Event.EventUseCases
+import com.uttkarsh.InstaStudio.domain.usecase.event.subEvent.SubEventUseCases
 import com.uttkarsh.InstaStudio.utils.session.SessionManager
 import com.uttkarsh.InstaStudio.utils.states.SubEventState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,8 +31,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class EventViewModel @Inject constructor(
-    private val eventRepository: EventRepository,
-    private val sessionManager: SessionManager
+    private val eventUseCases: EventUseCases
 
 ): ViewModel(){
 
@@ -95,18 +96,13 @@ class EventViewModel @Inject constructor(
             _upcomingEventState.value = EventState.Loading
 
             try {
-                val studioId = sessionManager.getStudioId()
-                val response = eventRepository.getUpcomingEvents(studioId)
+                val response = eventUseCases.getUpcomingEvents()
                     .cachedIn(viewModelScope)
                     .stateIn(viewModelScope, SharingStarted.Lazily, PagingData.empty())
 
                 _upcomingEventState.value = EventState.UpcomingPagingSuccess(response)
 
-            }catch (e: HttpException) {
-                val message = ApiErrorExtractor.extractMessage(e)
-                _upcomingEventState.value = EventState.Error(message)
-
-            } catch (e: Exception) {
+            }catch (e: Exception) {
                 _upcomingEventState.value = EventState.Error(e.localizedMessage ?: "Unexpected error occurred")
             }
         }
@@ -117,18 +113,13 @@ class EventViewModel @Inject constructor(
             _completedEventState.value = EventState.Loading
 
             try {
-                val studioId = sessionManager.getStudioId()
-                val response = eventRepository.getCompletedEvents(studioId)
+                val response = eventUseCases.getCompletedEvents()
                     .cachedIn(viewModelScope)
                     .stateIn(viewModelScope, SharingStarted.Lazily, PagingData.empty())
 
                 _completedEventState.value = EventState.CompletedPagingSuccess(response)
 
-            }catch (e: HttpException) {
-                val message = ApiErrorExtractor.extractMessage(e)
-                _completedEventState.value = EventState.Error(message)
-
-            } catch (e: Exception) {
+            }catch (e: Exception) {
                 _completedEventState.value = EventState.Error(e.localizedMessage ?: "Unexpected error occurred")
             }
         }
@@ -139,22 +130,11 @@ class EventViewModel @Inject constructor(
             _eventState.value = EventState.Loading
 
             try {
-                val studioId = sessionManager.getStudioId()
+                val response = eventUseCases.getNextUpcomingEvent()
 
-                val response = eventRepository.getNextUpcomingEvent(studioId)
+                _eventState.value = EventState.Success(response)
 
-                Log.d("NextUpcomingEvent", "Data: ${response.data}, Error: ${response.error}")
-
-                if(response.data != null){
-                    _eventState.value = EventState.Success(response.data)
-                }else{
-                    _eventState.value = EventState.Error(response.error.message)
-                }
-            }catch (e: HttpException) {
-                val message = ApiErrorExtractor.extractMessage(e)
-                _eventState.value = EventState.Error(message)
-
-            } catch (e: Exception) {
+            }catch (e: Exception) {
                 _eventState.value = EventState.Error(e.localizedMessage ?: "Unexpected error occurred")
             }
         }
@@ -163,34 +143,15 @@ class EventViewModel @Inject constructor(
     fun getEventById() {
         viewModelScope.launch(Dispatchers.IO) {
             _eventState.value = EventState.Loading
-            Log.d("EventById", "Loading state set")
 
             try {
-                val studioId = sessionManager.getStudioId()
-                Log.d("EventById", "Studio ID: $studioId, Event ID: $eventId")
+                val response = eventUseCases.getEventById(eventId)
 
-                val response = eventRepository.getEventById(studioId, eventId)
+                _eventState.value = EventState.Success(response)
 
-                Log.d("EventById", "Raw response: $response")
-                Log.d("EventById", "Response data: ${response.data}")
-                Log.d("EventById", "Response error: ${response.error}")
 
-                if (response.data != null) {
-                    _eventState.value = EventState.Success(response.data)
-                    Log.d("EventById", "EventState set to Success")
-                } else {
-                    _eventState.value = EventState.Error(response.error.message)
-                    Log.d("EventById", "EventState set to Error with error: ${response.error.message}")
-                }
-
-            } catch (e: HttpException) {
-                val message = ApiErrorExtractor.extractMessage(e)
-                _eventState.value = EventState.Error(message)
-                Log.d("EventById", "HttpException: $message")
-
-            } catch (e: Exception) {
+            }catch (e: Exception) {
                 _eventState.value = EventState.Error(e.localizedMessage ?: "Unexpected error occurred")
-                Log.d("EventById", "Exception: ${e.localizedMessage}")
             }
         }
     }

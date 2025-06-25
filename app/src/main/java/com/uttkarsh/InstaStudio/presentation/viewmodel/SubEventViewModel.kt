@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.uttkarsh.InstaStudio.domain.repository.EventRepository
+import com.uttkarsh.InstaStudio.domain.usecase.event.subEvent.SubEventUseCases
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
 import com.uttkarsh.InstaStudio.utils.session.SessionManager
@@ -23,8 +24,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SubEventViewModel  @Inject constructor(
-    private val eventRepository: EventRepository,
-    private val sessionManager: SessionManager
+    private val subEventUseCases: SubEventUseCases
 ): ViewModel() {
 
     private val _subEventState = MutableStateFlow<SubEventState>(SubEventState.Idle)
@@ -42,23 +42,13 @@ class SubEventViewModel  @Inject constructor(
             _subEventState.value = SubEventState.Loading
 
             try {
-                val studioId = sessionManager.getStudioId()
 
-                val response = eventRepository.getSubEventById(studioId, subEventId)
+                val response = subEventUseCases.getSubEventById(subEventId)
 
-                if (response.data != null) {
-                    _subEventState.value = SubEventState.Success(response.data)
-                } else {
-                    _subEventState.value = SubEventState.Error(response.error.message)
-                }
+                _subEventState.value = SubEventState.Success(response)
 
 
-            }catch (e: HttpException) {
-                val message = ApiErrorExtractor.extractMessage(e)
-                _subEventState.value = SubEventState.Error(message)
-                Log.d("EventById", "HttpException: $message")
-
-            } catch (e: Exception) {
+            }catch (e: Exception) {
                 _subEventState.value = SubEventState.Error(e.localizedMessage ?: "Unexpected error occurred")
                 Log.d("EventById", "Exception: ${e.localizedMessage}")
             }

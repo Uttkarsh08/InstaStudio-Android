@@ -1,6 +1,5 @@
 package com.uttkarsh.InstaStudio.domain.usecase.event.addSubEvent
 
 data class AddSubEventUseCases(
-    val createNewSubEvent: CreateNewSubEventUseCase,
-    val getSubEventById: GetSubEventByIdUseCase
+    val createNewSubEvent: CreateNewSubEventUseCase
 )
