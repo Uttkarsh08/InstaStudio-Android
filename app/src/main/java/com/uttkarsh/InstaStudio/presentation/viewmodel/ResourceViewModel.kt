@@ -12,6 +12,7 @@ import com.uttkarsh.InstaStudio.domain.model.dto.resource.ResourceRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.dto.resource.ResourceResponseDTO
 import com.uttkarsh.InstaStudio.domain.model.validators.validate
 import com.uttkarsh.InstaStudio.domain.repository.ResourceRepository
+import com.uttkarsh.InstaStudio.domain.usecase.resource.ResourceUseCases
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
 import com.uttkarsh.InstaStudio.utils.session.SessionManager
@@ -31,8 +32,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ResourceViewModel @Inject constructor(
-    private val resourceRepository: ResourceRepository,
-    private val sessionManager: SessionManager
+    private val resourceUseCases: ResourceUseCases
 ): ViewModel() {
 
     private val _resourceState = MutableStateFlow<ResourceState>(ResourceState.Idle)
@@ -70,10 +70,9 @@ class ResourceViewModel @Inject constructor(
     fun getAllResources(){
         viewModelScope.launch(Dispatchers.IO) {
             _resourceState.value = ResourceState.Loading
-            val id = sessionManager.getStudioId()
 
             try {
-                val response = resourceRepository.getAllResources(id)
+                val response = resourceUseCases.getAllResources()
                     .cachedIn(viewModelScope)
                     .stateIn(viewModelScope, SharingStarted.Lazily, PagingData.empty())
 
@@ -92,36 +91,16 @@ class ResourceViewModel @Inject constructor(
 
     fun createNewResource() {
         viewModelScope.launch {
-            val studioId = sessionManager.getStudioId()
-            val resourceRequest = ResourceRequestDTO(
-                resourceName = _resourceName.value,
-                resourcePrice = _resourcePrice.value,
-                studioId = studioId
-            )
-
-            val validationError = resourceRequest.validate()
-            if (validationError != null) {
-                _resourceState.value = ResourceState.Error(validationError)
-                return@launch
-            }
 
             _resourceState.value = ResourceState.Loading
             try {
-                val response = withContext(Dispatchers.IO) {
-                    resourceRepository.createNewResource(resourceRequest)
-                }
+                val response = resourceUseCases.createResource(
+                    resourceName = _resourceName.value,
+                    resourcePrice = _resourcePrice.value
+                )
+                _resourceState.value = ResourceState.Success(response)
 
-                if (response.data != null) {
-                    _resourceState.value = ResourceState.Success(response.data)
-                } else {
-                    _resourceState.value = ResourceState.Error(response.error.message)
-                }
-
-            } catch (e: HttpException) {
-                val message = ApiErrorExtractor.extractMessage(e)
-                _resourceState.value = ResourceState.Error(message)
-
-            } catch (e: Exception) {
+            }catch (e: Exception) {
                 _resourceState.value = ResourceState.Error(e.localizedMessage ?: "Unexpected error occurred")
             }
         }
@@ -131,32 +110,17 @@ class ResourceViewModel @Inject constructor(
     fun updateResourceById(){
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val studioId = sessionManager.getStudioId()
-                val request = ResourceRequestDTO(
-                    resourceName = _resourceName.value,
-                    resourcePrice = _resourcePrice.value,
-                    studioId = studioId
-                )
-                val validationError = request.validate()
-                if (validationError != null) {
-                    _resourceState.value = ResourceState.Error(validationError)
-                    return@launch
-                }
 
                 _resourceState.value = ResourceState.Loading
 
-                Log.d("UPDATE", "Sending values: ${_resourceName.value}, ${_resourcePrice.value}")
-                val response = resourceRepository.updateResourceById(studioId, resourceId, request)
-                if(response.data != null){
-                    _resourceState.value = ResourceState.Success(response.data)
-                }else {
-                    _resourceState.value = ResourceState.Error(response.error.message)
-                }
+                val response = resourceUseCases.updateResource(
+                    resourceId = resourceId,
+                    resourceName = _resourceName.value,
+                    resourcePrice = _resourcePrice.value
+                )
+                _resourceState.value = ResourceState.Success(response)
 
-            }catch (e: HttpException) {
-                val message = ApiErrorExtractor.extractMessage(e)
-                _resourceState.value = ResourceState.Error(message)
-            } catch (e: Exception) {
+            }catch (e: Exception) {
                 _resourceState.value = ResourceState.Error(e.localizedMessage ?: "An unexpected error occurred.")
             }
         }

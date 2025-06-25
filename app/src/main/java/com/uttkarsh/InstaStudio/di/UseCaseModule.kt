@@ -3,6 +3,7 @@ package com.uttkarsh.InstaStudio.di
 import com.uttkarsh.InstaStudio.domain.repository.AuthRepository
 import com.uttkarsh.InstaStudio.domain.repository.EventRepository
 import com.uttkarsh.InstaStudio.domain.repository.ProfileRepository
+import com.uttkarsh.InstaStudio.domain.repository.ResourceRepository
 import com.uttkarsh.InstaStudio.domain.usecase.auth.*
 import com.uttkarsh.InstaStudio.domain.usecase.dashboard.DashboardUseCases
 import com.uttkarsh.InstaStudio.domain.usecase.dashboard.GetUserProfileUseCase
@@ -15,6 +16,10 @@ import com.uttkarsh.InstaStudio.domain.usecase.profile.FetchLatestEmailUseCase
 import com.uttkarsh.InstaStudio.domain.usecase.profile.GetStudioImageUseCase
 import com.uttkarsh.InstaStudio.domain.usecase.profile.ProfileUseCases
 import com.uttkarsh.InstaStudio.domain.usecase.profile.SaveAdminProfileUseCase
+import com.uttkarsh.InstaStudio.domain.usecase.resource.CreateResourceUseCase
+import com.uttkarsh.InstaStudio.domain.usecase.resource.GetAllResourcesUseCase
+import com.uttkarsh.InstaStudio.domain.usecase.resource.ResourceUseCases
+import com.uttkarsh.InstaStudio.domain.usecase.resource.UpdateResourceUseCase
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
 import com.uttkarsh.InstaStudio.utils.session.SessionManager
 import dagger.Module
@@ -91,6 +96,18 @@ object UseCaseModule {
         return AddSubEventUseCases(
             createNewSubEvent = CreateNewSubEventUseCase(eventRepository, sessionManager),
             getSubEventById = GetSubEventByIdUseCase(eventRepository, sessionManager)
+        )
+    }
+    
+    @Provides
+    fun provideResourceUseCases(
+        resourceRepository: ResourceRepository,
+        sessionManager: SessionManager
+    ): ResourceUseCases {
+        return ResourceUseCases(
+            createResource = CreateResourceUseCase(resourceRepository, sessionManager),
+            updateResource = UpdateResourceUseCase(resourceRepository, sessionManager),
+            getAllResources = GetAllResourcesUseCase(resourceRepository, sessionManager)
         )
     }
 }
