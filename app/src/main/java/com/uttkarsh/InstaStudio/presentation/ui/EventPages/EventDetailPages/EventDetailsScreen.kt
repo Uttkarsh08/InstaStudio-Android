@@ -70,6 +70,9 @@ fun EventDetailsScreen(
                 title = "Event Details",
                 isNavIcon = true,
                 navIcon = R.drawable.back,
+                isRightIcon = false,
+                rightIcon = null,
+                onRightIconClicked = {},
                 onNavClick = { navController.navigateUp() }
             )
         }

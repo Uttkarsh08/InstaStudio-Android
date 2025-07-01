@@ -45,6 +45,9 @@ fun SubEventDetailScreen(
                 title = "SubEvent Details",
                 isNavIcon = true,
                 navIcon = R.drawable.back,
+                isRightIcon = false,
+                rightIcon = null,
+                onRightIconClicked = {},
                 onNavClick = { navController.navigateUp() }
             )
         }

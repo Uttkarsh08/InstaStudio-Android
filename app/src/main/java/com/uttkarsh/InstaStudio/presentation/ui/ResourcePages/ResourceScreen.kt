@@ -91,9 +91,12 @@ fun ResourceScreen(
     Scaffold(
         topBar = {
             AppTopBar(
-                title = "Add Resource",
+                title = "Your Resources",
                 isNavIcon = true,
                 navIcon = R.drawable.back,
+                isRightIcon = false,
+                rightIcon = null,
+                onRightIconClicked = {},
                 onNavClick =  { navController.navigateUp() }
             )
         },
@@ -302,3 +305,17 @@ fun ResourceScreen(
     }
 }
 
+
+//Scaffold(
+//topBar = {
+//    AppTopBar(
+//        title = "Your Resources",
+//        isNavIcon = true,
+//        navIcon = R.drawable.back,
+//        isRightIcon = true,
+//        rightIcon = Icons.Filled.Add,
+//        onRightIconClicked = {},
+//        onNavClick = {}
+//    )
+//}
+//)

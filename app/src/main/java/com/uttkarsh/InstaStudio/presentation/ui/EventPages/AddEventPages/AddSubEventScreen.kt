@@ -39,6 +39,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -115,6 +116,9 @@ fun AddSubEventScreen(
                 title = "Add Event",
                 isNavIcon = true,
                 navIcon = R.drawable.back,
+                isRightIcon = false,
+                rightIcon = null,
+                onRightIconClicked = {},
                 onNavClick = {},
             )
         }

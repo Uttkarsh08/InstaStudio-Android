@@ -34,7 +34,6 @@ import com.uttkarsh.InstaStudio.presentation.viewmodel.AddEventViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AuthViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.DashBoardViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.EventViewModel
-import com.uttkarsh.InstaStudio.utils.time.TimeProvider
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,7 +61,10 @@ fun DashBoardScreen(
                 title = "DashBoard",
                 isNavIcon = true,
                 navIcon = R.drawable.studiologo,
-                onNavClick = { /* TODO: Open Drawer */ }
+                isRightIcon = false,
+                rightIcon = null,
+                onNavClick = { /* TODO: Open Drawer */ },
+                onRightIconClicked = {}
             )
         },
         bottomBar = { BottomBar(addEventViewModel, navController) }

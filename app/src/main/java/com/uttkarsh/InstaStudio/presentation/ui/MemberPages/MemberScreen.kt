@@ -98,6 +98,9 @@ fun MemberScreen(
                 title = "Your Members",
                 isNavIcon = true,
                 navIcon = R.drawable.back,
+                isRightIcon = false,
+                rightIcon = null,
+                onRightIconClicked = {},
                 onNavClick = { navController.navigateUp() }
             )
         },

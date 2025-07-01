@@ -120,7 +120,10 @@ fun AddEventScreen(
                 title = "Add Event",
                 isNavIcon = true,
                 navIcon = R.drawable.back,
-                onNavClick = {},
+                isRightIcon = false,
+                rightIcon = null,
+                onRightIconClicked = {},
+                onNavClick = {}
             )
         }
     ) {
