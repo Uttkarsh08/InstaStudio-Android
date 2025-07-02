@@ -16,13 +16,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.colorResource
 import com.uttkarsh.InstaStudio.R
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -31,7 +31,6 @@ import com.uttkarsh.InstaStudio.presentation.navigation.Screens
 import com.uttkarsh.InstaStudio.presentation.ui.utils.AppTopBar
 import com.uttkarsh.InstaStudio.presentation.ui.utils.SearchBar
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AddEventViewModel
-import com.uttkarsh.InstaStudio.presentation.viewmodel.AuthViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.DashBoardViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.EventViewModel
 import kotlinx.coroutines.delay
@@ -39,7 +38,6 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashBoardScreen(
-    authViewModel: AuthViewModel = hiltViewModel(),
     eventViewModel: EventViewModel = hiltViewModel(),
     addEventViewModel: AddEventViewModel = hiltViewModel(),
     dashBoardViewModel: DashBoardViewModel = hiltViewModel(),
@@ -58,7 +56,7 @@ fun DashBoardScreen(
     Scaffold(
         topBar = {
             AppTopBar(
-                title = "DashBoard",
+                title = "InstaStudio",
                 isNavIcon = true,
                 navIcon = R.drawable.studiologo,
                 isRightIcon = false,
@@ -82,8 +80,8 @@ fun DashBoardScreen(
                     .fillMaxWidth()
                     .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
                     .border(
-                        BorderStroke(2.dp, colorResource(R.color.searchBarBorder)),
-                        RoundedCornerShape(14.dp)
+                        BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimary),
+                        RoundedCornerShape(10.dp)
                     ),
 
                 onSearchChanged = { /* TODO: Update viewModel with new search query */ }
@@ -92,10 +90,10 @@ fun DashBoardScreen(
             Spacer(Modifier.height(16.dp))
 
             NextEventSection(
-                eventViewModel, nextEvenState, {
-                    navController.navigate(Screens.EventDetailScreen.route)
-                }
-            )
+                eventViewModel, nextEvenState
+            ) {
+                navController.navigate(Screens.EventDetailScreen.route)
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth()

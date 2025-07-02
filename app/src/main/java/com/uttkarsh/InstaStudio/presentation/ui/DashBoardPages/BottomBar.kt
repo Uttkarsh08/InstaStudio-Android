@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
@@ -18,17 +18,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -49,7 +48,7 @@ data class NavigationItem(
 fun BottomBar(
     addEventViewModel: AddEventViewModel = hiltViewModel(),
     navController: NavController,
-){
+) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
@@ -65,7 +64,7 @@ fun BottomBar(
             iconContentDescription = "dashboard_Screen"
         ),
         NavigationItem(
-            route = Screens.DashBoardScreen.route,
+            route = Screens.EventScreen.route,
             icon = R.drawable.calender,
             selectedIcon = R.drawable.selectedcalender,
             iconContentDescription = "Calender_screen"
@@ -85,22 +84,26 @@ fun BottomBar(
     )
 
     Box(
-        modifier = Modifier.fillMaxWidth()
-            .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
-            .height(90.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                bottom = WindowInsets.navigationBars.asPaddingValues()
+                    .calculateBottomPadding() + 8.dp
+            )
+            .padding(horizontal = 8.dp)
+            .shadow(
+                elevation = 2.dp,
+                shape = RoundedCornerShape(27.dp),
+                clip = true
+            )
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(27.dp))
+            .height(60.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth(0.5f)
-                .fillMaxHeight()
-                .background(
-                    color = colorResource(id = R.color.mainGreen),
-                    shape = RoundedCornerShape(topEnd = 100.dp)
-                )
-                .align(Alignment.BottomStart)
-                .padding(start = 16.dp, end = 48.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxSize()
+                .background(MaterialTheme.colorScheme.surfaceContainerLowest),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceAround
         ) {
             navigationItems.take(2).forEach { item ->
                 BottomBarItem(
@@ -117,22 +120,28 @@ fun BottomBar(
                     },
                     currentDestination = currentDestination
                 )
-            }
-        }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(0.5f)
-                .fillMaxHeight()
-                .background(
-                    color = colorResource(id = R.color.mainGreen),
-                    shape = RoundedCornerShape(topStart = 100.dp)
+            }
+            FloatingActionButton(
+                onClick = {
+                    addEventViewModel.markAddEventScreenForReset()
+                    navController.navigate(Screens.AddEventDetailsScreen.route) {
+                        launchSingleTop = true
+                    }
+                },
+                shape = CircleShape,
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier
+                    .size(50.dp)
+                    .border(2.dp, MaterialTheme.colorScheme.tertiaryContainer, CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add",
+                    modifier = Modifier.size(25.dp)
                 )
-                .align(Alignment.BottomEnd)
-                .padding(start = 48.dp, end = 16.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+            }
             navigationItems.drop(2).forEach { item ->
                 BottomBarItem(
                     item = item,
@@ -148,31 +157,8 @@ fun BottomBar(
                     },
                     currentDestination = currentDestination
                 )
+
             }
         }
-
-        FloatingActionButton(
-            onClick = {
-                addEventViewModel.markAddEventScreenForReset()
-                navController.navigate(Screens.AddEventDetailsScreen.route) {
-                launchSingleTop = true
-            } },
-            shape = CircleShape,
-            elevation = FloatingActionButtonDefaults.elevation(6.dp),
-            containerColor = colorResource(id = R.color.dashBoardContainer),
-            contentColor = Color.Black,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .size(70.dp)
-                .border(3.dp, Color.White, CircleShape)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Add",
-                tint = Color.Black,
-                modifier = Modifier.size(32.dp)
-            )
-        }
     }
-
 }

@@ -42,13 +42,13 @@ fun BottomBarItem(
                 Image(
                     painter = painterResource(id =  item.selectedIcon),
                     contentDescription = item.iconContentDescription,
-                    modifier = Modifier.size(28.dp)
+                    modifier = Modifier.size(24.dp)
                 )
             }else{
                 Image(
                     painter = painterResource(id =  item.icon),
                     contentDescription = item.iconContentDescription,
-                    modifier = Modifier.size(28.dp)
+                    modifier = Modifier.size(24.dp)
                 )
             }
 

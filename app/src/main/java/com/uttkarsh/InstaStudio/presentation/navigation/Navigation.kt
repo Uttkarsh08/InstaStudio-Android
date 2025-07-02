@@ -63,7 +63,7 @@ fun Navigation(
             ProfileCompletionScreen(profileViewModel, navController)
         }
         composable(Screens.DashBoardScreen.route) {
-            DashBoardScreen(authViewModel, eventViewModel, addEventViewModel, dashBoardViewModel, navController)
+            DashBoardScreen(eventViewModel, addEventViewModel, dashBoardViewModel, navController)
 
         }
         composable(Screens.ResourceScreen.route) {

@@ -14,14 +14,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -50,9 +49,9 @@ fun NextEventSection(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
-                    .height(78.dp),
+                    .height(70.dp),
                 shape = RoundedCornerShape(27.dp),
-                color = colorResource(R.color.buttons),
+                color = MaterialTheme.colorScheme.primaryContainer,
                 onClick = {
                     eventViewModel.updateEventId(event.eventId)
                     onEventClick()
@@ -65,7 +64,7 @@ fun NextEventSection(
         }
 
         is EventState.Loading -> {
-            CircularProgressIndicator(color = Color.Black)
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary)
         }
 
         is EventState.Error -> {
@@ -73,9 +72,9 @@ fun NextEventSection(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
-                    .height(78.dp),
+                    .height(70.dp),
                 shape = RoundedCornerShape(27.dp),
-                color = colorResource(R.color.buttons),
+                color = MaterialTheme.colorScheme.primaryContainer,
                 onClick = onEventClick,
             ) {
                 Box(
@@ -87,7 +86,7 @@ fun NextEventSection(
                         text = "No Upcoming Event",
                         fontFamily = alatsiFont,
                         fontSize = 20.sp,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
             }
@@ -133,22 +132,22 @@ fun EventCard(
                     text = event?.clientName ?: "All Clear",
                     fontFamily = alatsiFont,
                     fontSize = 20.sp,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 val timeProvider = rememberTimeProvider()
                 Text(
                     text = timeProvider.formatDate(event?.eventStartDate.toString()).toString(),
                     fontFamily = alatsiFont,
                     fontSize = 20.sp,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
 
             Column(
                 modifier = Modifier
-                    .size(width = 100.dp, height = 30.dp)
+                    .size(width = 100.dp, height = 25.dp)
                     .clip(shape = RoundedCornerShape(20.dp))
-                    .background(color = colorResource(R.color.mainGreen))
+                    .background(MaterialTheme.colorScheme.onPrimaryContainer)
             ) {
                 Row(
                     modifier = Modifier.fillMaxSize(),
@@ -159,13 +158,13 @@ fun EventCard(
                         text = "Upcoming",
                         fontFamily = alatsiFont,
                         fontSize = 14.sp,
-                        color = Color.Black
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                     Column(
                         modifier = Modifier
                             .size(10.dp)
                             .clip(shape = RoundedCornerShape(100.dp))
-                            .background(color = colorResource(R.color.darkGreen))
+                            .background(MaterialTheme.colorScheme.tertiary)
                     ) { null }
                 }
             }
