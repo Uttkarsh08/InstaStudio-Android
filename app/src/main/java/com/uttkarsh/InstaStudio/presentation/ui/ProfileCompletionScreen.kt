@@ -100,7 +100,7 @@ fun ProfileCompletionScreen(
                 .padding(innerPadding)
                 .imePadding()
                 .verticalScroll(scrollState)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .background(MaterialTheme.colorScheme.primaryContainer)
         ) {
 
             Column(
@@ -113,7 +113,7 @@ fun ProfileCompletionScreen(
                             topEnd = 27.dp
                         )
                     )
-                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .background(MaterialTheme.colorScheme.onPrimaryContainer)
                     .padding(
                         horizontal = 32.dp,
                         vertical = 24.dp
@@ -141,7 +141,7 @@ fun ProfileCompletionScreen(
                     text = email.value,
                     fontFamily = alatsiFont,
                     fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.onPrimary,
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
 
@@ -225,15 +225,15 @@ fun ProfileCompletionScreen(
                         .height(50.dp)
                         .align(Alignment.CenterHorizontally),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        contentColor = MaterialTheme.colorScheme.primaryContainer
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     ),
                     shape = RoundedCornerShape(15.dp),
                 ) {
                     if (isLoading) {
                         CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            modifier = Modifier.size(24.dp),
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.size(20.dp),
                             strokeWidth = 2.dp
                         )
                     } else {

@@ -18,14 +18,21 @@ private val DarkColorScheme = darkColorScheme(
 
 private val LightColorScheme = lightColorScheme(
     primary = Purple40,
-    primaryContainer = white,
-    onPrimary = black,
     secondary = PurpleGrey40,
-    tertiary = Pink40,
-    surfaceContainerHigh = primaryBackgroundDark,
-    onSurfaceVariant = onSurfaceDegree1,
-    surface = surfaceDegree1,
+    primaryContainer = mainBeach,
+    onPrimaryContainer = white,
+    onPrimary = black,
+    surfaceContainerLowest = cardLightest,
+    surfaceContainerLow = cardMain,
+    surfaceContainerHigh = cardDark,
+    surfaceContainer = cardMedium,
+    onSurfaceVariant = cardLight,
+    secondaryContainer = secondaryBackground,
+    tertiaryContainer = tertiaryBackground,
     error = errorRed,
+    errorContainer = mainRed,
+    tertiary = mainGreen
+
 )
 
 @Composable
