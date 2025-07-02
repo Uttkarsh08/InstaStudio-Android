@@ -75,6 +75,20 @@ class AddSubEventViewModel @Inject constructor(
     private val _subEventTypeDropdownExpanded = mutableStateOf(false)
     val subEventTypeDropdownExpanded: State<Boolean> = _subEventTypeDropdownExpanded
 
+    var shouldResetAddSubEventScreen by mutableStateOf(true)
+        private set
+
+    fun resetAddSubEventScreen(){
+        if(shouldResetAddSubEventScreen){
+            resetAddSubEventState()
+            resetSubEventDetails()
+            shouldResetAddSubEventScreen = false
+        }
+    }
+
+    fun markAddSubEventScreenForReset() {
+        shouldResetAddSubEventScreen = true
+    }
 
     fun updateSubEventId(id: Long){
         subEventId = id

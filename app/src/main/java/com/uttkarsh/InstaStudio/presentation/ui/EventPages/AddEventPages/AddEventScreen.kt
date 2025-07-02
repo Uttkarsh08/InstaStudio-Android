@@ -56,6 +56,7 @@ import com.uttkarsh.InstaStudio.presentation.ui.utils.ShowDatePickerDialog
 import com.uttkarsh.InstaStudio.presentation.ui.utils.ShowTimePickerDialog
 import com.uttkarsh.InstaStudio.presentation.ui.utils.TrailingIconConfig
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AddEventViewModel
+import com.uttkarsh.InstaStudio.presentation.viewmodel.AddSubEventViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.EventViewModel
 import com.uttkarsh.InstaStudio.utils.states.AddEventState
 
@@ -63,6 +64,7 @@ import com.uttkarsh.InstaStudio.utils.states.AddEventState
 fun AddEventScreen(
     addEventViewModel: AddEventViewModel = hiltViewModel(),
     eventViewModel: EventViewModel = hiltViewModel(),
+    addSubEventViewModel: AddSubEventViewModel = hiltViewModel(),
     navController: NavController
 ) {
 
@@ -350,6 +352,7 @@ fun AddEventScreen(
 
                             Button(
                                 onClick = {
+                                    addSubEventViewModel.markAddSubEventScreenForReset()
                                     navController.navigate(Screens.AddSubEventDetailsScreen.route)
                                 },
                                 colors = ButtonDefaults.buttonColors(

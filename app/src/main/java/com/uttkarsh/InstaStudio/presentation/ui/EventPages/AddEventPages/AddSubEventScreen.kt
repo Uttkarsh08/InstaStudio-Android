@@ -2,7 +2,6 @@ package com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages
 
 import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -22,39 +20,39 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.uttkarsh.InstaStudio.R
 import com.uttkarsh.InstaStudio.presentation.ui.utils.AppTopBar
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.uttkarsh.InstaStudio.domain.model.DatePickerTarget
 import com.uttkarsh.InstaStudio.domain.model.TimePickerTarget
 import com.uttkarsh.InstaStudio.presentation.navigation.Screens
+import com.uttkarsh.InstaStudio.presentation.ui.utils.NoteMarkTextField
 import com.uttkarsh.InstaStudio.presentation.ui.utils.ShowDatePickerDialog
 import com.uttkarsh.InstaStudio.presentation.ui.utils.ShowTimePickerDialog
+import com.uttkarsh.InstaStudio.presentation.ui.utils.TrailingIconConfig
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AddEventViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AddSubEventViewModel
 import com.uttkarsh.InstaStudio.utils.states.AddSubEventState
@@ -106,125 +104,189 @@ fun AddSubEventScreen(
     }
 
     LaunchedEffect(Unit) {
-        addSubEventViewModel.resetAddSubEventState()
-        addSubEventViewModel.resetSubEventDetails()
+        addSubEventViewModel.resetAddSubEventScreen()
     }
 
     Scaffold(
+        modifier = Modifier
+            .fillMaxSize(),
+        contentWindowInsets = WindowInsets.statusBars,
         topBar = {
             AppTopBar(
                 color = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                title = "Add Event",
+                title = "Add SubEvent",
                 isNavIcon = true,
                 navIcon = R.drawable.back,
                 isRightIcon = false,
                 rightIcon = null,
                 onRightIconClicked = {},
-                onNavClick = {},
+                onNavClick = { navController.navigateUp() }
             )
         }
-    ) {
-        Box(
+    ) { innerPadding ->
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(it)
-                .padding(horizontal = 20.dp)
+                .padding(innerPadding)
+                .imePadding()
+                .navigationBarsPadding()
+                .background(MaterialTheme.colorScheme.primaryContainer)
         ) {
             Column(
                 modifier = Modifier
-                    .verticalScroll(scrollState),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                    .fillMaxSize()
+                    .padding(top = 10.dp)
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 27.dp,
+                            topEnd = 27.dp
+                        )
+                    )
+                    .background(MaterialTheme.colorScheme.onPrimaryContainer)
+
             ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(
+                            horizontal = 32.dp,
+                            vertical = 24.dp
+                        )
+                        .verticalScroll(scrollState),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
 
-
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        text = "Event Type",
-                        fontFamily = alatsiFont,
-                        color = Color.Black,
-                        fontSize = 16.sp
+                    NoteMarkTextField(
+                        text = selectedSubEventType.displayName,
+                        onValueChange = {},
+                        label = "Event Type",
+                        hint = selectedSubEventType.displayName,
+                        isNumberType = false,
+                        haveTrailingIcon = true,
+                        trailingIconConfig = TrailingIconConfig.ImageVectorIcon(Icons.Default.KeyboardArrowDown),
+                        readOnly = true,
+                        onClick = { addSubEventViewModel.toggleSubEventTypeDropdown() }
                     )
 
-                    Box(
+                    DropdownMenu(
+                        expanded = dropdownExpanded,
+                        onDismissRequest = { addSubEventViewModel.closeSubEventTypeDropdown() },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(40.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .border(
-                                1.dp,
-                                colorResource(R.color.grey),
-                                RoundedCornerShape(8.dp)
-                            )
-                    ) {
-                        TextButton(
-                            onClick = { addSubEventViewModel.toggleSubEventTypeDropdown() },
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 12.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = selectedSubEventType.displayName,
-                                    color = Color.Black,
-                                    fontFamily = alatsiFont,
-                                    fontSize = 16.sp
+                            .clip(
+                                RoundedCornerShape(
+                                    bottomStart = 8.dp,
+                                    bottomEnd = 8.dp
                                 )
-                                Icon(
-                                    imageVector = Icons.Default.KeyboardArrowDown,
-                                    contentDescription = "Dropdown Arrow",
-                                    tint = Color.Black
+                            )
+                            .padding(horizontal = 30.dp)
+                            .background(MaterialTheme.colorScheme.background)
+                    ) {
+                        subEventTypes.forEach { type ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = type.displayName,
+                                        color = MaterialTheme.colorScheme.onPrimary,
+                                        fontFamily = alatsiFont,
+                                        fontSize = 16.sp
+                                    )
+                                },
+                                onClick = {
+                                    addSubEventViewModel.onSubEventTypeSelected(type)
+                                },
+                                contentPadding = PaddingValues(horizontal = 12.dp)
+                            )
+                        }
+                    }
+
+                    Column {
+                        Text(
+                            text = "Date & Time",
+                            fontFamily = alatsiFont,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.weight(1f),
+                            ) {
+
+                                NoteMarkTextField(
+                                    text = subEventStartDate,
+                                    onValueChange = {},
+                                    label = "From",
+                                    hint = subEventStartDate,
+                                    isNumberType = false,
+                                    haveTrailingIcon = true,
+                                    trailingIconConfig = TrailingIconConfig.ResourceIcon(R.drawable.calender),
+                                    readOnly = true,
+                                    onClick = { addSubEventViewModel.onDateBoxClick(DatePickerTarget.START_DATE) }
+                                )
+
+                                Spacer(Modifier.height(8.dp))
+
+                                NoteMarkTextField(
+                                    text = subEventStartTime,
+                                    onValueChange = {},
+                                    hint = subEventStartTime,
+                                    label = null,
+                                    isNumberType = false,
+                                    haveTrailingIcon = true,
+                                    trailingIconConfig = TrailingIconConfig.ImageVectorIcon(Icons.Default.KeyboardArrowDown),
+                                    readOnly = true,
+                                    onClick = { addSubEventViewModel.onTimeBoxClick(TimePickerTarget.START_TIME) }
                                 )
                             }
-                        }
 
-                        DropdownMenu(
-                            expanded = dropdownExpanded,
-                            onDismissRequest = { addSubEventViewModel.closeSubEventTypeDropdown() },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(
-                                    RoundedCornerShape(
-                                        bottomStart = 8.dp,
-                                        bottomEnd = 8.dp
-                                    )
+                            Column(
+                                modifier = Modifier.weight(1f),
+                            ) {
+
+                                NoteMarkTextField(
+                                    text = subEventEndDate,
+                                    onValueChange = {},
+                                    label = "To",
+                                    hint = subEventEndDate,
+                                    isNumberType = false,
+                                    haveTrailingIcon = true,
+                                    trailingIconConfig = TrailingIconConfig.ResourceIcon(R.drawable.calender),
+                                    readOnly = true,
+                                    onClick = { addSubEventViewModel.onDateBoxClick(DatePickerTarget.END_DATE) }
                                 )
-                                .padding(horizontal = 30.dp)
-                                .background(MaterialTheme.colorScheme.background)
-                        ) {
-                            subEventTypes.forEach { type ->
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            text = type.displayName,
-                                            color = Color.Black,
-                                            fontFamily = alatsiFont,
-                                            fontSize = 16.sp
-                                        )
-                                    },
-                                    onClick = {
-                                        addSubEventViewModel.onSubEventTypeSelected(type)
-                                    },
-                                    contentPadding = PaddingValues(horizontal = 12.dp)
+
+                                Spacer(Modifier.height(8.dp))
+
+                                NoteMarkTextField(
+                                    text = subEventEndTime,
+                                    onValueChange = {},
+                                    hint = subEventEndTime,
+                                    label = null,
+                                    isNumberType = false,
+                                    haveTrailingIcon = true,
+                                    trailingIconConfig = TrailingIconConfig.ImageVectorIcon(Icons.Default.KeyboardArrowDown),
+                                    readOnly = true,
+                                    onClick = { addSubEventViewModel.onTimeBoxClick(TimePickerTarget.END_TIME) }
                                 )
                             }
                         }
                     }
-                }
 
-
-                Column {
-                    Text(
-                        text = "Date & Time",
-                        fontFamily = alatsiFont,
-                        color = Color.Black,
-                        fontSize = 16.sp
+                    NoteMarkTextField(
+                        text = subEveLocation,
+                        onValueChange = { addSubEventViewModel.updateSubEventLocation(it) },
+                        label = "Location",
+                        hint = "LPU",
+                        isNumberType = false,
+                        haveTrailingIcon = false,
+                        trailingIconConfig = null
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -233,228 +295,88 @@ fun AddSubEventScreen(
                         Column(
                             modifier = Modifier.weight(1f),
                         ) {
-                            Text(
-                                text = "From",
-                                fontFamily = alatsiFont,
-                                color = Color.Black,
-                                fontSize = 12.sp
+                            NoteMarkTextField(
+                                text = subEventCity,
+                                onValueChange = { addSubEventViewModel.updateSubEventCity(it) },
+                                label = "City",
+                                hint = "Phagwara",
+                                isNumberType = false,
+                                haveTrailingIcon = false,
+                                trailingIconConfig = null
                             )
-
-                            Spacer(modifier = Modifier.height(4.dp))
-
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(35.dp)
-                                    .clickable(onClick = {
-                                        addSubEventViewModel.onDateBoxClick(DatePickerTarget.START_DATE)
-                                    })
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .border(
-                                        1.dp,
-                                        colorResource(R.color.grey),
-                                        RoundedCornerShape(8.dp)
-                                    )
-                                    .padding(horizontal = 12.dp),
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .align(Alignment.Center)
-                                        .padding(4.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-
-                                    Text(text = subEventStartDate)
-
-                                    Icon(
-                                        painter = painterResource(R.drawable.calender),
-                                        contentDescription = null,
-                                        tint = colorResource(R.color.grey),
-                                        modifier = Modifier.size(15.dp)
-                                    )
-                                }
-
-                            }
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(35.dp)
-                                    .clickable(onClick = {
-                                        addSubEventViewModel.onTimeBoxClick(TimePickerTarget.START_TIME)
-                                    })
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .border(
-                                        1.dp,
-                                        colorResource(R.color.grey),
-                                        RoundedCornerShape(8.dp)
-                                    )
-                                    .padding(horizontal = 12.dp),
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .align(Alignment.Center)
-                                        .padding(4.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-
-                                    Text(text = subEventStartTime)
-
-                                    Icon(
-                                        Icons.Default.KeyboardArrowDown,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(15.dp)
-                                    )
-                                }
-
-                            }
-
                         }
-
 
                         Column(
                             modifier = Modifier.weight(1f),
                         ) {
-                            Text(
-                                text = "To",
-                                fontFamily = alatsiFont,
-                                color = Color.Black,
-                                fontSize = 12.sp
+
+                            NoteMarkTextField(
+                                text = subEventState,
+                                onValueChange = { addSubEventViewModel.updateSubEventState(it) },
+                                label = "State",
+                                hint = "Punjab",
+                                isNumberType = false,
+                                haveTrailingIcon = false,
+                                trailingIconConfig = null
                             )
+                        }
+                    }
 
-                            Spacer(modifier = Modifier.height(4.dp))
+                    NoteMarkTextField(
+                        text = selectedSubEventType.displayName,
+                        onValueChange = {},
+                        label = "Members",
+                        hint = selectedSubEventType.displayName,
+                        isNumberType = false,
+                        haveTrailingIcon = true,
+                        trailingIconConfig = TrailingIconConfig.ImageVectorIcon(Icons.Default.KeyboardArrowDown),
+                        readOnly = true,
+                        onClick = { addSubEventViewModel.toggleSubEventTypeDropdown() }
+                    )
 
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(35.dp)
-                                    .clickable(onClick = {
-                                        addSubEventViewModel.onDateBoxClick(DatePickerTarget.END_DATE)
-                                    })
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .border(
-                                        1.dp,
-                                        colorResource(R.color.grey),
-                                        RoundedCornerShape(8.dp)
-                                    )
-                                    .padding(horizontal = 12.dp),
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .align(Alignment.Center)
-                                        .padding(4.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
+                    NoteMarkTextField(
+                        text = selectedSubEventType.displayName,
+                        onValueChange = {},
+                        label = "Resources",
+                        hint = selectedSubEventType.displayName,
+                        isNumberType = false,
+                        haveTrailingIcon = true,
+                        trailingIconConfig = TrailingIconConfig.ImageVectorIcon(Icons.Default.KeyboardArrowDown),
+                        readOnly = true,
+                        onClick = { addSubEventViewModel.toggleSubEventTypeDropdown() }
+                    )
 
-                                    Text(text = subEventEndDate)
-
-                                    Icon(
-                                        painter = painterResource(R.drawable.calender),
-                                        contentDescription = null,
-                                        tint = colorResource(R.color.grey),
-                                        modifier = Modifier.size(15.dp)
-                                    )
-                                }
-
-                            }
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(35.dp)
-                                    .clickable(onClick = {
-                                        addSubEventViewModel.onTimeBoxClick(TimePickerTarget.END_TIME)
-                                    })
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .border(
-                                        1.dp,
-                                        colorResource(R.color.grey),
-                                        RoundedCornerShape(8.dp)
-                                    )
-                                    .padding(horizontal = 12.dp),
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .align(Alignment.Center)
-                                        .padding(4.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-
-                                    Text(text = subEventEndTime)
-
-                                    Icon(
-                                        Icons.Default.KeyboardArrowDown,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(15.dp)
-                                    )
-                                }
-
-                            }
-
+                    Row(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        errorMessage?.let {
+                            Text(
+                                text = it,
+                                color = MaterialTheme.colorScheme.error,
+                            )
                         }
 
                     }
-                }
 
-                FloatingLabelBasicTextField(
-                    value = subEveLocation,
-                    onValueChange = { addSubEventViewModel.updateSubEventLocation(it) },
-                    label = "Location"
-                )
-
-                FloatingLabelBasicTextField(
-                    value = subEventCity,
-                    onValueChange = { addSubEventViewModel.updateSubEventCity(it) },
-                    label = "City"
-                )
-
-                FloatingLabelBasicTextField(
-                    value = subEventState,
-                    onValueChange = { addSubEventViewModel.updateSubEventState(it) },
-                    label = "State"
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    errorMessage?.let {
-                        Text(
-                            text = it,
-                            color = Color.Red,
-                        )
-                    }
-
-                }
-
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Button(
-                        onClick = {
-                            addSubEventViewModel.createNewSubEvent()
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = colorResource(R.color.darkGreen),
-                            contentColor = Color.Black
-                        )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
                     ) {
-                        Text(text = "Add New")
+                        Button(
+                            onClick = {
+                                addSubEventViewModel.createNewSubEvent()
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.tertiary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            ),
+                            modifier = Modifier
+                                .height(35.dp)
+                                .width(150.dp)
+                        ) {
+                            Text(text = "Save", fontFamily = alatsiFont, fontSize = 15.sp)
+                        }
                     }
-
                 }
             }
         }
@@ -462,10 +384,12 @@ fun AddSubEventScreen(
         when (state) {
 
             AddSubEventState.Idle -> {
-                Text(text = "Events Not Loaded Yet",
-                    color = Color.Black,
+                Text(
+                    text = "Events Not Loaded Yet",
+                    color = MaterialTheme.colorScheme.onPrimary,
                     fontFamily = alatsiFont,
-                    fontSize = 16.sp)
+                    fontSize = 16.sp
+                )
             }
 
             AddSubEventState.Loading -> {
@@ -480,6 +404,7 @@ fun AddSubEventScreen(
             is AddSubEventState.Success -> {
                 // Success is handled via LaunchedEffect, no UI needed here
             }
+
             is AddSubEventState.Error -> {
                 // Error UI handled separately
             }
@@ -498,8 +423,7 @@ fun AddSubEventScreen(
                 popUpTo(Screens.AddSubEventDetailsScreen.route) { inclusive = true }
                 launchSingleTop = true
             }
-            addSubEventViewModel.resetAddSubEventState()
-            addSubEventViewModel.resetSubEventDetails()
+            addSubEventViewModel.resetAddSubEventScreen()
         }
     }
 }
