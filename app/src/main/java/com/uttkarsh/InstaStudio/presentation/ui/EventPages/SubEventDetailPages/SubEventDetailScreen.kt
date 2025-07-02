@@ -42,6 +42,8 @@ fun SubEventDetailScreen(
     Scaffold(
         topBar = {
             AppTopBar(
+                color = androidx.compose.ui.graphics.Color.White,
+                contentColor = androidx.compose.ui.graphics.Color.Black,
                 title = "SubEvent Details",
                 isNavIcon = true,
                 navIcon = R.drawable.back,

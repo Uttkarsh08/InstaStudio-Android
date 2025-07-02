@@ -63,6 +63,8 @@ fun EventScreen(
     Scaffold(
         topBar = {
             AppTopBar(
+                color = Color.White,
+                contentColor = Color.Black,
                 title = "Events",
                 isNavIcon = true,
                 navIcon = R.drawable.back,

@@ -152,7 +152,9 @@ fun ProfileCompletionScreen(
                     onValueChange = viewModel::updateStudioName,
                     label = "Studio Name",
                     hint = "Priya Studio",
-                    isNumberType = false
+                    isNumberType = false,
+                    haveTrailingIcon = false,
+                    trailingIconConfig = null
                 )
 
                 NoteMarkTextField(
@@ -160,7 +162,9 @@ fun ProfileCompletionScreen(
                     onValueChange = viewModel::updatePhoneNumber,
                     label = "Phone No.",
                     hint = "7088XXXXXX",
-                    isNumberType = true
+                    isNumberType = true,
+                    haveTrailingIcon = false,
+                    trailingIconConfig = null
                 )
 
                 NoteMarkTextField(
@@ -168,7 +172,9 @@ fun ProfileCompletionScreen(
                     onValueChange = viewModel::updateAddress,
                     label = "Studio Address",
                     hint = "Hardaspur",
-                    isNumberType = false
+                    isNumberType = false,
+                    haveTrailingIcon = false,
+                    trailingIconConfig = null
                 )
 
                 NoteMarkTextField(
@@ -176,7 +182,9 @@ fun ProfileCompletionScreen(
                     onValueChange = viewModel::updateCity,
                     label = "City",
                     hint = "Rudrapur",
-                    isNumberType = false
+                    isNumberType = false,
+                    haveTrailingIcon = false,
+                    trailingIconConfig = null
                 )
 
                 Row(horizontalArrangement = Arrangement.SpaceBetween) {
@@ -186,7 +194,9 @@ fun ProfileCompletionScreen(
                         label = "State",
                         hint = "Uttarakhand",
                         isNumberType = false,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        haveTrailingIcon = false,
+                        trailingIconConfig = null
                     )
 
                     Spacer(Modifier.width(20.dp))
@@ -197,7 +207,9 @@ fun ProfileCompletionScreen(
                         label = "Pin Code",
                         hint = "263112",
                         isNumberType = true,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        haveTrailingIcon = false,
+                        trailingIconConfig = null
                     )
 
                 }

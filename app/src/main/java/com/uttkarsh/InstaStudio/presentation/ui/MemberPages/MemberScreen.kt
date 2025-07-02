@@ -95,6 +95,8 @@ fun MemberScreen(
     Scaffold(
         topBar = {
             AppTopBar(
+                color = Color.White,
+                contentColor = Color.Black,
                 title = "Your Members",
                 isNavIcon = true,
                 navIcon = R.drawable.back,

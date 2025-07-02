@@ -78,6 +78,24 @@ class TimeProviderImpl : TimeProvider {
         }
     }
 
+    override fun formatTime(rawDate: String, pattern: String): String? {
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val dateTime = LocalDateTime.parse(rawDate)
+                val formatter = DateTimeFormatter.ofPattern(pattern, Locale.ENGLISH)
+                dateTime.format(formatter)
+            } else {
+                val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH)
+                val outputFormat = SimpleDateFormat(pattern, Locale.ENGLISH)
+                val time = inputFormat.parse(rawDate)
+                outputFormat.format(time!!)
+            }
+        } catch (e: Exception) {
+            "Invalid Time"
+        }
+    }
+
+
 
 }
 

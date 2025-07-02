@@ -56,6 +56,8 @@ fun DashBoardScreen(
     Scaffold(
         topBar = {
             AppTopBar(
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
                 title = "InstaStudio",
                 isNavIcon = true,
                 navIcon = R.drawable.studiologo,

@@ -113,6 +113,8 @@ fun AddSubEventScreen(
     Scaffold(
         topBar = {
             AppTopBar(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 title = "Add Event",
                 isNavIcon = true,
                 navIcon = R.drawable.back,

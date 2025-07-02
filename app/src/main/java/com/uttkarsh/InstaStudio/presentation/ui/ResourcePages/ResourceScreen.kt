@@ -91,6 +91,8 @@ fun ResourceScreen(
     Scaffold(
         topBar = {
             AppTopBar(
+                color = Color.White,
+                contentColor = Color.Black,
                 title = "Your Resources",
                 isNavIcon = true,
                 navIcon = R.drawable.back,

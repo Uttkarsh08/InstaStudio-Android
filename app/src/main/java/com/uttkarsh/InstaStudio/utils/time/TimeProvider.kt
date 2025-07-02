@@ -9,6 +9,6 @@ interface TimeProvider {
     fun nowDateTime(): String
     fun parseDateTime(dateTimeStr: String): Date?
     fun nowLocalDateTime(): LocalDateTime?
-    fun formatDate(rawDate: String, pattern: String = "d MMM, yyyy, E"): String?
-
+    fun formatDate(rawDate: String, pattern: String = "dd MMM, yyyy, E"): String?
+    fun formatTime(rawDate: String, pattern: String = "HH:mm"): String?
 }
