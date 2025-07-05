@@ -22,3 +22,6 @@ val secondaryBackground = Color(0xFFD1A980)
 val mainGreen = Color(0xFF31D050)
 val mainRed = Color(0xFFC82333)
 val errorRed = Color(0xFFEB6A63)
+
+
+val cyan = Color(0xFFE1F4F3)

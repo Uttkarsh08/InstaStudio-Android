@@ -1,6 +1,11 @@
 package com.uttkarsh.InstaStudio.presentation.ui.ResourcePages
 
-import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -13,9 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
@@ -31,8 +34,10 @@ import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -45,8 +50,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -66,11 +69,10 @@ import kotlinx.coroutines.launch
 fun ResourceScreen(
     resourceViewModel: ResourceViewModel = hiltViewModel(),
     navController: NavController
-){
+) {
 
-    LaunchedEffect(Unit) {
-        resourceViewModel.getAllResources()
-    }
+    LaunchedEffect(Unit) { resourceViewModel.getAllResources() }
+
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
 
@@ -81,25 +83,26 @@ fun ResourceScreen(
     val state by resourceViewModel.resourceState.collectAsState()
     val name by resourceViewModel.resourceName.collectAsState()
     val price by resourceViewModel.resourcePrice.collectAsState()
+    val expandedResourceId by resourceViewModel.expandedResourceId.collectAsState()
 
     val allResources = if (state is ResourceState.ListSuccess) {
         (state as ResourceState.ListSuccess).response.collectAsLazyPagingItems()
     } else null
 
-    var errorMessage = (state as? ResourceState.Error)?.message
+    val errorMessage = (state as? ResourceState.Error)?.message
 
     Scaffold(
         topBar = {
             AppTopBar(
-                color = Color.White,
-                contentColor = Color.Black,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
                 title = "Your Resources",
                 isNavIcon = true,
                 navIcon = R.drawable.back,
                 isRightIcon = false,
                 rightIcon = null,
                 onRightIconClicked = {},
-                onNavClick =  { navController.navigateUp() }
+                onNavClick = { navController.navigateUp() }
             )
         },
         floatingActionButton = {
@@ -107,217 +110,203 @@ fun ResourceScreen(
                 onClick = {
                     bottomSheetType = BottomSheetType.Add
                     resourceViewModel.clearResourceValues()
-                    coroutineScope.launch {
-                        sheetState.show()
-                    }
+                    coroutineScope.launch { sheetState.show() }
                 },
                 shape = CircleShape,
                 elevation = FloatingActionButtonDefaults.elevation(6.dp),
-                containerColor = colorResource(id = R.color.dashBoardContainer),
-                contentColor = Color.Black,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier
-                    .size(70.dp)
-                    .border(3.dp, Color.White, CircleShape)
+                    .size(50.dp)
+                    .border(3.dp, MaterialTheme.colorScheme.onPrimaryContainer, CircleShape)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Add",
-                    tint = Color.Black,
-                    modifier = Modifier.size(32.dp)
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(20.dp)
                 )
             }
         },
-        floatingActionButtonPosition = FabPosition.EndOverlay,
-    ){
-        when (state) {
-            ResourceState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
+        floatingActionButtonPosition = FabPosition.Center
+    ) { paddingValues ->
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            SearchBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .border(
+                        BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimary),
+                        RoundedCornerShape(10.dp)
+                    ),
+                onSearchChanged = { /* handle search */ }
+            )
+
+            when (state) {
+                ResourceState.Loading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
                     CircularProgressIndicator()
                 }
-            }
 
-            is ResourceState.Error -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
+                is ResourceState.Error -> Box(Modifier.fillMaxSize(), Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = "Failed to load resources.")
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Failed to load resources.")
+                        Spacer(Modifier.height(8.dp))
                         Button(onClick = { resourceViewModel.getAllResources() }) {
                             Text("Retry")
                         }
                     }
                 }
-            }
 
-            ResourceState.Idle -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = "No resources loaded yet.")
+                ResourceState.Idle -> Box(Modifier.fillMaxSize(), Alignment.Center) {
+                    Text("No resources loaded yet.")
                 }
-            }
 
-            is ResourceState.ListSuccess -> {
-                val isRefreshing = allResources?.loadState?.refresh is LoadState.Loading
-                val pullRefreshState = rememberPullRefreshState(
-                    refreshing = isRefreshing,
-                    onRefresh = { allResources?.refresh() }
-                )
+                is ResourceState.ListSuccess -> {
+                    val isRefreshing = allResources?.loadState?.refresh is LoadState.Loading
+                    val pullRefreshState = rememberPullRefreshState(
+                        refreshing = isRefreshing,
+                        onRefresh = { allResources?.refresh() }
+                    )
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .pullRefresh(pullRefreshState)
-                ) {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        modifier = Modifier.fillMaxSize().padding(it),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .pullRefresh(pullRefreshState)
                     ) {
-                        item(span = { GridItemSpan(2) }) {
-                            SearchBar(
-                                modifier = Modifier.fillMaxWidth()
-                                    .padding(0.dp, bottom = 28.dp)
-                                    .border(
-                                        BorderStroke(2.dp, colorResource(R.color.searchBarBorder)),
-                                        RoundedCornerShape(14.dp)
-                                    ),
-                                onSearchChanged = { /* TODO */ }
-                            )
-                        }
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            contentPadding = PaddingValues(16.dp)
+                        ) {
+                            items(
+                                count = allResources?.itemCount ?: 0,
+                                key = { index -> allResources?.get(index)?.resourceId ?: index }
+                            ) { index ->
+                                allResources?.get(index)?.let { resource ->
 
-                        items(
-                            count = allResources?.itemCount ?: 0,
-                            key = { index -> allResources?.get(index)?.resourceId ?: index }
-                        ) { index ->
-                            allResources?.get(index)?.let { resource ->
-                                ResourceItem(
-                                    name = resource.resourceName,
-                                    price = resource.resourcePrice,
-                                    onCLick = {
-                                        Log.d(
-                                            "EDIT_SHEET",
-                                            "Updating resource: ${resource.resourceId}, ${resource.resourceName}, ${resource.resourcePrice}"
-                                        )
-                                        resourceViewModel.prepareEditResource(resource)
-                                        bottomSheetType = BottomSheetType.Edit
-                                        coroutineScope.launch {
-                                            sheetState.show()
+                                    val isExpanded = expandedResourceId == resource.resourceId
+
+                                    Surface(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .animateContentSize(),
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = MaterialTheme.colorScheme.surfaceContainerLow,
+                                        tonalElevation = 1.dp,
+                                        border = if (isExpanded) {
+                                            BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimary)
+                                        } else {
+                                            null
+                                        }
+                                    ) {
+                                        Column {
+                                            ResourceItem(
+                                                resource = resource,
+                                                onCLick = {
+                                                    if (isExpanded) {
+                                                        resourceViewModel.setExpandedResourceId(null)
+                                                    } else {
+                                                        resourceViewModel.prepareEditResource(resource)
+                                                        resourceViewModel.setExpandedResourceId(resource.resourceId)
+                                                    }
+                                                },
+                                                ifInFocus = isExpanded
+                                            )
+
+                                            AnimatedVisibility(
+                                                visible = isExpanded,
+                                                enter = expandVertically() + fadeIn(),
+                                                exit = shrinkVertically() + fadeOut()
+                                            ) {
+                                                ExpandedResourceSheet(
+                                                    resource = resource,
+                                                    onEditClicked = { /* handle edit */ },
+                                                    onDeleteClicked = { /* handle delete */ }
+                                                )
+                                            }
                                         }
                                     }
-                                )
-                            }
-                        }
-
-                        allResources.apply {
-                            when {
-                                this?.loadState?.append is LoadState.Loading -> {
-                                    items(1) {
-                                        ResourceShimmerShow()
-                                    }
                                 }
+                            }
 
-                                this?.loadState?.refresh is LoadState.Loading -> {
-                                    items(10) {
-                                        ResourceShimmerShow()
+                            allResources?.apply {
+                                when {
+                                    loadState.append is LoadState.Loading -> {
+                                        items(1) { ResourceShimmerShow() }
+                                    }
+                                    loadState.refresh is LoadState.Loading -> {
+                                        items(5) { ResourceShimmerShow() }
                                     }
                                 }
                             }
                         }
+                        PullRefreshIndicator(
+                            refreshing = isRefreshing,
+                            state = pullRefreshState,
+                            modifier = Modifier.align(Alignment.TopCenter)
+                        )
                     }
-                    PullRefreshIndicator(
-                        refreshing = isRefreshing,
-                        state = pullRefreshState,
-                        modifier = Modifier.align(Alignment.TopCenter)
-                    )
                 }
+
+                is ResourceState.Success -> {}
             }
-            is ResourceState.Success -> {}
-        }
-    }
-
-    if(bottomSheetType != BottomSheetType.None){
-        val heading = when (bottomSheetType) {
-            BottomSheetType.Edit -> "Edit Resource"
-            BottomSheetType.Add -> "Add Resource"
-            else -> ""
         }
 
-        ModalBottomSheet(
-            onDismissRequest = {
-                coroutineScope.launch {
-                    sheetState.hide()
-                }.invokeOnCompletion {
-                    bottomSheetType = BottomSheetType.None
-                }
-            },
-            sheetState = sheetState
-        ) {
-            ResourceSheet(
-                name = name,
-                price = price,
-                heading = heading,
-                errorMessage = errorMessage,
-                onNameChange = { resourceViewModel.updateResourceName(it) },
-                onPriceChange = { resourceViewModel.updateResourcePrice(it) },
-                onSave = {
-                    coroutineScope.launch {
-                        if (bottomSheetType == BottomSheetType.Add) {
-                            resourceViewModel.createNewResource()
-                        } else if (bottomSheetType == BottomSheetType.Edit) {
-                            resourceViewModel.updateResourceById()
-                        }
-                    }
+        if (bottomSheetType != BottomSheetType.None) {
+            val heading = when (bottomSheetType) {
+                BottomSheetType.Edit -> "Edit Resource"
+                BottomSheetType.Add -> "Add Resource"
+                else -> ""
+            }
+
+            ModalBottomSheet(
+                onDismissRequest = {
+                    coroutineScope.launch { sheetState.hide() }
+                        .invokeOnCompletion { bottomSheetType = BottomSheetType.None }
                 },
-                onCancel = {
-                    coroutineScope.launch {
-                        sheetState.hide()
-                    }.invokeOnCompletion {
-                        bottomSheetType = BottomSheetType.None
+                sheetState = sheetState,
+                containerColor = MaterialTheme.colorScheme.onPrimaryContainer
+            ) {
+                ResourceSheet(
+                    name = name,
+                    price = price,
+                    heading = heading,
+                    errorMessage = errorMessage,
+                    onNameChange = { resourceViewModel.updateResourceName(it) },
+                    onPriceChange = { resourceViewModel.updateResourcePrice(it) },
+                    onSave = {
+                        coroutineScope.launch {
+                            if (bottomSheetType == BottomSheetType.Add) {
+                                resourceViewModel.createNewResource()
+                            } else if (bottomSheetType == BottomSheetType.Edit) {
+                                resourceViewModel.updateResourceById()
+                            }
+                        }
+                    },
+                    onCancel = {
+                        coroutineScope.launch { sheetState.hide() }
+                            .invokeOnCompletion { bottomSheetType = BottomSheetType.None }
                     }
-                }
-            )
-        }
-    }
-
-    LaunchedEffect(state) {
-        if (state is ResourceState.Success) {
-            Log.d("ResourceScreen", "Success - Closing sheet and refreshing")
-            coroutineScope.launch {
-                sheetState.hide()
-            }.invokeOnCompletion {
-                bottomSheetType = BottomSheetType.None
+                )
             }
         }
-    }
 
-    LaunchedEffect(sheetState.isVisible) {
-        if (!sheetState.isVisible) {
-            Log.d("ResourceScreen", "Sheet hidden - refreshing resources")
-            resourceViewModel.getAllResources()
+        LaunchedEffect(state) {
+            if (state is ResourceState.Success) {
+                coroutineScope.launch { sheetState.hide() }
+                    .invokeOnCompletion { bottomSheetType = BottomSheetType.None }
+            }
+        }
+
+        LaunchedEffect(sheetState.isVisible) {
+            if (!sheetState.isVisible) {
+                resourceViewModel.getAllResources()
+            }
         }
     }
 }
-
-
-//Scaffold(
-//topBar = {
-//    AppTopBar(
-//        title = "Your Resources",
-//        isNavIcon = true,
-//        navIcon = R.drawable.back,
-//        isRightIcon = true,
-//        rightIcon = Icons.Filled.Add,
-//        onRightIconClicked = {},
-//        onNavClick = {}
-//    )
-//}
-//)

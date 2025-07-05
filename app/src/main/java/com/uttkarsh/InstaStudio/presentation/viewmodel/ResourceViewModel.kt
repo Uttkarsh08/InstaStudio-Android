@@ -40,6 +40,13 @@ class ResourceViewModel @Inject constructor(
     private val _resourcePrice = MutableStateFlow(0L)
     val resourcePrice: StateFlow<Long> = _resourcePrice
 
+    private val _expandedResourceId = MutableStateFlow<Long?>(null)
+    val expandedResourceId = _expandedResourceId.asStateFlow()
+
+    fun setExpandedResourceId(id: Long?) {
+        _expandedResourceId.value = id
+    }
+
     fun updateResourceName(newName: String) {
         Log.d("VIEWMODEL", "Name updating to: $newName")
         _resourceName.value = newName

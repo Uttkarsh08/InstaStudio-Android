@@ -18,7 +18,7 @@ private val DarkColorScheme = darkColorScheme(
 
 private val LightColorScheme = lightColorScheme(
     primary = Purple40,
-    secondary = PurpleGrey40,
+    secondary = cyan,
     primaryContainer = mainBeach,
     onPrimaryContainer = white,
     onPrimary = black,
@@ -31,7 +31,8 @@ private val LightColorScheme = lightColorScheme(
     tertiaryContainer = tertiaryBackground,
     error = errorRed,
     errorContainer = mainRed,
-    tertiary = mainGreen
+    tertiary = mainGreen,
+
 
 )
 
