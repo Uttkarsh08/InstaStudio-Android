@@ -12,7 +12,7 @@ import javax.inject.Singleton
 @Singleton
 interface AuthApiService {
 
-    @POST("api/auth/v1/login")
+    @POST("/api/auth/v1/login")
     suspend fun login(@Body request: LoginRequestDTO): ApiResponse<LoginResponseDTO>
 
     @POST("/api/auth/v1/refresh-token")

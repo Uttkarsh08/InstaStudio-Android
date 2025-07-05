@@ -90,7 +90,7 @@ object NetworkModule {
         @Named("UnauthenticatedClient") client: OkHttpClient
     ): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("http://172.20.10.11:8080")
+            .baseUrl("http://instastudio.ap-south-1.elasticbeanstalk.com")
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
@@ -103,7 +103,7 @@ object NetworkModule {
         @Named("AuthenticatedClient") client: OkHttpClient
     ): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("http://172.20.10.11:8080")
+            .baseUrl("http://instastudio.ap-south-1.elasticbeanstalk.com")
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
