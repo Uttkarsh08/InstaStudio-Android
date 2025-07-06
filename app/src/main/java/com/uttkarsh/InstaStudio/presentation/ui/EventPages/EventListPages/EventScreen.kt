@@ -182,12 +182,12 @@ fun EventsPage(
 
         is EventState.UpcomingPagingSuccess -> {
             val items = (state as EventState.UpcomingPagingSuccess).data.collectAsLazyPagingItems()
-            EventLazyList(eventViewModel, items, navController, true)
+            EventLazyList(eventViewModel, items, navController, true, false)
         }
 
         is EventState.CompletedPagingSuccess -> {
             val items = (state as EventState.CompletedPagingSuccess).data.collectAsLazyPagingItems()
-            EventLazyList(eventViewModel, items, navController, false)
+            EventLazyList(eventViewModel, items, navController, false, true)
         }
 
         else -> {}
@@ -200,7 +200,8 @@ fun EventLazyList(
     eventViewModel: EventViewModel,
     items: LazyPagingItems<EventListResponseDTO>,
     navController: NavController,
-    isForUpcomingEvents: Boolean
+    isForUpcomingEvents: Boolean,
+    isCompleted: Boolean
 ) {
 
     val isRefreshing = items.loadState.refresh is LoadState.Loading
@@ -241,10 +242,14 @@ fun EventLazyList(
                     key = { items[it]?.eventId ?: it }
                 ) {
                     items[it]?.let { event ->
-                        EventCard(event = event, onclick = {
-                            eventViewModel.updateEventId(event.eventId)
-                            navController.navigate(Screens.EventDetailScreen.route)
-                        })
+                        EventCard(event = event,
+                            onclick = {
+                                eventViewModel.updateEventId(event.eventId)
+                                navController.navigate(Screens.EventDetailScreen.route)
+                            },
+                            onButtonClicked = {},
+                            isCompleted = isCompleted
+                        )
                     }
                 }
 

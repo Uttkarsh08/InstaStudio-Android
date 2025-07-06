@@ -1,5 +1,6 @@
 package com.uttkarsh.InstaStudio.data.pagination
 
+import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.uttkarsh.InstaStudio.data.auth.EventApiService
@@ -23,6 +24,10 @@ class UpcomingEventPagingSource @Inject constructor(
 
             val response = eventApiService.getUpcomingEvents(studioId, page)
             val upcomingEvents = response.data?.content?: emptyList()
+            upcomingEvents.map { event ->
+                Log.d("UPCOMING", event.eventId.toString())
+
+            }
 
             LoadResult.Page(
                 data = upcomingEvents,

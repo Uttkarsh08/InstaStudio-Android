@@ -1,147 +1,214 @@
 package com.uttkarsh.InstaStudio.presentation.ui.EventPages.EventListPages
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
 import com.uttkarsh.InstaStudio.R
 import com.uttkarsh.InstaStudio.domain.model.dto.event.EventListResponseDTO
+import com.uttkarsh.InstaStudio.presentation.ui.utils.rememberTimeProvider
+import com.uttkarsh.InstaStudio.ui.theme.InstaStudioTheme
 
 @Composable
 fun EventCard(
     event: EventListResponseDTO,
-    onclick: () -> Unit
-){
+    isCompleted: Boolean,
+    onclick: () -> Unit,
+    onButtonClicked: () -> Unit
+) {
 
     val alatsiFont = FontFamily(Font(R.font.alatsi))
 
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .height(100.dp),
-        shape = RoundedCornerShape(27.dp),
-        color = colorResource(R.color.mediumContainer),
-        onClick = onclick
-    ){
-        Column(
+            .height(90.dp),
+        shape = RoundedCornerShape(15.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        onClick = onclick,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant)
+    ) {
+        Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.Center
-        ){
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                horizontalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .weight(.5f),
-                    verticalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(text = "Mr.Harish Kumar",
-                        fontFamily = alatsiFont,
-                        fontSize = 10.sp,
-                        lineHeight = 10.sp,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
 
+            val timeProvider = rememberTimeProvider()
+
+            Column(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(0.2f)
+                    .wrapContentWidth(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    timeProvider.formatDate(event.eventStartDate).toString().substring(0, 6),
+                    fontFamily = alatsiFont,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    timeProvider.formatTime(event.eventStartDate).toString(),
+                    fontFamily = alatsiFont,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Row(
+                modifier = Modifier.weight(0.1f).padding(vertical = 16.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .width(2.dp)
+                        .fillMaxHeight()
+                        .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(0.3f))
+                )
+            }
+
+            Column(
+                modifier = Modifier.weight(0.6f),
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.Start
+            ) {
+
+                Text(
+                    event.clientName,
+                    fontFamily = alatsiFont,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontWeight = FontWeight.Light
+                )
+
+                Column(
+                    modifier = Modifier.wrapContentSize(),
+                    verticalArrangement = Arrangement.spacedBy(0.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.wrapContentWidth().padding(0.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = rememberAsyncImagePainter("https://img.icons8.com/ios/50/marker--v1.png"),
+                            contentDescription = "Marker Icon",
+                            modifier = Modifier.size(10.dp).padding(0.dp),
+                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
+                        )
+
+                        Spacer(Modifier.width(4.dp))
+
+                        Text(
+                            text = event.eventType,
+                            fontFamily = alatsiFont,
+                            fontWeight = FontWeight.Thin,
+                            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+
+
+                    Row(
+                        modifier = Modifier.wrapContentWidth().padding(0.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = rememberAsyncImagePainter("https://img.icons8.com/ios-glyphs/30/sorting-options.png"),
+                            contentDescription = "Marker Icon",
+                            modifier = Modifier.size(10.dp).padding(0.dp),
+                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
+                        )
+
+                        Spacer(Modifier.width(4.dp))
+
+                        Text(
+                            event.eventLocation,
+                            fontFamily = alatsiFont,
+                            fontWeight = FontWeight.Thin,
+                            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .wrapContentSize()
+                    .width(80.dp)
+                    .height(30.dp)
+            ) {
+
+                if(isCompleted){
                     Button(
-                        onClick = {},
-                        modifier = Modifier.fillMaxWidth(),
+                        onClick = onButtonClicked,
+                        modifier = Modifier.fillMaxWidth()
+                            .clip(RoundedCornerShape(15.dp)),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = colorResource(R.color.darkGrey),
-                            contentColor = Color.Black
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
                         ),
                         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 2.dp)
                     ) {
-                        Text(text = "Edit", fontFamily = alatsiFont)
+                        Text(text = "Invoice", fontFamily = alatsiFont)
                     }
-                }
-
-
-                Column(
-                    modifier = Modifier.weight(1f)
-                        .fillMaxSize()
-                        .padding(vertical = 8.dp)
-                    ,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = event.clientName,
-                        fontFamily = alatsiFont,
-                        fontSize = 14.sp,
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier
-                            .height(24.dp)
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(text = event.eventStartDate.substring(0, 10), fontFamily = alatsiFont, fontSize = 14.sp)
-
-                        Text(text = event.eventLocation, fontFamily = alatsiFont, fontSize = 14.sp)
-                    }
-                }
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .weight(.5f),
-                    verticalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(text = "22/06/25",
-                        fontFamily = alatsiFont,
-                        fontSize = 10.sp,
-                        lineHeight = 10.sp,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-
-                    if(event.eventIsSaved){
+                }else{
+                    if (event.eventIsSaved) {
                         Button(
-                            onClick = {},
-                            modifier = Modifier.fillMaxWidth(),
+                            onClick = onButtonClicked,
+                            modifier = Modifier.fillMaxWidth()
+                                .clip(RoundedCornerShape(15.dp)),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = colorResource(R.color.darkGrey),
-                                contentColor = Color.Black
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                             ),
                             contentPadding = PaddingValues(horizontal = 4.dp, vertical = 2.dp)
                         ) {
                             Text(text = "Undo", fontFamily = alatsiFont)
                         }
-                    }else{
+                    } else {
                         Button(
-                            onClick = {},
-                            modifier = Modifier.fillMaxWidth(),
+                            onClick = onButtonClicked,
+                            modifier = Modifier.fillMaxWidth()
+                                .clip(RoundedCornerShape(15.dp)),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = colorResource(R.color.darkGreen),
-                                contentColor = Color.Black
+                                containerColor = MaterialTheme.colorScheme.tertiary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
                             ),
                             contentPadding = PaddingValues(horizontal = 4.dp, vertical = 2.dp)
                         ) {
@@ -149,6 +216,7 @@ fun EventCard(
                         }
                     }
                 }
+
             }
 
         }
