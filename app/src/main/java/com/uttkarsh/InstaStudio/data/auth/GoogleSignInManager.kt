@@ -1,5 +1,6 @@
 package com.uttkarsh.InstaStudio.data.auth
 
+import android.app.Activity
 import android.content.Context
 import android.util.Log
 import androidx.credentials.CredentialManager
@@ -23,30 +24,23 @@ import javax.inject.Singleton
 @Singleton
 class GoogleSignInManager @Inject constructor() {
 
-    suspend fun signInWithGoogle(context: Context): String? {
-        val credentialManager = CredentialManager.create(context)
+    suspend fun signInWithGoogle(activity: Activity): String? {
+        val credentialManager = CredentialManager.create(activity)
 
         val googleIdOption = GetGoogleIdOption.Builder()
-            .setServerClientId(context.getString(R.string.default_web_client_id))
+            .setServerClientId(activity.getString(R.string.default_web_client_id))
             .setAutoSelectEnabled(false)
             .setFilterByAuthorizedAccounts(false)
             .build()
-
-        val availability = GoogleApiAvailability.getInstance()
-        val resultCode = availability.isGooglePlayServicesAvailable(context)
-        if (resultCode != ConnectionResult.SUCCESS) {
-            Log.e("GoogleSignIn", "Google Play Services not available or outdated")
-            return null
-        }
 
         val request = GetCredentialRequest.Builder()
             .addCredentialOption(googleIdOption)
             .build()
 
         return try {
-            val result = credentialManager.getCredential(context, request)
+            val result = credentialManager.getCredential(activity, request)
             val credential = result.credential
-            Log.d("GoogleSignIn", "Got Credentials: $credential" ?: "No Credentials")
+            Log.d("GoogleSignIn", "Got Credentials: $credential")
             if (credential is CustomCredential &&
                 credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
             ) {

@@ -1,5 +1,6 @@
 package com.uttkarsh.InstaStudio.presentation.ui
 
+import android.app.Activity
 import android.content.res.Configuration
 import android.util.Log
 import android.widget.Toast
@@ -46,6 +47,7 @@ fun SignInScreen(
     val state by viewModel.authState.collectAsState()
     val isRegistered by viewModel.isRegistered.collectAsState()
     val loginType = viewModel.loginType.collectAsState().value
+    val activity = LocalContext.current as? Activity
 
     LaunchedEffect(state) {
         if (state is AuthState.Success) {
@@ -124,8 +126,8 @@ fun SignInScreen(
 
             Button(
                 onClick = {
-                    if (!isLoading) {
-                        viewModel.signInWithGoogle(context)
+                    if (!isLoading && activity != null) {
+                        viewModel.signInWithGoogle(activity)
                     }
                 },
                 modifier = Modifier

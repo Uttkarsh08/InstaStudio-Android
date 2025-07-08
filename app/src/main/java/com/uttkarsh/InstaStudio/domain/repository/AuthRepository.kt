@@ -16,9 +16,6 @@ class AuthRepository @Inject constructor(
     private val googleSignInManager: GoogleSignInManager,
     private val authApi: AuthApiService
 ) {
-    suspend fun signInWithGoogle(context: Context): String? {
-        return googleSignInManager.signInWithGoogle(context)
-    }
 
     suspend fun validateFirebaseToken(requestDTO: LoginRequestDTO): LoginResponseDTO {
         val resp = authApi.login(requestDTO)

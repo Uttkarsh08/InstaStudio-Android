@@ -47,7 +47,6 @@ object UseCaseModule {
 
     @Provides
     fun provideAuthUseCases(
-        signInWithGoogleUseCase: SignInWithGoogleUseCase,
         validateFirebaseTokenUseCase: ValidateFirebaseTokenUseCase,
         logoutUseCase: LogoutUseCase,
         checkUserLoggedInUseCase: CheckUserLoggedInUseCase,
@@ -56,7 +55,6 @@ object UseCaseModule {
         observeRegistrationStatusUseCase: ObserveRegistrationStatusUseCase
     ): AuthUseCases {
         return AuthUseCases(
-            signInWithGoogleUseCase,
             validateFirebaseTokenUseCase,
             logoutUseCase,
             checkUserLoggedInUseCase,

@@ -1,9 +1,11 @@
 package com.uttkarsh.InstaStudio.presentation.viewmodel
 
+import android.app.Activity
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.uttkarsh.InstaStudio.data.auth.GoogleSignInManager
 import com.uttkarsh.InstaStudio.domain.model.dto.auth.LoginRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.UserType
 import com.uttkarsh.InstaStudio.domain.usecase.auth.AuthUseCases
@@ -18,7 +20,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authUseCases: AuthUseCases
+    private val authUseCases: AuthUseCases,
+    private val googleSignInManager: GoogleSignInManager
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
@@ -71,11 +74,11 @@ class AuthViewModel @Inject constructor(
         _loginType.value = type
     }
 
-    fun signInWithGoogle(context: Context) {
+    fun signInWithGoogle(activity: Activity) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
             try {
-                val token = authUseCases.signInWithGoogle(context)
+                val token = googleSignInManager.signInWithGoogle(activity)
                 if (token != null) {
                     _authState.value = AuthState.Success(token)
                 } else {
@@ -83,10 +86,11 @@ class AuthViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 Log.e("AuthViewModel", "Sign-in error", e)
-                _authState.value = AuthState.Error(e.localizedMessage ?: "Unexpected sign-in error")
+                _authState.value = AuthState.Error(e.localizedMessage ?: "Sign-in failed.")
             }
         }
     }
+
 
     fun onFirebaseLoginSuccess(requestDTO: LoginRequestDTO) {
         viewModelScope.launch {
