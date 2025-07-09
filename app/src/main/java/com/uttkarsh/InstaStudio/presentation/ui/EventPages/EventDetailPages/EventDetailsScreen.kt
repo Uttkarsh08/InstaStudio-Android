@@ -9,13 +9,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
@@ -29,12 +32,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -67,8 +71,8 @@ fun EventDetailsScreen(
     Scaffold(
         topBar = {
             AppTopBar(
-                color = Color.White,
-                contentColor = Color.Black,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 title = "Event Details",
                 isNavIcon = true,
                 navIcon = R.drawable.back,
@@ -78,8 +82,8 @@ fun EventDetailsScreen(
                 onNavClick = { navController.navigateUp() }
             )
         }
-    ){ paddingValues ->
-        when(evenState){
+    ) { paddingValues ->
+        when (evenState) {
 
             is EventState.Success -> {
                 val event = (evenState as EventState.Success).response
@@ -88,59 +92,87 @@ fun EventDetailsScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(scrollState)
+                        .imePadding()
                         .padding(paddingValues),
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
-                    Text(text = event.clientName.toString(),
-                        fontFamily = alatsiFont,
-                        fontSize = 20.sp,
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Surface(
+                    Column(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 16.dp, horizontal = 8.dp)
-                            .height(150.dp),
-                        shape = RoundedCornerShape(27.dp)
+                            .fillMaxSize()
+                            .clip(
+                                RoundedCornerShape(
+                                    bottomStart = 27.dp,
+                                    bottomEnd = 27.dp
+                                )
+                            )
+                            .background(MaterialTheme.colorScheme.primaryContainer),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Image(painterResource(R.drawable.eventdetail), contentDescription = null)
 
+                        Text(
+                            text = event.clientName.toString(),
+                            fontFamily = alatsiFont,
+                            fontSize = 20.sp,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Surface(
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .padding(horizontal = 8.dp)
+                                .padding(top = 16.dp, bottom = 24.dp)
+                                .height(150.dp),
+                            shape = RoundedCornerShape(27.dp)
+                        ) {
+                            Image(
+                                painterResource(R.drawable.eventdetail),
+                                contentDescription = null
+                            )
+
+                        }
                     }
+                    Spacer(Modifier.height(10.dp))
 
                     val tabTitles = listOf("Schedule", "Payments", "Contact", "Deliverables")
 
-                    TabRow(
+                    ScrollableTabRow(
                         selectedTabIndex = pagerState.currentPage,
-                        containerColor =Color.Transparent,
-                        contentColor = colorResource(R.color.grey),
+                        containerColor = Color.Transparent,
+                        contentColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        edgePadding = 0.dp,
                         indicator = { tabPositions ->
                             Box(
                                 modifier = Modifier
                                     .tabIndicatorOffset(tabPositions[pagerState.currentPage])
                                     .height(2.dp)
-                                    .background(colorResource(R.color.darkGreen))
+                                    .background(MaterialTheme.colorScheme.onPrimary)
                             )
                         }
                     ) {
                         tabTitles.forEachIndexed { index, title ->
                             Tab(
-                                text = { Text(title, fontWeight = FontWeight.Bold) },
+                                text = {
+                                    Text(
+                                        text = title,
+                                        fontWeight = FontWeight.Bold,
+                                        style = MaterialTheme.typography.bodySmall
+                                        // No maxLines or ellipsis needed now
+                                    )
+                                },
                                 selected = pagerState.currentPage == index,
                                 onClick = {
                                     coroutineScope.launch {
                                         pagerState.animateScrollToPage(index)
                                     }
                                 },
-                                selectedContentColor = colorResource(R.color.darkGreen),
-                                unselectedContentColor = Color.DarkGray
+                                selectedContentColor = MaterialTheme.colorScheme.onPrimary,
+                                unselectedContentColor = MaterialTheme.colorScheme.surfaceContainerHigh
                             )
                         }
                     }
-
                     HorizontalPager(
                         state = pagerState,
                         modifier = Modifier
@@ -151,25 +183,31 @@ fun EventDetailsScreen(
                             0 -> {
                                 EventSchedulePage(subEventViewModel, event, navController)
                             }
+
                             1 -> {
 
                             }
-                            2->{
+
+                            2 -> {
 
                             }
-                            3->{
+
+                            3 -> {
 
                             }
                         }
                     }
                 }
             }
+
             is EventState.UpcomingPagingSuccess -> {
                 //Not to handle here
             }
+
             is EventState.CompletedPagingSuccess -> {
                 //Not to handle here
             }
+
             is EventState.Error -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -181,6 +219,7 @@ fun EventDetailsScreen(
                     }
                 }
             }
+
             EventState.Idle -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -189,6 +228,7 @@ fun EventDetailsScreen(
                     Text(text = "Event Not Loaded Yet.")
                 }
             }
+
             EventState.Loading -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),

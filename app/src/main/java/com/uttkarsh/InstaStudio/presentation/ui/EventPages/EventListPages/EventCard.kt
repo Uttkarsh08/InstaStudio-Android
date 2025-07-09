@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -26,18 +27,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberAsyncImagePainter
 import com.uttkarsh.InstaStudio.R
 import com.uttkarsh.InstaStudio.domain.model.dto.event.EventListResponseDTO
 import com.uttkarsh.InstaStudio.presentation.ui.utils.rememberTimeProvider
-import com.uttkarsh.InstaStudio.ui.theme.InstaStudioTheme
 
 @Composable
 fun EventCard(
@@ -60,9 +58,10 @@ fun EventCard(
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxSize()
+                .padding(end = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceAround
         ) {
 
             val timeProvider = rememberTimeProvider()
@@ -70,7 +69,7 @@ fun EventCard(
             Column(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .weight(0.2f)
+                    .weight(0.3f)
                     .wrapContentWidth(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -92,7 +91,7 @@ fun EventCard(
             }
 
             Row(
-                modifier = Modifier.weight(0.1f).padding(vertical = 16.dp)
+                modifier = Modifier.padding(vertical = 16.dp)
             ) {
                 Box(
                     modifier = Modifier
@@ -102,8 +101,10 @@ fun EventCard(
                 )
             }
 
+            Spacer(Modifier.width(16.dp))
+
             Column(
-                modifier = Modifier.weight(0.6f),
+                modifier = Modifier.weight(0.5f),
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.Start
             ) {
@@ -111,33 +112,35 @@ fun EventCard(
                 Text(
                     event.clientName,
                     fontFamily = alatsiFont,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onPrimary,
                     fontWeight = FontWeight.Light
                 )
 
                 Column(
                     modifier = Modifier.wrapContentSize(),
-                    verticalArrangement = Arrangement.spacedBy(0.dp)
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.Start
                 ) {
                     Row(
                         modifier = Modifier.wrapContentWidth().padding(0.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start
                     ) {
                         Image(
-                            painter = rememberAsyncImagePainter("https://img.icons8.com/ios/50/marker--v1.png"),
+                            painter = painterResource(R.drawable.location),
                             contentDescription = "Marker Icon",
                             modifier = Modifier.size(10.dp).padding(0.dp),
                             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
                         )
 
-                        Spacer(Modifier.width(4.dp))
+                        Spacer(Modifier.width(2.dp))
 
                         Text(
                             text = event.eventType,
                             fontFamily = alatsiFont,
                             fontWeight = FontWeight.Thin,
-                            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                            fontSize = MaterialTheme.typography.bodySmall.fontSize,
                             color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
@@ -145,22 +148,23 @@ fun EventCard(
 
                     Row(
                         modifier = Modifier.wrapContentWidth().padding(0.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start
                     ) {
                         Image(
-                            painter = rememberAsyncImagePainter("https://img.icons8.com/ios-glyphs/30/sorting-options.png"),
+                            painter = painterResource(R.drawable.options),
                             contentDescription = "Marker Icon",
                             modifier = Modifier.size(10.dp).padding(0.dp),
                             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
                         )
 
-                        Spacer(Modifier.width(4.dp))
+                        Spacer(Modifier.width(2.dp))
 
                         Text(
                             event.eventLocation,
                             fontFamily = alatsiFont,
                             fontWeight = FontWeight.Thin,
-                            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                            fontSize = MaterialTheme.typography.bodySmall.fontSize,
                             color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
@@ -170,51 +174,34 @@ fun EventCard(
             Row(
                 modifier = Modifier
                     .wrapContentSize()
-                    .width(80.dp)
-                    .height(30.dp)
+                    .weight(0.4f)
             ) {
 
-                if(isCompleted){
-                    Button(
-                        onClick = onButtonClicked,
-                        modifier = Modifier.fillMaxWidth()
-                            .clip(RoundedCornerShape(15.dp)),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        ),
-                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 2.dp)
-                    ) {
-                        Text(text = "Invoice", fontFamily = alatsiFont)
-                    }
-                }else{
-                    if (event.eventIsSaved) {
-                        Button(
-                            onClick = onButtonClicked,
-                            modifier = Modifier.fillMaxWidth()
-                                .clip(RoundedCornerShape(15.dp)),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                            ),
-                            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 2.dp)
-                        ) {
-                            Text(text = "Undo", fontFamily = alatsiFont)
-                        }
-                    } else {
-                        Button(
-                            onClick = onButtonClicked,
-                            modifier = Modifier.fillMaxWidth()
-                                .clip(RoundedCornerShape(15.dp)),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.tertiary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            ),
-                            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 2.dp)
-                        ) {
-                            Text(text = "Save", fontFamily = alatsiFont)
-                        }
-                    }
+                Button(
+                    onClick = onButtonClicked,
+                    modifier = Modifier
+                        .width(70.dp)
+                        .height(28.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = when {
+                            isCompleted -> MaterialTheme.colorScheme.secondaryContainer
+                            event.eventIsSaved -> MaterialTheme.colorScheme.surfaceContainerHigh
+                            else -> MaterialTheme.colorScheme.tertiary
+                        },
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 2.dp)
+                ) {
+                    Text(
+                        text = when {
+                            isCompleted -> "Invoice"
+                            event.eventIsSaved -> "Undo"
+                            else -> "Save"
+                        },
+                        fontFamily = alatsiFont,
+                        style = MaterialTheme.typography.labelSmall
+                    )
                 }
 
             }
