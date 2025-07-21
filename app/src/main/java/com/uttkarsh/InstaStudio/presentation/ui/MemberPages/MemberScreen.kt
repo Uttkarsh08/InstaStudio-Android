@@ -1,6 +1,12 @@
 package com.uttkarsh.InstaStudio.presentation.ui.MemberPages
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -29,8 +35,10 @@ import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -48,7 +56,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.uttkarsh.InstaStudio.presentation.ui.ResourcePages.ResourceShimmerShow
@@ -75,16 +82,15 @@ fun MemberScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val state by memberViewModel.memberState.collectAsState()
-    val memberName by memberViewModel.memberName.collectAsState()
     val memberEmail by memberViewModel.memberEmail.collectAsState()
     val memberSalary by memberViewModel.memberSalary.collectAsState()
-    val memberPhone by memberViewModel.memberPhone.collectAsState()
-    val memberAvgRating by memberViewModel.memberAvgRating.collectAsState()
     val memberSpecialization by memberViewModel.memberSpecialization.collectAsState()
 
     var bottomSheetType by rememberSaveable(stateSaver = BottomSheetTypeSaver) {
         mutableStateOf<BottomSheetType>(BottomSheetType.None)
     }
+
+    val expandedMemberId by memberViewModel.expandedMemberId.collectAsState()
 
     val allMembers = if(state is MemberState.PageSuccess){
         (state as MemberState.PageSuccess).response.collectAsLazyPagingItems()
@@ -107,141 +113,179 @@ fun MemberScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    bottomSheetType = BottomSheetType.Add
-                    memberViewModel.clearMemberValues()
-                    coroutineScope.launch {
-                        sheetState.show()
-                    }
-                },
-                shape = CircleShape,
-                elevation = FloatingActionButtonDefaults.elevation(6.dp),
-                containerColor = colorResource(id = R.color.dashBoardContainer),
-                contentColor = Color.Black,
-                modifier = Modifier
-                    .size(70.dp)
-                    .border(3.dp, Color.White, CircleShape)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add",
-                    tint = Color.Black,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-        },
-        floatingActionButtonPosition = FabPosition.EndOverlay,
-    ) {
-        when (state) {
-            MemberState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize().padding(it),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-
-            is MemberState.Error -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = "Failed to load resources.")
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Button(onClick = { memberViewModel.getAllMembers() }) {
-                            Text("Retry")
+                FloatingActionButton(
+                    onClick = {
+                        bottomSheetType = BottomSheetType.Add
+                        memberViewModel.clearMemberValues()
+                        coroutineScope.launch {
+                            sheetState.show()
                         }
-                    }
-                }
-            }
-
-            MemberState.Idle -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = "No Members loaded yet.")
-                }
-            }
-
-            is MemberState.ListSuccess -> {
-
-            }
-
-            is MemberState.Success -> {}
-
-            is MemberState.PageSuccess -> {
-                val isRefreshing = allMembers?.loadState?.refresh is LoadState.Loading
-                val pullRefreshState = rememberPullRefreshState(
-                    refreshing = isRefreshing,
-                    onRefresh = { allMembers?.refresh() }
-                )
-
-                Box(
+                    },
+                    shape = CircleShape,
+                    elevation = FloatingActionButtonDefaults.elevation(6.dp),
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier
-                        .fillMaxSize()
-                        .pullRefresh(pullRefreshState)
+                        .size(50.dp)
+                        .border(3.dp, MaterialTheme.colorScheme.onPrimaryContainer, CircleShape)
                 ) {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize().padding(it),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add",
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+        },
+        floatingActionButtonPosition = FabPosition.Center,
+    ) { paddingValues ->
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            SearchBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .border(
+                        BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimary),
+                        RoundedCornerShape(10.dp)
+                    ),
+                onSearchChanged = { /* handle search */ }
+            )
+            when (state) {
+                MemberState.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        item {
-                            SearchBar(
-                                modifier = Modifier.fillMaxWidth()
-                                    .padding(0.dp, bottom = 28.dp)
-                                    .border(
-                                        BorderStroke(2.dp, colorResource(R.color.searchBarBorder)),
-                                        RoundedCornerShape(14.dp)
-                                    ),
-                                onSearchChanged = { /* TODO */ }
-                            )
-                        }
+                        CircularProgressIndicator()
+                    }
+                }
 
-                        items(
-                            count = allMembers?.itemCount ?: 0,
-                            key = { index -> allMembers?.get(index)?.memberId ?: index }
-
-                        ) { index ->
-
-                            allMembers?.get(index)?.let { member ->
-                                MemberCard(
-                                    name = memberName,
-                                    email = memberEmail,
-                                    phoneNo = memberPhone,
-                                    avgRating = memberAvgRating,
-                                    specialization = memberSpecialization,
-                                    salary = memberSalary,
-                                    onclick = {}
-                                )
-                            }
-                        }
-
-                        allMembers.apply {
-                            when {
-                                this?.loadState?.append is LoadState.Loading -> {
-                                    items(1) {
-                                        ResourceShimmerShow()
-                                    }
-                                }
-
-                                this?.loadState?.refresh is LoadState.Loading -> {
-                                    items(10) {
-                                        ResourceShimmerShow()
-                                    }
-                                }
+                is MemberState.Error -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(text = "Failed to load Members.")
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(onClick = { memberViewModel.getAllMembers() }) {
+                                Text("Retry")
                             }
                         }
                     }
-                    PullRefreshIndicator(
+                }
+
+                MemberState.Idle -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "No Members loaded yet.")
+                    }
+                }
+
+                is MemberState.ListSuccess -> {
+
+                }
+
+                is MemberState.Success -> {}
+
+                is MemberState.PageSuccess -> {
+                    val isRefreshing = allMembers?.loadState?.refresh is LoadState.Loading
+                    val pullRefreshState = rememberPullRefreshState(
                         refreshing = isRefreshing,
-                        state = pullRefreshState,
-                        modifier = Modifier.align(Alignment.TopCenter)
+                        onRefresh = { allMembers?.refresh() }
                     )
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .pullRefresh(pullRefreshState)
+                    ) {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            contentPadding = PaddingValues(16.dp)
+                        ) {
+                            items(
+                                count = allMembers?.itemCount ?: 0,
+                                key = { index -> allMembers?.get(index)?.memberId ?: index }
+                            ) { index ->
+                                allMembers?.get(index)?.let { member ->
+
+                                    val isExpanded = expandedMemberId == member.memberId
+
+                                    Surface(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .animateContentSize(),
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = MaterialTheme.colorScheme.surfaceContainerLow,
+                                        tonalElevation = 1.dp,
+                                        border = if (isExpanded) {
+                                            BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimary)
+                                        } else {
+                                            null
+                                        }
+                                    ) {
+                                        Column {
+                                            MemberItem(
+                                                member = member,
+                                                onCLick = {
+                                                    if (isExpanded) {
+                                                        memberViewModel.setExpandedMemberId(null)
+                                                    } else {
+                                                        memberViewModel.prepareEditMember(member)
+                                                        memberViewModel.setExpandedMemberId(member.memberId)
+                                                    }
+                                                },
+                                                ifInFocus = isExpanded
+                                            )
+
+                                            AnimatedVisibility(
+                                                visible = isExpanded,
+                                                enter = expandVertically() + fadeIn(),
+                                                exit = shrinkVertically() + fadeOut()
+                                            ) {
+                                                ExpandedMemberSheet(
+                                                    member = member,
+                                                    onEditClicked = { /* handle edit */ },
+                                                    onDeleteClicked = { /* handle delete */ },
+                                                    onEventsClicked = { /* handle events */ }
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            allMembers.apply {
+                                when {
+                                    this?.loadState?.append is LoadState.Loading -> {
+                                        items(1) {
+                                            ResourceShimmerShow()
+                                        }
+                                    }
+
+                                    this?.loadState?.refresh is LoadState.Loading -> {
+                                        items(10) {
+                                            ResourceShimmerShow()
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        PullRefreshIndicator(
+                            refreshing = isRefreshing,
+                            state = pullRefreshState,
+                            modifier = Modifier.align(Alignment.TopCenter)
+                        )
+                    }
                 }
             }
         }

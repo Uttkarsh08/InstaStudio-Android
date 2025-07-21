@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.StateFlow
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.uttkarsh.InstaStudio.domain.model.dto.member.MemberProfileResponseDTO
+import com.uttkarsh.InstaStudio.domain.model.dto.resource.ResourceResponseDTO
 import com.uttkarsh.InstaStudio.domain.usecase.member.MemberUseCases
 import com.uttkarsh.InstaStudio.utils.states.MemberState
 import com.uttkarsh.InstaStudio.utils.time.TimeProvider
@@ -27,6 +29,9 @@ class MemberViewModel @Inject constructor(
 
     private val _memberState = MutableStateFlow<MemberState>(MemberState.Idle)
     val memberState = _memberState.asStateFlow()
+
+    private val _expandedMemberId = MutableStateFlow<Long?>(null)
+    val expandedMemberId = _expandedMemberId.asStateFlow()
 
     private val _memberId = MutableStateFlow(0L)
     val memberId: StateFlow<Long> = _memberId
@@ -59,6 +64,10 @@ class MemberViewModel @Inject constructor(
         _memberSalary.value = newSalary
     }
 
+    fun setExpandedMemberId(id: Long?) {
+        _expandedMemberId.value = id
+    }
+
     fun updateMemberPhone(newPhone: String) {
         _memberPhone.value = newPhone
     }
@@ -78,6 +87,12 @@ class MemberViewModel @Inject constructor(
 
     fun updateMemberId(newId: Long) {
         _memberId.value = newId
+    }
+    fun prepareEditMember(member: MemberProfileResponseDTO) {
+        updateMemberId(member.memberId)
+        updateMemberName(member.memberName)
+        updateMemberSalary(member.salary)
+        updateMemberSpecialization(member.specialization)
     }
 
     fun clearMemberValues(){

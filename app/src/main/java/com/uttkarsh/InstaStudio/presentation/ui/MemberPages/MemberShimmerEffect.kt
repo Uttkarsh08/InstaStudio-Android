@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import com.uttkarsh.InstaStudio.R
+import com.uttkarsh.InstaStudio.presentation.ui.ResourcePages.ResourceShimmerEffect
 import shimmerEffect
 
 
@@ -32,10 +33,10 @@ fun MemberShimmerEffect(
             modifier = modifier
                 .fillMaxWidth()
                 .height(90.dp)
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(15.dp))
                 .shimmerEffect()
-                .background(color = colorResource(R.color.shimmer))
-                .border(1.dp, color = colorResource(R.color.shimmer), shape = RoundedCornerShape(16.dp))
+                .background(color)
+                .border(1.dp, color = color, shape = RoundedCornerShape(15.dp))
         )
     }
 }
@@ -43,16 +44,14 @@ fun MemberShimmerEffect(
 @Composable
 fun MemberShimmerShow(modifier: Modifier = Modifier) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = modifier
     ) {
         repeat(10) {
-            MemberShimmerEffect(
+            ResourceShimmerEffect(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(130.dp)
-                    .padding(8.dp),
-                color = MaterialTheme.colorScheme.secondary
+                    .fillMaxWidth(),
+                color = MaterialTheme.colorScheme.surfaceContainerLow
             )
         }
     }
