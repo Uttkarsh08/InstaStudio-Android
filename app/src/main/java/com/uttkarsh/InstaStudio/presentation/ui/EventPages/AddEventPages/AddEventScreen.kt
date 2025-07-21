@@ -89,7 +89,7 @@ fun AddEventScreen(
 
     val state by addEventViewModel.addEventState.collectAsState()
     val subEventsMap by addEventViewModel.subEventsMap.collectAsState()
-
+    val shouldReset = addEventViewModel.shouldResetAddEventScreen
     val errorMessage = (state as? AddEventState.Error)?.message
 
     if (datePickerTarget != null) {
@@ -108,9 +108,10 @@ fun AddEventScreen(
         )
     }
 
-    LaunchedEffect(addEventViewModel) {
+    LaunchedEffect(shouldReset) {
         addEventViewModel.resetAddEventScreen()
     }
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
@@ -352,7 +353,6 @@ fun AddEventScreen(
 
                             Button(
                                 onClick = {
-                                    addSubEventViewModel.markAddSubEventScreenForReset()
                                     navController.navigate(Screens.AddSubEventDetailsScreen.route)
                                 },
                                 colors = ButtonDefaults.buttonColors(
@@ -499,8 +499,7 @@ fun AddEventScreen(
                 popUpTo(Screens.AddEventDetailsScreen.route) { inclusive = true }
                 launchSingleTop = true
             }
-            addEventViewModel.resetAddEventState()
-            addEventViewModel.resetEventDetails()
+            addEventViewModel.markAddEventScreenForReset()
         }
     }
 }

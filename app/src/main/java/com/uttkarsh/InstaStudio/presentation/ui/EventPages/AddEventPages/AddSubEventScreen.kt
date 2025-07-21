@@ -411,7 +411,7 @@ fun AddSubEventScreen(
         }
     }
 
-    LaunchedEffect(state) {
+    LaunchedEffect(key1 = state is AddSubEventState.Success) {
         if (state is AddSubEventState.Success) {
 
             val subEvent = (state as AddSubEventState.Success).response
@@ -419,11 +419,11 @@ fun AddSubEventScreen(
             addEventsViewModel.addSubEvent(subEvent)
             Log.d("AddSubEventScreen", "Adding SubEvent: ${subEvent.eventId}")
 
+            addSubEventViewModel.resetAddSubEventScreen()
             navController.navigate(Screens.AddEventDetailsScreen.route) {
                 popUpTo(Screens.AddSubEventDetailsScreen.route) { inclusive = true }
                 launchSingleTop = true
             }
-            addSubEventViewModel.resetAddSubEventScreen()
         }
     }
 }

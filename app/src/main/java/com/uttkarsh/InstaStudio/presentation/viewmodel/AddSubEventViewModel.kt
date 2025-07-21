@@ -1,5 +1,6 @@
 package com.uttkarsh.InstaStudio.presentation.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -79,15 +80,9 @@ class AddSubEventViewModel @Inject constructor(
         private set
 
     fun resetAddSubEventScreen(){
-        if(shouldResetAddSubEventScreen){
-            resetAddSubEventState()
-            resetSubEventDetails()
-            shouldResetAddSubEventScreen = false
-        }
-    }
-
-    fun markAddSubEventScreenForReset() {
-        shouldResetAddSubEventScreen = true
+        resetAddSubEventState()
+        resetSubEventDetails()
+        shouldResetAddSubEventScreen = false
     }
 
     fun updateSubEventId(id: Long){
@@ -142,6 +137,7 @@ class AddSubEventViewModel @Inject constructor(
 
     fun resetAddSubEventState() {
         _addSubEventState.value = AddSubEventState.Idle
+        Log.d("AddSubEventViewModel", "resetAddSubEventState changed")
     }
 
     fun onSubEventTypeSelected(type: SubEventType) {

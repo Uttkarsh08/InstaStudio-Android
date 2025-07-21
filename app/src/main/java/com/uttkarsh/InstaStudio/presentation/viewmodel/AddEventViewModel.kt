@@ -1,5 +1,6 @@
 package com.uttkarsh.InstaStudio.presentation.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -199,7 +200,10 @@ class AddEventViewModel @Inject constructor(
         eventIsSaved = false
         datePickerTarget = null
         timePickerTarget = null
+        Log.d("AddEventViewModel", "_subEventsMap before clear: ${_subEventsMap.value}")
         _subEventsMap.value = emptyMap()
+        Log.d("AddEventViewModel", "_subEventsMap after clear: ${_subEventsMap.value}")
+
     }
 
 
