@@ -63,7 +63,7 @@ fun EventSchedulePage(
                 subEvents[it].let { event ->
                     SubEventCardInEventDetails(
                         event, {
-                            //on SubEventClicked
+                            subEventViewModel.setSubEvents(subEvents)
                             subEventViewModel.updateSubEventId(event.eventId)
                             navController.navigate(Screens.SubEventDetailScreen.route)
                         })
@@ -115,7 +115,6 @@ fun SubEventCardInEventDetails(
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(34.dp)
                 )
             }
 

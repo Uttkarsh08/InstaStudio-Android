@@ -43,7 +43,7 @@ fun NextEventSection(
     val alatsiFont = FontFamily(Font(R.font.alatsi))
 
     when (eventState) {
-        is EventState.Success -> {
+        is EventState.NextEventSuccess -> {
             val event = eventState.response
             Surface(
                 modifier = Modifier
@@ -68,6 +68,8 @@ fun NextEventSection(
         }
 
         is EventState.Error -> {
+            val error = eventState.message
+            val noUpcoming = (error.contains("404"))
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -78,15 +80,16 @@ fun NextEventSection(
                 onClick = onEventClick,
             ) {
                 Box(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().padding(8.dp),
                     contentAlignment = Alignment.Center
                 ) {
 
                     Text(
-                        text = "No Upcoming Event",
+                        text = if(noUpcoming) "No Upcoming Event" else "Some Error occurred, \nPlease try again Later",
                         fontFamily = alatsiFont,
                         fontSize = 20.sp,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.align(Alignment.Center)
                     )
                 }
             }
@@ -98,8 +101,15 @@ fun NextEventSection(
             EventShimmerShow()
         }
 
-        is EventState.CompletedPagingSuccess -> {}
-        is EventState.UpcomingPagingSuccess -> {}
+        is EventState.Success -> {
+            //Not to handle here
+        }
+        is EventState.CompletedPagingSuccess -> {
+            //Not to handle here
+        }
+        is EventState.UpcomingPagingSuccess -> {
+            //Not to handle here
+        }
     }
 }
 

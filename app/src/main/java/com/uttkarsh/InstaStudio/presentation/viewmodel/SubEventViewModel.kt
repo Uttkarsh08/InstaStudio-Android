@@ -3,9 +3,11 @@ package com.uttkarsh.InstaStudio.presentation.viewmodel
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.uttkarsh.InstaStudio.domain.model.dto.event.EventResponseDTO
 import com.uttkarsh.InstaStudio.domain.usecase.event.subEvent.SubEventUseCases
 import com.uttkarsh.InstaStudio.utils.states.SubEventState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,11 +26,22 @@ class SubEventViewModel  @Inject constructor(
     private val _subEventState = MutableStateFlow<SubEventState>(SubEventState.Idle)
     val subEventState: StateFlow<SubEventState> = _subEventState.asStateFlow()
 
+    private val _subEvents = MutableStateFlow<List<EventResponseDTO>>(emptyList())
+    val subEvents: StateFlow<List<EventResponseDTO>> = _subEvents.asStateFlow()
+
+    private val _selectedSubEventId = MutableStateFlow<Long?>(null)
+    val selectedSubEventId = _selectedSubEventId.asStateFlow()
+
     var subEventId by mutableLongStateOf(0L)
         private set
 
     fun updateSubEventId(newId: Long){
         subEventId = newId
+        _selectedSubEventId.value = newId
+    }
+
+    fun setSubEvents(subEvents: List<EventResponseDTO>) {
+        _subEvents.value = subEvents
     }
 
     fun getSubEventById(){

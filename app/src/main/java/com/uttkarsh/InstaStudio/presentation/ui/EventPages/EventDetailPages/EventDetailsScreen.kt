@@ -16,13 +16,11 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,6 +37,9 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -61,7 +62,7 @@ fun EventDetailsScreen(
     val alatsiFont = FontFamily(Font(R.font.alatsi))
 
     val evenState by eventViewModel.eventState.collectAsState()
-    val pagerState = rememberPagerState(pageCount = { 4 }, initialPage = 0)
+    val pagerState = rememberPagerState(pageCount = { 4 })
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
@@ -91,7 +92,6 @@ fun EventDetailsScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .verticalScroll(scrollState)
                         .imePadding()
                         .padding(paddingValues),
                     verticalArrangement = Arrangement.Top,
@@ -100,7 +100,7 @@ fun EventDetailsScreen(
 
                     Column(
                         modifier = Modifier
-                            .fillMaxSize()
+                            .fillMaxWidth()
                             .clip(
                                 RoundedCornerShape(
                                     bottomStart = 27.dp,
@@ -138,35 +138,36 @@ fun EventDetailsScreen(
 
                     val tabTitles = listOf("Schedule", "Payments", "Contact", "Deliverables")
 
-                    ScrollableTabRow(
+                    TabRow(
                         selectedTabIndex = pagerState.currentPage,
+                        modifier = Modifier.fillMaxWidth(),
                         containerColor = Color.Transparent,
-                        contentColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        edgePadding = 0.dp,
                         indicator = { tabPositions ->
-                            Box(
-                                modifier = Modifier
-                                    .tabIndicatorOffset(tabPositions[pagerState.currentPage])
-                                    .height(2.dp)
-                                    .background(MaterialTheme.colorScheme.onPrimary)
+                            TabRowDefaults.Indicator(
+                                Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
+                                height = 2.dp,
+                                color = MaterialTheme.colorScheme.onPrimary
                             )
                         }
                     ) {
                         tabTitles.forEachIndexed { index, title ->
                             Tab(
-                                text = {
-                                    Text(
-                                        text = title,
-                                        fontWeight = FontWeight.Bold,
-                                        style = MaterialTheme.typography.bodySmall
-                                        // No maxLines or ellipsis needed now
-                                    )
-                                },
                                 selected = pagerState.currentPage == index,
                                 onClick = {
                                     coroutineScope.launch {
                                         pagerState.animateScrollToPage(index)
                                     }
+                                },
+                                text = {
+                                    Text(
+                                        text = title,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 12.sp
+                                        )
+                                    )
                                 },
                                 selectedContentColor = MaterialTheme.colorScheme.onPrimary,
                                 unselectedContentColor = MaterialTheme.colorScheme.surfaceContainerHigh
@@ -205,6 +206,10 @@ fun EventDetailsScreen(
             }
 
             is EventState.CompletedPagingSuccess -> {
+                //Not to handle here
+            }
+
+            is EventState.NextEventSuccess -> {
                 //Not to handle here
             }
 

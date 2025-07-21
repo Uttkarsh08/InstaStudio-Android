@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.lifecycle.viewModelScope
+import com.uttkarsh.InstaStudio.domain.model.dto.event.EventResponseDTO
 import com.uttkarsh.InstaStudio.domain.usecase.event.Event.EventUseCases
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -32,6 +33,9 @@ class EventViewModel @Inject constructor(
 
     private val _completedEventState = MutableStateFlow<EventState>(EventState.Idle)
     val completedEventState: StateFlow<EventState> = _completedEventState.asStateFlow()
+
+    private val _nextEventState = MutableStateFlow<EventState>(EventState.Idle)
+    val nextEventState: StateFlow<EventState> = _nextEventState.asStateFlow()
 
     private val _eventState = MutableStateFlow<EventState>(EventState.Idle)
     val eventState: StateFlow<EventState> = _eventState.asStateFlow()
@@ -124,10 +128,10 @@ class EventViewModel @Inject constructor(
             try {
                 val response = eventUseCases.getNextUpcomingEvent()
 
-                _eventState.value = EventState.Success(response)
+                _nextEventState.value = EventState.NextEventSuccess(response)
 
             }catch (e: Exception) {
-                _eventState.value = EventState.Error(e.localizedMessage ?: "Unexpected error occurred")
+                _nextEventState.value = EventState.Error(e.localizedMessage ?: "Unexpected error occurred")
             }
         }
     }
@@ -140,7 +144,6 @@ class EventViewModel @Inject constructor(
                 val response = eventUseCases.getEventById(eventId)
 
                 _eventState.value = EventState.Success(response)
-
 
             }catch (e: Exception) {
                 _eventState.value = EventState.Error(e.localizedMessage ?: "Unexpected error occurred")

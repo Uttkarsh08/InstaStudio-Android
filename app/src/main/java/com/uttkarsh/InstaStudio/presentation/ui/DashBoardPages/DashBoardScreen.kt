@@ -45,7 +45,7 @@ fun DashBoardScreen(
 ){
     val scrollState = rememberScrollState()
 
-    val nextEvenState by eventViewModel.eventState.collectAsState()
+    val nextEvenState by eventViewModel.nextEventState.collectAsState()
 
     LaunchedEffect(Unit) {
         dashBoardViewModel.loadUserProfileIfNeeded()
