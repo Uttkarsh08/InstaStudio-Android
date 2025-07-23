@@ -1,5 +1,6 @@
 package com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -49,6 +50,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.scale
@@ -102,7 +104,7 @@ fun AddEventScreen(
     val eventState = addEventViewModel.eventState
     val datePickerTarget = addEventViewModel.datePickerTarget
     val timePickerTarget = addEventViewModel.timePickerTarget
-    val isSubEventEnabled = addEventViewModel.isSubEventEnabled
+    val isSubEventEnabled by addEventViewModel::isSubEventEnabled
 
     val state by addEventViewModel.addEventState.collectAsState()
     val availableMembersState by memberViewModel.memberState.collectAsState()
@@ -124,8 +126,8 @@ fun AddEventScreen(
 
     val shouldReset = addEventViewModel.shouldResetAddEventScreen
     val errorMessage = (state as? AddEventState.Error)?.message
-    val dropdownWidth = remember { mutableStateOf(0) }
-    val dropdownHeight = remember { mutableStateOf(0) }
+    val dropdownWidth = remember { mutableIntStateOf(0) }
+    val dropdownHeight = remember { mutableIntStateOf(0) }
 
     if (datePickerTarget != null) {
         ShowDatePickerDialog(
@@ -144,7 +146,9 @@ fun AddEventScreen(
     }
 
     LaunchedEffect(shouldReset) {
+        Log.d("AddEventScreen Before", isSubEventEnabled.toString())
         addEventViewModel.resetAddEventScreen()
+        Log.d("AddEventScreen After", isSubEventEnabled.toString())
     }
 
     Scaffold(
@@ -203,8 +207,8 @@ fun AddEventScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .onGloballyPositioned { coordinates ->
-                                    dropdownWidth.value = coordinates.size.width
-                                    dropdownHeight.value = coordinates.size.height
+                                    dropdownWidth.intValue = coordinates.size.width
+                                    dropdownHeight.intValue = coordinates.size.height
                                 }
                         ) {
                             NoteMarkTextField(
@@ -224,7 +228,7 @@ fun AddEventScreen(
                                 onDismissRequest = { addEventViewModel.closeEventTypeDropdown() },
                                 shape = RoundedCornerShape(15.dp),
                                 modifier = Modifier
-                                    .width(with(LocalDensity.current) { dropdownWidth.value.toDp() })
+                                    .width(with(LocalDensity.current) { dropdownWidth.intValue.toDp() })
                                     .heightIn(max = 300.dp)
                                     .background(MaterialTheme.colorScheme.surfaceContainerLow)
                             ) {
@@ -531,8 +535,8 @@ fun AddEventScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .onGloballyPositioned { coordinates ->
-                                        dropdownWidth.value = coordinates.size.width
-                                        dropdownHeight.value = coordinates.size.height
+                                        dropdownWidth.intValue = coordinates.size.width
+                                        dropdownHeight.intValue = coordinates.size.height
                                     }
                             ) {
                                 NoteMarkTextField(
@@ -552,10 +556,10 @@ fun AddEventScreen(
                                     onDismissRequest = { addEventViewModel.closeResourceDropdown() },
                                     shape = RoundedCornerShape(15.dp),
                                     offset = with(LocalDensity.current) {
-                                        DpOffset(x = 0.dp, y = with(LocalDensity.current) { dropdownHeight.value.toDp() })
+                                        DpOffset(x = 0.dp, y = with(LocalDensity.current) { dropdownHeight.intValue.toDp() })
                                     },
                                     modifier = Modifier
-                                        .width(with(LocalDensity.current) { dropdownWidth.value.toDp() })
+                                        .width(with(LocalDensity.current) { dropdownWidth.intValue.toDp() })
                                         .heightIn(max = 300.dp)
                                         .background(MaterialTheme.colorScheme.surfaceContainerLow)
                                 ) {
@@ -618,8 +622,8 @@ fun AddEventScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .onGloballyPositioned { coordinates ->
-                                        dropdownWidth.value = coordinates.size.width
-                                        dropdownHeight.value = coordinates.size.height
+                                        dropdownWidth.intValue = coordinates.size.width
+                                        dropdownHeight.intValue = coordinates.size.height
                                     }
                             ) {
                                 NoteMarkTextField(
@@ -639,10 +643,10 @@ fun AddEventScreen(
                                     onDismissRequest = { addEventViewModel.closeMemberDropdown() },
                                     shape = RoundedCornerShape(15.dp),
                                     offset = with(LocalDensity.current) {
-                                        DpOffset(x = 0.dp, y = with(LocalDensity.current) { dropdownHeight.value.toDp() })
+                                        DpOffset(x = 0.dp, y = with(LocalDensity.current) { dropdownHeight.intValue.toDp() })
                                     },
                                     modifier = Modifier
-                                        .width(with(LocalDensity.current) { dropdownWidth.value.toDp() })
+                                        .width(with(LocalDensity.current) { dropdownWidth.intValue.toDp() })
                                         .heightIn(max = 300.dp)
                                         .background(MaterialTheme.colorScheme.surfaceContainerLow)
                                 ) {
@@ -796,9 +800,22 @@ fun AddEventScreen(
         }
     }
 
-    LaunchedEffect(eventStartDate, eventStartTime, eventEndDate, eventEndTime) {
-        memberViewModel.getAvailableMembers(eventStartDate, eventStartTime, eventEndDate, eventEndTime)
-        resourceViewModel.getAvailableResources(eventStartDate, eventStartTime, eventEndDate, eventEndTime)
+    LaunchedEffect(eventStartDate, eventStartTime, eventEndDate, eventEndTime, isSubEventEnabled
+    ) {
+        if (!isSubEventEnabled) {
+            memberViewModel.getAvailableMembers(
+                eventStartDate,
+                eventStartTime,
+                eventEndDate,
+                eventEndTime
+            )
+            resourceViewModel.getAvailableResources(
+                eventStartDate,
+                eventStartTime,
+                eventEndDate,
+                eventEndTime
+            )
+        }
     }
 }
 

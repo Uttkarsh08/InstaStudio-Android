@@ -256,6 +256,7 @@ class AddEventViewModel @Inject constructor(
     }
 
     fun resetEventDetails(){
+        isSubEventEnabled = true
         eventId = 0L
         clientName = ""
         clientPhoneNo = ""
@@ -270,7 +271,7 @@ class AddEventViewModel @Inject constructor(
         eventIsSaved = false
         datePickerTarget = null
         timePickerTarget = null
-        isSubEventEnabled = true
+        Log.d("AddEventViewModel subEventEnabled: ", isSubEventEnabled.toString())
         _subEventsMap.value = emptyMap()
         _selectedEventMembers.value = emptySet()
         _selectedEventResources.value = emptySet()
