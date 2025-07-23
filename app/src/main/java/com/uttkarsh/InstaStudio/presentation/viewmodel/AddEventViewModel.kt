@@ -19,6 +19,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import androidx.compose.runtime.State
 import com.uttkarsh.InstaStudio.domain.model.dto.event.SubEventResponseDTO
+import com.uttkarsh.InstaStudio.domain.model.dto.member.MemberProfileResponseDTO
+import com.uttkarsh.InstaStudio.domain.model.dto.resource.ResourceResponseDTO
 import com.uttkarsh.InstaStudio.domain.usecase.event.addEvent.AddEventUseCases
 import com.uttkarsh.InstaStudio.utils.time.TimeProvider
 import kotlinx.coroutines.flow.update
@@ -36,6 +38,12 @@ class AddEventViewModel @Inject constructor(
         private set
 
     var clientName by mutableStateOf("")
+        private set
+
+    var groomName by mutableStateOf("")
+        private set
+
+    var brideName by mutableStateOf("")
         private set
 
     var clientPhoneNo by mutableStateOf("")
@@ -72,6 +80,9 @@ class AddEventViewModel @Inject constructor(
     var timePickerTarget by mutableStateOf<TimePickerTarget?>(null)
         private set
 
+    var isSubEventEnabled by mutableStateOf(true)
+        private set
+
     private val _eventTypes = EventType.entries
     val eventTypes: List<EventType> = _eventTypes
 
@@ -80,6 +91,18 @@ class AddEventViewModel @Inject constructor(
 
     private val _eventTypeDropdownExpanded = mutableStateOf(false)
     val eventTypeDropdownExpanded: State<Boolean> = _eventTypeDropdownExpanded
+
+    private val _selectedEventResources = MutableStateFlow<Set<Long>>(emptySet())
+    val selectedEventResources: StateFlow<Set<Long>> = _selectedEventResources
+
+    private val _resourcesDropdownExpanded = mutableStateOf(false)
+    val resourcesDropdownExpanded: State<Boolean> = _resourcesDropdownExpanded
+
+    private val _selectedEventMembers = MutableStateFlow<Set<Long>>(emptySet())
+    val selectedEventMembers: StateFlow<Set<Long>> = _selectedEventMembers
+
+    private val _membersDropdownExpanded = mutableStateOf(false)
+    val membersDropdownExpanded: State<Boolean> = _membersDropdownExpanded
 
     private val _subEventsMap = MutableStateFlow<Map<Long, SubEventResponseDTO>>(emptyMap())
     val subEventsMap: StateFlow<Map<Long, SubEventResponseDTO>> = _subEventsMap
@@ -111,6 +134,14 @@ class AddEventViewModel @Inject constructor(
         clientName = newName
     }
 
+    fun updateGroomName(newName: String) {
+        groomName = newName
+    }
+
+    fun updateBrideName(newName: String) {
+        brideName = newName
+    }
+
     fun updateClientPhoneNo(newPhoneNo: String) {
         clientPhoneNo = newPhoneNo
     }
@@ -133,6 +164,10 @@ class AddEventViewModel @Inject constructor(
 
     fun updateEventIsSaved(newIsSaved: Boolean) {
         eventIsSaved = newIsSaved
+    }
+
+    fun toggleSubEventEnabled() {
+        isSubEventEnabled = !isSubEventEnabled
     }
 
     fun onDateBoxClick(target: DatePickerTarget) {
@@ -185,6 +220,41 @@ class AddEventViewModel @Inject constructor(
         _eventTypeDropdownExpanded.value = false
     }
 
+    fun onResourceSelected(resource: ResourceResponseDTO) {
+        _selectedEventResources.value = if (_selectedEventResources.value.contains(resource.resourceId)) {
+            _selectedEventResources.value - resource.resourceId
+        } else {
+            _selectedEventResources.value + resource.resourceId
+        }
+    }
+
+    fun toggleResourceDropdown() {
+        _resourcesDropdownExpanded.value = !_resourcesDropdownExpanded.value
+    }
+
+    fun closeResourceDropdown() {
+        _resourcesDropdownExpanded.value = false
+    }
+
+    fun onMemberSelected(member: MemberProfileResponseDTO) {
+        Log.d("AddEventViewModel", "Function called: ${member.memberId}")
+        _selectedEventMembers.value = if (_selectedEventMembers.value.contains(member.memberId)) {
+            _selectedEventMembers.value - member.memberId
+        } else {
+            _selectedEventMembers.value + member.memberId
+        }
+        Log.d("AddEventViewModel", "onMemberSelected: ${_selectedEventMembers.value}")
+    }
+
+
+    fun toggleMemberDropdown() {
+        _membersDropdownExpanded.value = !_membersDropdownExpanded.value
+    }
+
+    fun closeMemberDropdown() {
+        _membersDropdownExpanded.value = false
+    }
+
     fun resetEventDetails(){
         eventId = 0L
         clientName = ""
@@ -200,14 +270,22 @@ class AddEventViewModel @Inject constructor(
         eventIsSaved = false
         datePickerTarget = null
         timePickerTarget = null
-        Log.d("AddEventViewModel", "_subEventsMap before clear: ${_subEventsMap.value}")
+        isSubEventEnabled = true
         _subEventsMap.value = emptyMap()
-        Log.d("AddEventViewModel", "_subEventsMap after clear: ${_subEventsMap.value}")
 
+    }
+
+    fun prepareClientName(): String {
+        return if (selectedEventType.value == EventType.WEDDING) {
+            "${groomName.trim()} weds ${brideName.trim()}"
+        } else {
+            clientName.trim()
+        }
     }
 
 
     fun createNewEvent() {
+        val finalClientName = prepareClientName()
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 _addEventState.value = AddEventState.Loading
@@ -217,7 +295,7 @@ class AddEventViewModel @Inject constructor(
                 val subEventsIds = subEventsMap.value.map { it.value.eventId }.toSet()
 
                 val response = eventUseCases.createNewEvent(
-                    clientName = clientName,
+                    clientName = finalClientName,
                     clientPhoneNo = clientPhoneNo,
                     eventType = selectedEventType.value.toString(),
                     subEventIds = subEventsIds,

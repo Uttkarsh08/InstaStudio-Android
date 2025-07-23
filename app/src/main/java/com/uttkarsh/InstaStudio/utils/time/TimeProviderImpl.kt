@@ -95,6 +95,18 @@ class TimeProviderImpl : TimeProvider {
         }
     }
 
+    override fun parseToLocalDateTime(dateTimeStr: String, pattern: String): LocalDateTime? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            try {
+                val formatter = DateTimeFormatter.ofPattern(pattern)
+                LocalDateTime.parse(dateTimeStr, formatter)
+            } catch (e: Exception) {
+                null
+            }
+        } else {
+            null
+        }
+    }
 
 
 }

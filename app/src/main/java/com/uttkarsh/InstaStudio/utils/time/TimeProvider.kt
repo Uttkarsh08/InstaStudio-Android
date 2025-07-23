@@ -11,4 +11,5 @@ interface TimeProvider {
     fun nowLocalDateTime(): LocalDateTime?
     fun formatDate(rawDate: String, pattern: String = "dd MMM, yyyy, E"): String?
     fun formatTime(rawDate: String, pattern: String = "HH:mm"): String?
+    fun parseToLocalDateTime(dateTimeStr: String, pattern: String = "yyyy-MM-dd'T'HH:mm:ss"): LocalDateTime?
 }

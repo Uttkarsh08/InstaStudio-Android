@@ -1,11 +1,13 @@
 package com.uttkarsh.InstaStudio.domain.model
 
 enum class SubEventType(val displayName: String) {
-    WEDDING("Wedding"),
-    HALDI("haldi"),
-    BIRTHDAY("Birthday"),
-    CORPORATE("Corporate"),
-    OTHER("Other");
+    PRE_WEDDING("Pre-Wedding"),
+    ENGAGEMENT("Engagement"),
+    HALDI("Haldi"),
+    MEHENDI("Mehendi"),
+    SANGEET("Sangeet"),
+    RECEPTION("Reception"),
+    VIDAI("Vidai");
 
     override fun toString(): String = displayName
 }

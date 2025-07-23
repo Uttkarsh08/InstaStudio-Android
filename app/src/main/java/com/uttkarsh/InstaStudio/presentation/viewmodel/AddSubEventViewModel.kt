@@ -70,7 +70,7 @@ class AddSubEventViewModel @Inject constructor(
     private val _subEventTypes = SubEventType.entries
     val subEventTypes: List<SubEventType> = _subEventTypes
 
-    private val _selectedSubEventType = mutableStateOf(SubEventType.WEDDING)
+    private val _selectedSubEventType = mutableStateOf(SubEventType.PRE_WEDDING)
     val selectedSubEventType: State<SubEventType> = _selectedSubEventType
 
     private val _subEventTypeDropdownExpanded = mutableStateOf(false)
@@ -156,7 +156,7 @@ class AddSubEventViewModel @Inject constructor(
 
     fun resetSubEventDetails(){
         subEventId =0L
-        _selectedSubEventType.value = SubEventType.WEDDING
+        _selectedSubEventType.value = SubEventType.PRE_WEDDING
         subEventStartDate = timeProvider.nowDate()
         subEventEndDate = timeProvider.nowDate()
         subEventStartTime = timeProvider.nowTime()

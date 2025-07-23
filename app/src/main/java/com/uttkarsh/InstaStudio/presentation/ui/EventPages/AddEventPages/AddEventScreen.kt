@@ -31,24 +31,34 @@ import androidx.compose.ui.unit.sp
 import com.uttkarsh.InstaStudio.R
 import com.uttkarsh.InstaStudio.presentation.ui.utils.AppTopBar
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.DpOffset
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.uttkarsh.InstaStudio.domain.model.DatePickerTarget
+import com.uttkarsh.InstaStudio.domain.model.EventType
 import com.uttkarsh.InstaStudio.domain.model.TimePickerTarget
 import com.uttkarsh.InstaStudio.presentation.navigation.Screens
 import com.uttkarsh.InstaStudio.presentation.ui.utils.NoteMarkTextField
@@ -56,15 +66,16 @@ import com.uttkarsh.InstaStudio.presentation.ui.utils.ShowDatePickerDialog
 import com.uttkarsh.InstaStudio.presentation.ui.utils.ShowTimePickerDialog
 import com.uttkarsh.InstaStudio.presentation.ui.utils.TrailingIconConfig
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AddEventViewModel
-import com.uttkarsh.InstaStudio.presentation.viewmodel.AddSubEventViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.EventViewModel
+import com.uttkarsh.InstaStudio.presentation.viewmodel.MemberViewModel
 import com.uttkarsh.InstaStudio.utils.states.AddEventState
+import com.uttkarsh.InstaStudio.utils.states.MemberState
 
 @Composable
 fun AddEventScreen(
     addEventViewModel: AddEventViewModel = hiltViewModel(),
     eventViewModel: EventViewModel = hiltViewModel(),
-    addSubEventViewModel: AddSubEventViewModel = hiltViewModel(),
+    memberViewModel: MemberViewModel = hiltViewModel(),
     navController: NavController
 ) {
 
@@ -73,7 +84,9 @@ fun AddEventScreen(
 
     val eventTypes = addEventViewModel.eventTypes
     val selectedEventType by addEventViewModel.selectedEventType
-    val dropdownExpanded by addEventViewModel.eventTypeDropdownExpanded
+    val eventTypeDropdownExpanded by addEventViewModel.eventTypeDropdownExpanded
+    val eventResourcesDropDownExpanded by addEventViewModel.resourcesDropdownExpanded
+    val eventMembersDropDownExpanded by addEventViewModel.membersDropdownExpanded
 
     val clientName = addEventViewModel.clientName
     val clientPhoneNo = addEventViewModel.clientPhoneNo
@@ -86,11 +99,25 @@ fun AddEventScreen(
     val eventState = addEventViewModel.eventState
     val datePickerTarget = addEventViewModel.datePickerTarget
     val timePickerTarget = addEventViewModel.timePickerTarget
+    val isSubEventEnabled = addEventViewModel.isSubEventEnabled
 
     val state by addEventViewModel.addEventState.collectAsState()
+    val availableMembersState by memberViewModel.memberState.collectAsState()
+
+    val availableMembers = when (availableMembersState) {
+        is MemberState.ListSuccess -> (availableMembersState as MemberState.ListSuccess).response
+        else -> emptyList()
+    }
+    val selectedMembers by addEventViewModel.selectedEventMembers.collectAsState()
+
     val subEventsMap by addEventViewModel.subEventsMap.collectAsState()
+
+
+
     val shouldReset = addEventViewModel.shouldResetAddEventScreen
     val errorMessage = (state as? AddEventState.Error)?.message
+    val dropdownWidth = remember { mutableStateOf(0) }
+    val dropdownHeight = remember { mutableStateOf(0) }
 
     if (datePickerTarget != null) {
         ShowDatePickerDialog(
@@ -126,7 +153,7 @@ fun AddEventScreen(
                 isRightIcon = false,
                 rightIcon = null,
                 onRightIconClicked = {},
-                onNavClick = {navController.navigateUp()}
+                onNavClick = { navController.navigateUp() }
             )
         }
     ) { innerPadding ->
@@ -162,60 +189,116 @@ fun AddEventScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
 
-                    NoteMarkTextField(
-                        text = clientName,
-                        onValueChange = addEventViewModel::updateClientName,
-                        label = "Client Name",
-                        hint = "Harish & Jyoti",
-                        isNumberType = false,
-                        haveTrailingIcon = false,
-                        trailingIconConfig = null
-                    )
+                    Column(modifier = Modifier.fillMaxWidth()) {
 
-                    NoteMarkTextField(
-                        text = selectedEventType.displayName,
-                        onValueChange = {},
-                        label = "Event Type",
-                        hint = selectedEventType.displayName,
-                        isNumberType = false,
-                        haveTrailingIcon = true,
-                        trailingIconConfig = TrailingIconConfig.ImageVectorIcon(Icons.Default.KeyboardArrowDown),
-                        readOnly = true,
-                        onClick = { addEventViewModel.toggleEventTypeDropdown() }
-                    )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .onGloballyPositioned { coordinates ->
+                                    dropdownWidth.value = coordinates.size.width
+                                    dropdownHeight.value = coordinates.size.height
+                                }
+                        ) {
+                            NoteMarkTextField(
+                                text = selectedEventType.displayName,
+                                onValueChange = {},
+                                label = "Event Type",
+                                hint = selectedEventType.displayName,
+                                isNumberType = false,
+                                haveTrailingIcon = true,
+                                trailingIconConfig = TrailingIconConfig.ImageVectorIcon(Icons.Default.KeyboardArrowDown),
+                                readOnly = true,
+                                onClick = { addEventViewModel.toggleEventTypeDropdown() }
+                            )
 
-                    DropdownMenu(
-                        expanded = dropdownExpanded,
-                        onDismissRequest = { addEventViewModel.closeEventTypeDropdown() },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(
-                                RoundedCornerShape(
-                                    bottomStart = 8.dp,
-                                    bottomEnd = 8.dp
-                                )
-                            )
-                            .padding(horizontal = 30.dp)
-                            .background(MaterialTheme.colorScheme.background)
-                    ) {
-                        eventTypes.forEach { type ->
-                            DropdownMenuItem(
-                                text = {
-                                    Text(
-                                        text = type.displayName,
-                                        color = MaterialTheme.colorScheme.onPrimary,
-                                        fontFamily = alatsiFont,
-                                        fontSize = 16.sp
-                                    )
-                                },
-                                onClick = {
-                                    addEventViewModel.onEventTypeSelected(type)
-                                },
-                                contentPadding = PaddingValues(horizontal = 12.dp)
-                            )
+                            DropdownMenu(
+                                expanded = eventTypeDropdownExpanded,
+                                onDismissRequest = { addEventViewModel.closeEventTypeDropdown() },
+                                shape = RoundedCornerShape(15.dp),
+                                modifier = Modifier
+                                    .width(with(LocalDensity.current) { dropdownWidth.value.toDp() })
+                                    .heightIn(max = 300.dp)
+                                    .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .heightIn(max = 300.dp)
+                                        .verticalScroll(rememberScrollState())
+                                ) {
+                                    Column {
+                                        eventTypes.forEach { type ->
+                                            DropdownMenuItem(
+                                                text = {
+                                                    Text(
+                                                        text = type.displayName,
+                                                        fontFamily = alatsiFont,
+                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        color = MaterialTheme.colorScheme.onPrimary
+                                                    )
+                                                },
+                                                onClick = {
+                                                    addEventViewModel.onEventTypeSelected(type)
+                                                    addEventViewModel.closeEventTypeDropdown()
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
 
+                    if (selectedEventType == EventType.WEDDING || selectedEventType == EventType.ANNIVERSARY ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            NoteMarkTextField(
+                                text = addEventViewModel.groomName,
+                                onValueChange = addEventViewModel::updateGroomName,
+                                label = "Groom Name",
+                                hint = "Harish",
+                                isNumberType = false,
+                                haveTrailingIcon = false,
+                                trailingIconConfig = null,
+                                modifier = Modifier.weight(1f)
+                            )
+
+                            Text(
+                                text = "weds",
+                                fontFamily = alatsiFont,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier
+                                    .align(Alignment.Bottom)
+                                    .padding(bottom = 16.dp)
+                            )
+
+                            NoteMarkTextField(
+                                text = addEventViewModel.brideName,
+                                onValueChange = addEventViewModel::updateBrideName,
+                                label = "Bride Name",
+                                hint = "Jyoti",
+                                isNumberType = false,
+                                haveTrailingIcon = false,
+                                trailingIconConfig = null,
+                                modifier = Modifier.weight(1f)
+                            )
+
+                        }
+                    } else {
+                        NoteMarkTextField(
+                            text = clientName,
+                            onValueChange = addEventViewModel::updateClientName,
+                            label = "Client Name",
+                            hint = "Harish",
+                            isNumberType = false,
+                            haveTrailingIcon = false,
+                            trailingIconConfig = null
+                        )
+                    }
 
                     Column {
                         Text(
@@ -344,64 +427,238 @@ fun AddEventScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = "Sub-Events",
-                                fontFamily = alatsiFont,
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-
-                            Button(
-                                onClick = {
-                                    navController.navigate(Screens.AddSubEventDetailsScreen.route)
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
-                                ),
-                                modifier = Modifier
-                                    .height(30.dp)
-                                    .wrapContentWidth()
-                                    .align(Alignment.Bottom)
+                            Row(modifier = Modifier.weight(1f),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(text = "Add New", fontFamily = alatsiFont, fontSize = 13.sp)
+                                Text(
+                                    text = "Sub-Events",
+                                    fontFamily = alatsiFont,
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+
+                                Switch(
+                                    modifier = Modifier.scale(0.7f),
+                                    checked = isSubEventEnabled,
+                                    onCheckedChange = { addEventViewModel.toggleSubEventEnabled() },
+                                    colors = SwitchDefaults.colors(
+                                        checkedThumbColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
+                                        uncheckedTrackColor = MaterialTheme.colorScheme.surfaceContainerLowest
+                                    )
+                                )
+                            }
+
+                            if (isSubEventEnabled) {
+                                Button(
+                                    onClick = {
+                                        navController.navigate(Screens.AddSubEventDetailsScreen.route)
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary
+                                    ),
+                                    modifier = Modifier
+                                        .height(30.dp)
+                                        .wrapContentWidth()
+                                        .align(Alignment.CenterVertically)
+                                ) {
+                                    Text(
+                                        text = "Add New",
+                                        fontFamily = alatsiFont,
+                                        color = MaterialTheme.colorScheme.onPrimary,
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
                             }
                         }
 
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(8.dp))
-                                .border(
-                                    1.dp,
-                                    MaterialTheme.colorScheme.surfaceContainerHigh,
-                                    RoundedCornerShape(8.dp)
-                                )
-                                .padding(horizontal = 12.dp)
-                        ) {
-                            Column(
+                        if(isSubEventEnabled){
+                            Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .defaultMinSize(minHeight = 160.dp)
-                                    .padding(top = 8.dp, bottom = 8.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .border(
+                                        1.dp,
+                                        MaterialTheme.colorScheme.surfaceContainerHigh,
+                                        RoundedCornerShape(8.dp)
+                                    )
+                                    .padding(horizontal = 12.dp)
                             ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .defaultMinSize(minHeight = 160.dp)
+                                        .padding(top = 8.dp, bottom = 8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
 
-                                subEventsMap.toList().map { cur ->
-                                    val subEvent = cur.second
-                                    if (true) {
-                                        SubEventCard(
-                                            subEvent = subEvent,
-                                            onDeleteClick = {
-                                                addEventViewModel.removeSubEvent(
-                                                    subEvent
+                                    subEventsMap.toList().map { cur ->
+                                        val subEvent = cur.second
+                                        if (true) {
+                                            SubEventCard(
+                                                subEvent = subEvent,
+                                                onDeleteClick = {
+                                                    addEventViewModel.removeSubEvent(
+                                                        subEvent
+                                                    )
+                                                }
+                                            )
+                                        } else {
+                                            Text("Loading sub event...", fontFamily = alatsiFont)
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+                    if(!isSubEventEnabled){
+
+                        Column(modifier = Modifier.fillMaxWidth()) {
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .onGloballyPositioned { coordinates ->
+                                        dropdownWidth.value = coordinates.size.width
+                                    }
+                            ) {
+                                NoteMarkTextField(
+                                    text = selectedEventType.displayName,
+                                    onValueChange = {},
+                                    label = "Event Type",
+                                    hint = selectedEventType.displayName,
+                                    isNumberType = false,
+                                    haveTrailingIcon = true,
+                                    trailingIconConfig = TrailingIconConfig.ImageVectorIcon(Icons.Default.KeyboardArrowDown),
+                                    readOnly = true,
+                                    onClick = { addEventViewModel.toggleEventTypeDropdown() }
+                                )
+
+                                DropdownMenu(
+                                    expanded = eventResourcesDropDownExpanded,
+                                    onDismissRequest = { addEventViewModel.closeResourceDropdown() },
+                                    shape = RoundedCornerShape(15.dp),
+                                    modifier = Modifier
+                                        .width(with(LocalDensity.current) { dropdownWidth.value.toDp() })
+                                        .heightIn(max = 300.dp)
+                                        .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .heightIn(max = 300.dp)
+                                            .verticalScroll(rememberScrollState())
+                                    ) {
+                                        Column {
+                                            eventTypes.forEach { type ->
+                                                DropdownMenuItem(
+                                                    text = {
+                                                        Text(
+                                                            text = type.displayName,
+                                                            fontFamily = alatsiFont,
+                                                            style = MaterialTheme.typography.bodyMedium,
+                                                            color = MaterialTheme.colorScheme.onPrimary
+                                                        )
+                                                    },
+                                                    onClick = {
+                                                        addEventViewModel.onEventTypeSelected(type)
+                                                        addEventViewModel.closeEventTypeDropdown()
+                                                    }
                                                 )
                                             }
-                                        )
-                                    } else {
-                                        Text("Loading sub event...", fontFamily = alatsiFont)
+                                        }
                                     }
+                                }
+                            }
+                        }
 
+                        Column(modifier = Modifier.fillMaxWidth()) {
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .onGloballyPositioned { coordinates ->
+                                        dropdownWidth.value = coordinates.size.width
+                                        dropdownHeight.value = coordinates.size.height
+                                    }
+                            ) {
+                                NoteMarkTextField(
+                                    text = "Select Members",
+                                    onValueChange = {},
+                                    label = "Members",
+                                    hint = "Select Members",
+                                    isNumberType = false,
+                                    haveTrailingIcon = true,
+                                    trailingIconConfig = TrailingIconConfig.ImageVectorIcon(Icons.Default.KeyboardArrowDown),
+                                    readOnly = true,
+                                    onClick = { addEventViewModel.toggleMemberDropdown() }
+                                )
+
+                                DropdownMenu(
+                                    expanded = eventMembersDropDownExpanded,
+                                    onDismissRequest = { addEventViewModel.closeMemberDropdown() },
+                                    shape = RoundedCornerShape(15.dp),
+                                    offset = with(LocalDensity.current) {
+                                        DpOffset(x = 0.dp, y = with(LocalDensity.current) { dropdownHeight.value.toDp() })
+                                    },
+                                    modifier = Modifier
+                                        .width(with(LocalDensity.current) { dropdownWidth.value.toDp() })
+                                        .heightIn(max = 300.dp)
+                                        .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .heightIn(max = 300.dp)
+                                            .verticalScroll(rememberScrollState())
+                                    ) {
+                                        Column {
+                                            availableMembers.forEach { member ->
+                                                val isSelected = selectedMembers.contains(member.memberId)
+                                                DropdownMenuItem(
+                                                    text = {
+                                                        Row(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            verticalAlignment = Alignment.CenterVertically,
+                                                            horizontalArrangement = Arrangement.SpaceBetween
+                                                        ) {
+                                                            Text(
+                                                                text = member.memberName,
+                                                                fontFamily = alatsiFont,
+                                                                style = MaterialTheme.typography.bodyMedium,
+                                                                color = MaterialTheme.colorScheme.onPrimary
+                                                            )
+                                                            Text(
+                                                                text = "₹${member.salary}",
+                                                                fontFamily = alatsiFont,
+                                                                style = MaterialTheme.typography.bodySmall,
+                                                                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
+                                                            )
+
+                                                            Checkbox(
+                                                                checked = isSelected,
+                                                                onCheckedChange = {
+                                                                    addEventViewModel.onMemberSelected(member)
+                                                                },
+                                                                colors = CheckboxDefaults.colors(
+                                                                    checkedColor = MaterialTheme.colorScheme.primaryContainer,
+                                                                    uncheckedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                                                    checkmarkColor = MaterialTheme.colorScheme.onPrimary
+                                                                )
+                                                            )
+                                                        }
+                                                    },
+                                                    onClick = {
+                                                        addEventViewModel.onMemberSelected(member)
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -501,6 +758,10 @@ fun AddEventScreen(
             }
             addEventViewModel.markAddEventScreenForReset()
         }
+    }
+
+    LaunchedEffect(eventStartDate, eventStartTime, eventEndDate, eventEndTime) {
+        memberViewModel.getAvailableMembers(eventStartDate, eventStartTime, eventEndDate, eventEndTime)
     }
 }
 
