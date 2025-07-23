@@ -1,11 +1,7 @@
 package com.uttkarsh.InstaStudio.domain.model.validators
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.uttkarsh.InstaStudio.domain.model.dto.event.EventRequestDTO
 import com.uttkarsh.InstaStudio.utils.time.TimeProvider
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.Date
 
 fun EventRequestDTO.validate(

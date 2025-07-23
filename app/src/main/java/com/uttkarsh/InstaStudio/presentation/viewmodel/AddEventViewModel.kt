@@ -300,6 +300,8 @@ class AddEventViewModel @Inject constructor(
                     clientPhoneNo = clientPhoneNo,
                     eventType = selectedEventType.value.toString(),
                     subEventIds = subEventsIds,
+                    memberIds = _selectedEventMembers.value,
+                    resourceIds = _selectedEventResources.value,
                     eventStart = eventStart,
                     eventEnd = eventEnd,
                     eventLocation = eventLocation,
