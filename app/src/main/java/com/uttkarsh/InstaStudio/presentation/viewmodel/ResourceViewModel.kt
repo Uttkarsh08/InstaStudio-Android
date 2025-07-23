@@ -12,6 +12,7 @@ import com.uttkarsh.InstaStudio.domain.model.dto.resource.ResourceResponseDTO
 import com.uttkarsh.InstaStudio.domain.usecase.resource.ResourceUseCases
 import com.uttkarsh.InstaStudio.utils.api.ApiErrorExtractor
 import com.uttkarsh.InstaStudio.utils.states.ResourceState
+import com.uttkarsh.InstaStudio.utils.time.TimeProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +26,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ResourceViewModel @Inject constructor(
-    private val resourceUseCases: ResourceUseCases
+    private val resourceUseCases: ResourceUseCases,
+    private val timeProvider: TimeProvider
 ): ViewModel() {
 
     private val _resourceState = MutableStateFlow<ResourceState>(ResourceState.Idle)
@@ -33,6 +35,7 @@ class ResourceViewModel @Inject constructor(
 
     var resourceId by mutableLongStateOf(0L)
         private set
+
 
     private val _resourceName = MutableStateFlow("")
     val resourceName: StateFlow<String> = _resourceName
@@ -76,7 +79,7 @@ class ResourceViewModel @Inject constructor(
                     .cachedIn(viewModelScope)
                     .stateIn(viewModelScope, SharingStarted.Lazily, PagingData.empty())
 
-                _resourceState.value = ResourceState.ListSuccess(response)
+                _resourceState.value = ResourceState.PageSuccess(response)
 
             }catch (e: HttpException) {
                 val message = ApiErrorExtractor.extractMessage(e)
@@ -123,6 +126,25 @@ class ResourceViewModel @Inject constructor(
             }catch (e: Exception) {
                 _resourceState.value = ResourceState.Error(e.localizedMessage ?: "An unexpected error occurred.")
             }
+        }
+    }
+
+    fun getAvailableResources(eventStartDate: String, eventStartTime: String, eventEndDate: String, eventEndTime: String){
+        viewModelScope.launch(Dispatchers.IO) {
+
+            val eventStart = timeProvider.parseToLocalDateTime(eventStartDate + "T" + eventStartTime)!!
+            val eventEnd = timeProvider.parseToLocalDateTime(eventEndDate + "T" + eventEndTime)!!
+
+            try {
+                val response = resourceUseCases.getAvailableResources(
+                    startDate = eventStart,
+                    endDate = eventEnd
+                )
+                _resourceState.value = ResourceState.ListSuccess(response)
+            }catch (e: Exception){
+                _resourceState.value = ResourceState.Error(e.localizedMessage ?: "Unexpected error")
+            }
+
         }
     }
 

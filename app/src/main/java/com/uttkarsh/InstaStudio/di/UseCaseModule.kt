@@ -31,6 +31,7 @@ import com.uttkarsh.InstaStudio.domain.usecase.profile.ProfileUseCases
 import com.uttkarsh.InstaStudio.domain.usecase.profile.SaveAdminProfileUseCase
 import com.uttkarsh.InstaStudio.domain.usecase.resource.CreateResourceUseCase
 import com.uttkarsh.InstaStudio.domain.usecase.resource.GetAllResourcesUseCase
+import com.uttkarsh.InstaStudio.domain.usecase.resource.GetAvailableResourcesUseCase
 import com.uttkarsh.InstaStudio.domain.usecase.resource.ResourceUseCases
 import com.uttkarsh.InstaStudio.domain.usecase.resource.UpdateResourceUseCase
 import com.uttkarsh.InstaStudio.utils.SharedPref.SessionStore
@@ -120,7 +121,8 @@ object UseCaseModule {
         return ResourceUseCases(
             createResource = CreateResourceUseCase(resourceRepository, sessionManager),
             updateResource = UpdateResourceUseCase(resourceRepository, sessionManager),
-            getAllResources = GetAllResourcesUseCase(resourceRepository, sessionManager)
+            getAllResources = GetAllResourcesUseCase(resourceRepository, sessionManager),
+            getAvailableResources = GetAvailableResourcesUseCase(resourceRepository, sessionManager)
         )
     }
 

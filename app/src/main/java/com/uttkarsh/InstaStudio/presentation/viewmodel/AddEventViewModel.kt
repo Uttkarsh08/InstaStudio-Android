@@ -272,7 +272,8 @@ class AddEventViewModel @Inject constructor(
         timePickerTarget = null
         isSubEventEnabled = true
         _subEventsMap.value = emptyMap()
-
+        _selectedEventMembers.value = emptySet()
+        _selectedEventResources.value = emptySet()
     }
 
     fun prepareClientName(): String {

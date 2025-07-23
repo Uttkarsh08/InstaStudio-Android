@@ -9,6 +9,7 @@ import com.uttkarsh.InstaStudio.domain.model.ApiResponse
 import com.uttkarsh.InstaStudio.domain.model.dto.resource.ResourceRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.dto.resource.ResourceResponseDTO
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -36,6 +37,14 @@ class ResourceRepository @Inject constructor(
         request: ResourceRequestDTO
     ): ApiResponse<ResourceResponseDTO>{
         return resourceApi.updateResourceById(studioId, resourceId, request)
+    }
+
+    suspend fun getAvailableResources(
+        studioId: Long,
+        startDate: LocalDateTime,
+        endDate: LocalDateTime
+    ): ApiResponse<List<ResourceResponseDTO>>{
+        return resourceApi.getAvailableResources(studioId, startDate, endDate)
     }
 
 }

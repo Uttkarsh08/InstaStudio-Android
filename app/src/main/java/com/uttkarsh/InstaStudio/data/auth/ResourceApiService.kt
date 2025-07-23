@@ -10,6 +10,7 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
+import java.time.LocalDateTime
 import javax.inject.Singleton
 
 @Singleton
@@ -33,4 +34,11 @@ interface ResourceApiService {
         @Body request: ResourceRequestDTO
 
     ): ApiResponse<ResourceResponseDTO>
+
+    @GET("/api/v1/{studioId}/available-resources")
+    suspend fun getAvailableResources(
+        @Path("studioId") studioId: Long,
+        @Query("startDate") startDate: LocalDateTime,
+        @Query("endDate") endDate : LocalDateTime
+    ): ApiResponse<List<ResourceResponseDTO>>
 }

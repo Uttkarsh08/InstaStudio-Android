@@ -68,14 +68,17 @@ import com.uttkarsh.InstaStudio.presentation.ui.utils.TrailingIconConfig
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AddEventViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.EventViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.MemberViewModel
+import com.uttkarsh.InstaStudio.presentation.viewmodel.ResourceViewModel
 import com.uttkarsh.InstaStudio.utils.states.AddEventState
 import com.uttkarsh.InstaStudio.utils.states.MemberState
+import com.uttkarsh.InstaStudio.utils.states.ResourceState
 
 @Composable
 fun AddEventScreen(
     addEventViewModel: AddEventViewModel = hiltViewModel(),
     eventViewModel: EventViewModel = hiltViewModel(),
     memberViewModel: MemberViewModel = hiltViewModel(),
+    resourceViewModel: ResourceViewModel = hiltViewModel(),
     navController: NavController
 ) {
 
@@ -103,16 +106,21 @@ fun AddEventScreen(
 
     val state by addEventViewModel.addEventState.collectAsState()
     val availableMembersState by memberViewModel.memberState.collectAsState()
+    val availableResourcesState by resourceViewModel.resourceState.collectAsState()
 
     val availableMembers = when (availableMembersState) {
         is MemberState.ListSuccess -> (availableMembersState as MemberState.ListSuccess).response
         else -> emptyList()
     }
+    val availableResources = when(availableResourcesState){
+        is ResourceState.ListSuccess -> (availableResourcesState as ResourceState.ListSuccess).response
+        else -> emptyList()
+    }
+
     val selectedMembers by addEventViewModel.selectedEventMembers.collectAsState()
+    val selectedResources by addEventViewModel.selectedEventResources.collectAsState()
 
     val subEventsMap by addEventViewModel.subEventsMap.collectAsState()
-
-
 
     val shouldReset = addEventViewModel.shouldResetAddEventScreen
     val errorMessage = (state as? AddEventState.Error)?.message
@@ -524,24 +532,28 @@ fun AddEventScreen(
                                     .fillMaxWidth()
                                     .onGloballyPositioned { coordinates ->
                                         dropdownWidth.value = coordinates.size.width
+                                        dropdownHeight.value = coordinates.size.height
                                     }
                             ) {
                                 NoteMarkTextField(
-                                    text = selectedEventType.displayName,
+                                    text = "Select Resources",
                                     onValueChange = {},
-                                    label = "Event Type",
-                                    hint = selectedEventType.displayName,
+                                    label = "Resources",
+                                    hint = "Select Resources",
                                     isNumberType = false,
                                     haveTrailingIcon = true,
                                     trailingIconConfig = TrailingIconConfig.ImageVectorIcon(Icons.Default.KeyboardArrowDown),
                                     readOnly = true,
-                                    onClick = { addEventViewModel.toggleEventTypeDropdown() }
+                                    onClick = { addEventViewModel.toggleResourceDropdown() }
                                 )
 
                                 DropdownMenu(
                                     expanded = eventResourcesDropDownExpanded,
                                     onDismissRequest = { addEventViewModel.closeResourceDropdown() },
                                     shape = RoundedCornerShape(15.dp),
+                                    offset = with(LocalDensity.current) {
+                                        DpOffset(x = 0.dp, y = with(LocalDensity.current) { dropdownHeight.value.toDp() })
+                                    },
                                     modifier = Modifier
                                         .width(with(LocalDensity.current) { dropdownWidth.value.toDp() })
                                         .heightIn(max = 300.dp)
@@ -554,19 +566,43 @@ fun AddEventScreen(
                                             .verticalScroll(rememberScrollState())
                                     ) {
                                         Column {
-                                            eventTypes.forEach { type ->
+                                            availableResources.forEach { resource ->
+                                                val isSelected = selectedResources.contains(resource.resourceId)
                                                 DropdownMenuItem(
                                                     text = {
-                                                        Text(
-                                                            text = type.displayName,
-                                                            fontFamily = alatsiFont,
-                                                            style = MaterialTheme.typography.bodyMedium,
-                                                            color = MaterialTheme.colorScheme.onPrimary
-                                                        )
+                                                        Row(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            verticalAlignment = Alignment.CenterVertically,
+                                                            horizontalArrangement = Arrangement.SpaceBetween
+                                                        ) {
+                                                            Text(
+                                                                text = resource.resourceName,
+                                                                fontFamily = alatsiFont,
+                                                                style = MaterialTheme.typography.bodyMedium,
+                                                                color = MaterialTheme.colorScheme.onPrimary
+                                                            )
+                                                            Text(
+                                                                text = "₹${resource.resourcePrice}",
+                                                                fontFamily = alatsiFont,
+                                                                style = MaterialTheme.typography.bodySmall,
+                                                                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
+                                                            )
+
+                                                            Checkbox(
+                                                                checked = isSelected,
+                                                                onCheckedChange = {
+                                                                    addEventViewModel.onResourceSelected(resource)
+                                                                },
+                                                                colors = CheckboxDefaults.colors(
+                                                                    checkedColor = MaterialTheme.colorScheme.primaryContainer,
+                                                                    uncheckedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                                                    checkmarkColor = MaterialTheme.colorScheme.onPrimary
+                                                                )
+                                                            )
+                                                        }
                                                     },
                                                     onClick = {
-                                                        addEventViewModel.onEventTypeSelected(type)
-                                                        addEventViewModel.closeEventTypeDropdown()
+                                                        addEventViewModel.onResourceSelected(resource)
                                                     }
                                                 )
                                             }
@@ -751,17 +787,18 @@ fun AddEventScreen(
 
             eventViewModel.resetHasLoadedFlags()
             eventViewModel.resetHasLoadedNextUpcomingEvent()
+            addEventViewModel.markAddEventScreenForReset()
 
             navController.navigate(Screens.EventScreen.route) {
                 popUpTo(Screens.AddEventDetailsScreen.route) { inclusive = true }
                 launchSingleTop = true
             }
-            addEventViewModel.markAddEventScreenForReset()
         }
     }
 
     LaunchedEffect(eventStartDate, eventStartTime, eventEndDate, eventEndTime) {
         memberViewModel.getAvailableMembers(eventStartDate, eventStartTime, eventEndDate, eventEndTime)
+        resourceViewModel.getAvailableResources(eventStartDate, eventStartTime, eventEndDate, eventEndTime)
     }
 }
 

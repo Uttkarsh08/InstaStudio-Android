@@ -85,8 +85,8 @@ fun ResourceScreen(
     val price by resourceViewModel.resourcePrice.collectAsState()
     val expandedResourceId by resourceViewModel.expandedResourceId.collectAsState()
 
-    val allResources = if (state is ResourceState.ListSuccess) {
-        (state as ResourceState.ListSuccess).response.collectAsLazyPagingItems()
+    val allResources = if (state is ResourceState.PageSuccess) {
+        (state as ResourceState.PageSuccess).response.collectAsLazyPagingItems()
     } else null
 
     val errorMessage = (state as? ResourceState.Error)?.message
@@ -166,7 +166,7 @@ fun ResourceScreen(
                     Text("No resources loaded yet.")
                 }
 
-                is ResourceState.ListSuccess -> {
+                is ResourceState.PageSuccess -> {
                     val isRefreshing = allResources?.loadState?.refresh is LoadState.Loading
                     val pullRefreshState = rememberPullRefreshState(
                         refreshing = isRefreshing,
@@ -254,6 +254,9 @@ fun ResourceScreen(
                 }
 
                 is ResourceState.Success -> {}
+                is ResourceState.ListSuccess -> {
+                    //Not to be handled here
+                }
             }
         }
 
