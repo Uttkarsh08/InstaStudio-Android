@@ -182,9 +182,7 @@ class AddEventViewModel @Inject constructor(
             DatePickerTarget.END_DATE -> {
                 eventEndDate = date
             }
-            null -> {
-                timePickerTarget = null
-            }
+            null -> {}
         }
         datePickerTarget = null
     }
@@ -259,6 +257,8 @@ class AddEventViewModel @Inject constructor(
         isSubEventEnabled = true
         eventId = 0L
         clientName = ""
+        groomName = ""
+        brideName = ""
         clientPhoneNo = ""
         _selectedEventType.value = EventType.WEDDING
         eventStartDate = timeProvider.nowDate()
@@ -278,7 +278,7 @@ class AddEventViewModel @Inject constructor(
     }
 
     fun prepareClientName(): String {
-        return if (selectedEventType.value == EventType.WEDDING) {
+        return if (selectedEventType.value == EventType.WEDDING || selectedEventType.value == EventType.ANNIVERSARY) {
             "${groomName.trim()} weds ${brideName.trim()}"
         } else {
             clientName.trim()
@@ -294,7 +294,15 @@ class AddEventViewModel @Inject constructor(
 
                 val eventStart = eventStartDate + "T" + eventStartTime
                 val eventEnd = eventEndDate + "T" + eventEndTime
-                val subEventsIds = subEventsMap.value.map { it.value.eventId }.toSet()
+
+                var subEventsIds = emptySet<Long>()
+                if(isSubEventEnabled){
+                    _selectedEventResources.value = emptySet()
+                    _selectedEventMembers.value = emptySet()
+                     subEventsIds = subEventsMap.value.map { it.value.eventId }.toSet()
+                }else{
+                    subEventsIds = emptySet()
+                }
 
                 val response = eventUseCases.createNewEvent(
                     clientName = finalClientName,
