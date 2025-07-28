@@ -32,7 +32,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.Alignment
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -67,8 +66,6 @@ fun AddEventScreen(
 
     val shouldReset = addEventViewModel.shouldResetAddEventScreen
     val errorMessage = (state as? AddEventState.Error)?.message
-    val dropdownWidth = remember { mutableIntStateOf(0) }
-    val dropdownHeight = remember { mutableIntStateOf(0) }
 
     if (datePickerTarget != null) {
         ShowDatePickerDialog(
@@ -140,11 +137,11 @@ fun AddEventScreen(
                         ),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    item { EventTypeSelector(addEventViewModel, alatsiFont, dropdownWidth, dropdownHeight) }
+                    item { EventTypeSelector(addEventViewModel, alatsiFont) }
                     item { ClientInfoSection(addEventViewModel, alatsiFont) }
                     item { DateTimeSection(addEventViewModel, eventStartDate, eventStartTime, eventEndDate, eventEndTime, alatsiFont) }
                     item { LocationSection(addEventViewModel) }
-                    item { SubEventSection(addEventViewModel, resourceViewModel, memberViewModel, alatsiFont, dropdownWidth, dropdownHeight, navController) }
+                    item { SubEventSection(addEventViewModel, resourceViewModel, memberViewModel, alatsiFont, navController) }
                     item {
                         Row(
                             modifier = Modifier.fillMaxWidth()

@@ -1,52 +1,47 @@
 package com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Popup
+import androidx.compose.material3.MenuAnchorType
 import androidx.navigation.NavController
 import com.uttkarsh.InstaStudio.presentation.navigation.Screens
 import com.uttkarsh.InstaStudio.presentation.ui.utils.NoteMarkTextField
@@ -57,14 +52,13 @@ import com.uttkarsh.InstaStudio.presentation.viewmodel.ResourceViewModel
 import com.uttkarsh.InstaStudio.utils.states.MemberState
 import com.uttkarsh.InstaStudio.utils.states.ResourceState
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SubEventSection(
     addEventViewModel: AddEventViewModel,
     resourceViewModel: ResourceViewModel,
     memberViewModel: MemberViewModel,
     alatsiFont: FontFamily,
-    dropdownWidth: MutableIntState,
-    dropdownHeight: MutableIntState,
     navController: NavController
 ) {
 
@@ -79,7 +73,7 @@ fun SubEventSection(
         is MemberState.ListSuccess -> (availableMembersState as MemberState.ListSuccess).response
         else -> emptyList()
     }
-    val availableResources = when(availableResourcesState){
+    val availableResources = when (availableResourcesState) {
         is ResourceState.ListSuccess -> (availableResourcesState as ResourceState.ListSuccess).response
         else -> emptyList()
     }
@@ -96,7 +90,8 @@ fun SubEventSection(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(modifier = Modifier.weight(1f),
+            Row(
+                modifier = Modifier.weight(1f),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -143,7 +138,7 @@ fun SubEventSection(
             }
         }
 
-        if(isSubEventEnabled){
+        if (isSubEventEnabled) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -181,210 +176,176 @@ fun SubEventSection(
                     }
                 }
             }
-        }else{
+        } else {
 
-            var offsetY by remember { mutableStateOf(0.dp) }
-            val density = LocalDensity.current
             val scrollState = rememberScrollState()
 
             Column(modifier = Modifier.fillMaxWidth()) {
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .onGloballyPositioned { coordinates ->
-                            dropdownWidth.intValue = coordinates.size.width
-                            dropdownHeight.intValue = coordinates.size.height
-                            offsetY = with(density) { coordinates.size.height.toDp() }
-                        }
+                ExposedDropdownMenuBox(
+                    expanded = eventResourcesDropDownExpanded,
+                    onExpandedChange = {
+                        addEventViewModel.toggleResourceDropdown()
+                    }
                 ) {
                     NoteMarkTextField(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(type = MenuAnchorType.PrimaryNotEditable),
                         text = "Select Resources",
                         onValueChange = {},
                         label = "Resources",
                         hint = "Select Resources",
                         isNumberType = false,
-                        haveTrailingIcon = true,
-                        trailingIconConfig = TrailingIconConfig.ImageVectorIcon(Icons.Default.KeyboardArrowDown),
                         readOnly = true,
-                        onClick = {
-                            addEventViewModel.toggleResourceDropdown()
-                        }
+                        trailingIconConfig = TrailingIconConfig.ImageVectorIcon(
+                            if (eventResourcesDropDownExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown
+                        ),
+                        haveTrailingIcon = true,
+                        onClick = {}
                     )
 
-                    if (eventResourcesDropDownExpanded) {
-                        Popup(
-                            alignment = Alignment.TopStart,
-                            offset = IntOffset(0, with(density) { offsetY.roundToPx() }),
-                            onDismissRequest = {
-                                addEventViewModel.closeResourceDropdown()
-                            }
+                    ExposedDropdownMenu(
+                        expanded = eventResourcesDropDownExpanded,
+                        onDismissRequest = {
+                            addEventViewModel.closeResourceDropdown()
+                        },
+                        modifier = Modifier
+                            .exposedDropdownSize(true)
+                            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .heightIn(max = 300.dp)
+                                .verticalScroll(scrollState)
                         ) {
-                            Surface(
-                                shape = RoundedCornerShape(15.dp),
-                                color = MaterialTheme.colorScheme.surfaceContainerLow,
-                                tonalElevation = 2.dp,
-                                shadowElevation = 2.dp,
-                                modifier = Modifier
-                                    .width(with(density) { dropdownWidth.intValue.toDp() })
-                                    .shadow(
-                                        elevation = 2.dp,
-                                        shape = RoundedCornerShape(15.dp),
-                                        ambientColor = Color.Black.copy(alpha = 0.15f),
-                                        spotColor = Color.Black.copy(alpha = 0.2f)
-                                    )
-                                    .heightIn(max = 300.dp)
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .verticalScroll(scrollState)
-                                        .padding(vertical = 8.dp)
-                                ) {
-                                    availableResources.forEach { resource ->
-                                        val isSelected = selectedResources.contains(resource.resourceId)
-                                        DropdownMenuItem(
-                                            text = {
-                                                Row(
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    verticalAlignment = Alignment.CenterVertically,
-                                                    horizontalArrangement = Arrangement.SpaceBetween
-                                                ) {
-                                                    Text(
-                                                        text = resource.resourceName,
-                                                        fontFamily = alatsiFont,
-                                                        style = MaterialTheme.typography.bodyMedium,
-                                                        color = MaterialTheme.colorScheme.onPrimary
-                                                    )
-                                                    Text(
-                                                        text = "₹${resource.resourcePrice}",
-                                                        fontFamily = alatsiFont,
-                                                        style = MaterialTheme.typography.bodySmall,
-                                                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
-                                                    )
-                                                    Checkbox(
-                                                        checked = isSelected,
-                                                        onCheckedChange = {
-                                                            addEventViewModel.onResourceSelected(resource)
-                                                        },
-                                                        colors = CheckboxDefaults.colors(
-                                                            checkedColor = MaterialTheme.colorScheme.primaryContainer,
-                                                            uncheckedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                                            checkmarkColor = MaterialTheme.colorScheme.onPrimary
-                                                        )
-                                                    )
-                                                }
-                                            },
-                                            onClick = {
-                                                addEventViewModel.onResourceSelected(resource)
-                                            }
-                                        )
-                                    }
-                                }
+                            availableResources.forEach { resource ->
+                                val isSelected = selectedResources.contains(resource.resourceId)
+                                DropdownMenuItem(
+                                    text = {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = resource.resourceName,
+                                                fontFamily = alatsiFont,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.onPrimary,
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                            Text(
+                                                text = "₹${resource.resourcePrice}",
+                                                fontFamily = alatsiFont,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
+                                                modifier = Modifier.padding(horizontal = 8.dp)
+                                            )
+                                            Checkbox(
+                                                checked = isSelected,
+                                                onCheckedChange = {
+                                                    addEventViewModel.onResourceSelected(resource)
+                                                },
+                                                colors = CheckboxDefaults.colors(
+                                                    checkedColor = MaterialTheme.colorScheme.primaryContainer,
+                                                    uncheckedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                                    checkmarkColor = MaterialTheme.colorScheme.onPrimary
+                                                )
+                                            )
+                                        }
+                                    },
+                                    onClick = {
+                                        addEventViewModel.onResourceSelected(resource)
+                                    },
+                                    contentPadding = PaddingValues(horizontal = 16.dp)
+                                )
                             }
                         }
                     }
                 }
 
-            }
-            Spacer(Modifier.height(16.dp))
-            Column(modifier = Modifier.fillMaxWidth()) {
+                Spacer(Modifier.height(16.dp))
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .onGloballyPositioned { coordinates ->
-                            dropdownWidth.intValue = coordinates.size.width
-                            dropdownHeight.intValue = coordinates.size.height
-                        }
+                ExposedDropdownMenuBox(
+                    expanded = eventMembersDropDownExpanded,
+                    onExpandedChange = { addEventViewModel.toggleMemberDropdown() }
                 ) {
                     NoteMarkTextField(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(type = MenuAnchorType.PrimaryNotEditable),
                         text = "Select Members",
                         onValueChange = {},
                         label = "Members",
                         hint = "Select Members",
-                        isNumberType = false,
-                        haveTrailingIcon = true,
-                        trailingIconConfig = TrailingIconConfig.ImageVectorIcon(Icons.Default.KeyboardArrowDown),
                         readOnly = true,
-                        onClick = {
-                            addEventViewModel.toggleMemberDropdown()
-                        }
+                        isNumberType = false,
+                        trailingIconConfig = TrailingIconConfig.ImageVectorIcon(
+                            if (eventMembersDropDownExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown
+                        ),
+                        haveTrailingIcon = true,
+                        onClick = { /* handled above */ }
                     )
 
-                    if (eventMembersDropDownExpanded) {
-                        Popup(
-                            alignment = Alignment.TopStart,
-                            offset = IntOffset(0, with(density) { dropdownHeight.intValue }),
-                            onDismissRequest = {
-                                addEventViewModel.closeMemberDropdown()
-                            }
+                    ExposedDropdownMenu(
+                        expanded = eventMembersDropDownExpanded,
+                        onDismissRequest = { addEventViewModel.closeMemberDropdown() },
+                        modifier = Modifier
+                            .exposedDropdownSize(true)
+                            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .heightIn(max = 300.dp)
+                                .verticalScroll(rememberScrollState())
                         ) {
-                            Surface(
-                                shape = RoundedCornerShape(15.dp),
-                                color = MaterialTheme.colorScheme.surfaceContainerLow,
-                                tonalElevation = 2.dp,
-                                shadowElevation = 2.dp,
-                                modifier = Modifier
-                                    .width(with(density) { dropdownWidth.intValue.toDp() })
-                                    .shadow(
-                                        elevation = 2.dp,
-                                        shape = RoundedCornerShape(15.dp),
-                                        ambientColor = Color.Black.copy(alpha = 0.15f),
-                                        spotColor = Color.Black.copy(alpha = 0.2f)
-                                    )
-                                    .heightIn(max = 300.dp)
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .verticalScroll(scrollState)
-                                        .padding(vertical = 8.dp)
-                                ) {
-                                    availableMembers.forEach { member ->
-                                        val isSelected = selectedMembers.contains(member.memberId)
-                                        DropdownMenuItem(
-                                            text = {
-                                                Row(
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    verticalAlignment = Alignment.CenterVertically,
-                                                    horizontalArrangement = Arrangement.SpaceBetween
-                                                ) {
-                                                    Text(
-                                                        text = member.memberName,
-                                                        fontFamily = alatsiFont,
-                                                        style = MaterialTheme.typography.bodyMedium,
-                                                        color = MaterialTheme.colorScheme.onPrimary
-                                                    )
-                                                    Text(
-                                                        text = "₹${member.salary}",
-                                                        fontFamily = alatsiFont,
-                                                        style = MaterialTheme.typography.bodySmall,
-                                                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
-                                                    )
-                                                    Checkbox(
-                                                        checked = isSelected,
-                                                        onCheckedChange = {
-                                                            addEventViewModel.onMemberSelected(member)
-                                                        },
-                                                        colors = CheckboxDefaults.colors(
-                                                            checkedColor = MaterialTheme.colorScheme.primaryContainer,
-                                                            uncheckedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                                            checkmarkColor = MaterialTheme.colorScheme.onPrimary
-                                                        )
-                                                    )
-                                                }
-                                            },
-                                            onClick = {
-                                                addEventViewModel.onMemberSelected(member)
-                                            }
-                                        )
-                                    }
-                                }
+                            availableMembers.forEach { member ->
+                                val isSelected = selectedMembers.contains(member.memberId)
+                                DropdownMenuItem(
+                                    text = {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = member.memberName,
+                                                fontFamily = alatsiFont,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.onPrimary,
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                            Text(
+                                                text = "₹${member.salary}",
+                                                fontFamily = alatsiFont,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
+                                                modifier = Modifier.padding(horizontal = 8.dp)
+                                            )
+                                            Checkbox(
+                                                checked = isSelected,
+                                                onCheckedChange = {
+                                                    addEventViewModel.onMemberSelected(member)
+                                                },
+                                                colors = CheckboxDefaults.colors(
+                                                    checkedColor = MaterialTheme.colorScheme.primaryContainer,
+                                                    uncheckedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                                    checkmarkColor = MaterialTheme.colorScheme.onPrimary
+                                                )
+                                            )
+                                        }
+                                    },
+                                    onClick = {
+                                        addEventViewModel.onMemberSelected(member)
+                                    },
+                                    contentPadding = PaddingValues(horizontal = 16.dp)
+                                )
                             }
                         }
                     }
                 }
             }
         }
-
     }
 }
