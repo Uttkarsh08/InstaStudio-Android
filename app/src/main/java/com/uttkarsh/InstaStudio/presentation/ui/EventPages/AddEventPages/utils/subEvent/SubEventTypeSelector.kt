@@ -1,4 +1,4 @@
-package com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages
+package com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages.utils.subEvent
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -22,44 +22,44 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.uttkarsh.InstaStudio.presentation.ui.utils.NoteMarkTextField
 import com.uttkarsh.InstaStudio.presentation.ui.utils.TrailingIconConfig
-import com.uttkarsh.InstaStudio.presentation.viewmodel.AddEventViewModel
+import com.uttkarsh.InstaStudio.presentation.viewmodel.AddSubEventViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EventTypeSelector(
-    addEventViewModel: AddEventViewModel,
+fun SubEventTypeSelector(
+    addSubEventViewModel: AddSubEventViewModel,
     alatsiFont: FontFamily
 ) {
-    val eventTypes = addEventViewModel.eventTypes
-    val selectedEventType by addEventViewModel.selectedEventType
-    val eventTypeDropdownExpanded by addEventViewModel.eventTypeDropdownExpanded
+    val subEventTypes = addSubEventViewModel.subEventTypes
+    val selectedSubEventType by addSubEventViewModel.selectedSubEventType
+    val dropdownExpanded by addSubEventViewModel.subEventTypeDropdownExpanded
 
     ExposedDropdownMenuBox(
-        expanded = eventTypeDropdownExpanded,
+        expanded = dropdownExpanded,
         onExpandedChange = {
-            addEventViewModel.toggleEventTypeDropdown()
+            addSubEventViewModel.toggleSubEventTypeDropdown()
         }
     ) {
         NoteMarkTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .menuAnchor(type = MenuAnchorType.PrimaryNotEditable),
-            text = selectedEventType.displayName,
+            text = selectedSubEventType.displayName,
             onValueChange = {},
             label = "Event Type",
-            hint = selectedEventType.displayName,
+            hint = selectedSubEventType.displayName,
             isNumberType = false,
             haveTrailingIcon = true,
             trailingIconConfig = TrailingIconConfig.ImageVectorIcon(
-                if (eventTypeDropdownExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown
+                if (dropdownExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown
             ),
             readOnly = true
         )
 
         ExposedDropdownMenu(
-            expanded = eventTypeDropdownExpanded,
+            expanded = dropdownExpanded,
             onDismissRequest = {
-                addEventViewModel.closeEventTypeDropdown()
+                addSubEventViewModel.closeSubEventTypeDropdown()
             },
             modifier = Modifier.exposedDropdownSize()
                 .background(MaterialTheme.colorScheme.surfaceContainerLow)
@@ -70,7 +70,7 @@ fun EventTypeSelector(
                     .heightIn(max = 300.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                eventTypes.forEach { type ->
+                subEventTypes.forEach { type ->
                     DropdownMenuItem(
                         text = {
                             Text(
@@ -81,8 +81,8 @@ fun EventTypeSelector(
                             )
                         },
                         onClick = {
-                            addEventViewModel.onEventTypeSelected(type)
-                            addEventViewModel.closeEventTypeDropdown()
+                            addSubEventViewModel.onSubEventTypeSelected(type)
+                            addSubEventViewModel.closeSubEventTypeDropdown()
                         }
                     )
                 }

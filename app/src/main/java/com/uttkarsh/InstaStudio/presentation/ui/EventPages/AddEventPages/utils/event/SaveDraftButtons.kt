@@ -1,4 +1,4 @@
-package com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages
+package com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages.utils.event
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

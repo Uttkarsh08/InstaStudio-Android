@@ -35,7 +35,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.uttkarsh.InstaStudio.domain.model.DatePickerTarget
+import com.uttkarsh.InstaStudio.domain.model.TimePickerTarget
 import com.uttkarsh.InstaStudio.presentation.navigation.Screens
+import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages.utils.event.ClientInfoSection
+import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages.utils.DateTimeSection
+import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages.utils.event.EventTypeSelector
+import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages.utils.LocationSection
+import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages.utils.event.SaveDraftButtons
+import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages.utils.event.SubEventSection
 import com.uttkarsh.InstaStudio.presentation.ui.utils.ShowDatePickerDialog
 import com.uttkarsh.InstaStudio.presentation.ui.utils.ShowTimePickerDialog
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AddEventViewModel
@@ -139,9 +147,42 @@ fun AddEventScreen(
                 ) {
                     item { EventTypeSelector(addEventViewModel, alatsiFont) }
                     item { ClientInfoSection(addEventViewModel, alatsiFont) }
-                    item { DateTimeSection(addEventViewModel, eventStartDate, eventStartTime, eventEndDate, eventEndTime, alatsiFont) }
-                    item { LocationSection(addEventViewModel) }
-                    item { SubEventSection(addEventViewModel, resourceViewModel, memberViewModel, alatsiFont, navController) }
+                    item {
+                        DateTimeSection(
+                            eventStartDate = eventStartDate,
+                            eventStartTime = eventStartTime,
+                            eventEndDate = eventEndDate,
+                            eventEndTime = eventStartTime,
+                            onStartDateClick = { addEventViewModel.onDateBoxClick(DatePickerTarget.START_DATE) },
+                            onStartTimeClick = { addEventViewModel.onTimeBoxClick(TimePickerTarget.START_TIME) },
+                            onEndDateClick = { addEventViewModel.onDateBoxClick(DatePickerTarget.END_DATE) },
+                            onEndTimeClick = { addEventViewModel.onTimeBoxClick(TimePickerTarget.END_TIME) },
+                            alatsiFont = alatsiFont
+                        )
+
+                    }
+                    item {
+                        LocationSection(
+                            location = addEventViewModel.eventLocation,
+                            onLocationChange = addEventViewModel::updateEventLocation,
+                            city = addEventViewModel.eventCity,
+                            onCityChange = addEventViewModel::updateEventCity,
+                            state = addEventViewModel.eventState,
+                            onStateChange = addEventViewModel::updateEventState,
+                            contactNumber = addEventViewModel.clientPhoneNo,
+                            onContactNumberChange = addEventViewModel::updateClientPhoneNo
+                        )
+
+                    }
+                    item {
+                        SubEventSection(
+                            addEventViewModel,
+                            resourceViewModel,
+                            memberViewModel,
+                            alatsiFont,
+                            navController
+                        )
+                    }
                     item {
                         Row(
                             modifier = Modifier.fillMaxWidth()

@@ -1,4 +1,4 @@
-package com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages
+package com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages.utils
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,23 +15,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.uttkarsh.InstaStudio.R
-import com.uttkarsh.InstaStudio.domain.model.DatePickerTarget
-import com.uttkarsh.InstaStudio.domain.model.TimePickerTarget
 import com.uttkarsh.InstaStudio.presentation.ui.utils.NoteMarkTextField
 import com.uttkarsh.InstaStudio.presentation.ui.utils.TrailingIconConfig
-import com.uttkarsh.InstaStudio.presentation.viewmodel.AddEventViewModel
-import java.time.LocalDateTime
 
 @Composable
 fun DateTimeSection(
-    addEventViewModel: AddEventViewModel,
     eventStartDate: String,
     eventStartTime: String,
     eventEndDate: String,
     eventEndTime: String,
+    onStartDateClick: () -> Unit,
+    onStartTimeClick: () -> Unit,
+    onEndDateClick: () -> Unit,
+    onEndTimeClick: () -> Unit,
     alatsiFont: FontFamily
 ) {
-
     Column {
         Text(
             text = "Date & Time",
@@ -39,15 +37,14 @@ fun DateTimeSection(
             color = MaterialTheme.colorScheme.onPrimary,
             style = MaterialTheme.typography.bodyMedium
         )
+
         Spacer(modifier = Modifier.height(8.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Column(
-                modifier = Modifier.weight(1f),
-            ) {
+            Column(modifier = Modifier.weight(1f)) {
 
                 NoteMarkTextField(
                     text = eventStartDate,
@@ -58,7 +55,7 @@ fun DateTimeSection(
                     haveTrailingIcon = true,
                     trailingIconConfig = TrailingIconConfig.ResourceIcon(R.drawable.calender),
                     readOnly = true,
-                    onClick = { addEventViewModel.onDateBoxClick(DatePickerTarget.START_DATE) }
+                    onClick = onStartDateClick
                 )
 
                 Spacer(Modifier.height(8.dp))
@@ -72,13 +69,11 @@ fun DateTimeSection(
                     haveTrailingIcon = true,
                     trailingIconConfig = TrailingIconConfig.ImageVectorIcon(Icons.Default.KeyboardArrowDown),
                     readOnly = true,
-                    onClick = { addEventViewModel.onTimeBoxClick(TimePickerTarget.START_TIME) }
+                    onClick = onStartTimeClick
                 )
             }
 
-            Column(
-                modifier = Modifier.weight(1f),
-            ) {
+            Column(modifier = Modifier.weight(1f)) {
 
                 NoteMarkTextField(
                     text = eventEndDate,
@@ -89,7 +84,7 @@ fun DateTimeSection(
                     haveTrailingIcon = true,
                     trailingIconConfig = TrailingIconConfig.ResourceIcon(R.drawable.calender),
                     readOnly = true,
-                    onClick = { addEventViewModel.onDateBoxClick(DatePickerTarget.END_DATE) }
+                    onClick = onEndDateClick
                 )
 
                 Spacer(Modifier.height(8.dp))
@@ -103,9 +98,10 @@ fun DateTimeSection(
                     haveTrailingIcon = true,
                     trailingIconConfig = TrailingIconConfig.ImageVectorIcon(Icons.Default.KeyboardArrowDown),
                     readOnly = true,
-                    onClick = { addEventViewModel.onTimeBoxClick(TimePickerTarget.END_TIME) }
+                    onClick = onEndTimeClick
                 )
             }
         }
     }
 }
+

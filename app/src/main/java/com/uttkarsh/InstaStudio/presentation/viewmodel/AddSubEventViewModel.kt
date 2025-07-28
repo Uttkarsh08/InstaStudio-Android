@@ -11,6 +11,8 @@ import androidx.lifecycle.viewModelScope
 import com.uttkarsh.InstaStudio.domain.model.DatePickerTarget
 import com.uttkarsh.InstaStudio.domain.model.SubEventType
 import com.uttkarsh.InstaStudio.domain.model.TimePickerTarget
+import com.uttkarsh.InstaStudio.domain.model.dto.member.MemberProfileResponseDTO
+import com.uttkarsh.InstaStudio.domain.model.dto.resource.ResourceResponseDTO
 import com.uttkarsh.InstaStudio.domain.usecase.event.addSubEvent.AddSubEventUseCases
 import com.uttkarsh.InstaStudio.utils.states.AddSubEventState
 import com.uttkarsh.InstaStudio.utils.time.TimeProvider
@@ -19,10 +21,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 import javax.inject.Inject
 import kotlin.Long
 
@@ -75,6 +73,18 @@ class AddSubEventViewModel @Inject constructor(
 
     private val _subEventTypeDropdownExpanded = mutableStateOf(false)
     val subEventTypeDropdownExpanded: State<Boolean> = _subEventTypeDropdownExpanded
+
+    private val _selectedSubEventResources = MutableStateFlow<Set<Long>>(emptySet())
+    val selectedSubEventResources: StateFlow<Set<Long>> = _selectedSubEventResources
+
+    private val _resourcesDropdownExpanded = mutableStateOf(false)
+    val resourcesDropdownExpanded: State<Boolean> = _resourcesDropdownExpanded
+
+    private val _selectedSubEventMembers = MutableStateFlow<Set<Long>>(emptySet())
+    val selectedSubEventMembers: StateFlow<Set<Long>> = _selectedSubEventMembers
+
+    private val _membersDropdownExpanded = mutableStateOf(false)
+    val membersDropdownExpanded: State<Boolean> = _membersDropdownExpanded
 
     var shouldResetAddSubEventScreen by mutableStateOf(true)
         private set
@@ -154,9 +164,43 @@ class AddSubEventViewModel @Inject constructor(
         _subEventTypeDropdownExpanded.value = false
     }
 
+    fun onResourceSelected(resource: ResourceResponseDTO) {
+        _selectedSubEventResources.value = if (_selectedSubEventResources.value.contains(resource.resourceId)) {
+            _selectedSubEventResources.value - resource.resourceId
+        } else {
+            _selectedSubEventResources.value + resource.resourceId
+        }
+    }
+
+    fun toggleResourceDropdown() {
+        _resourcesDropdownExpanded.value = !_resourcesDropdownExpanded.value
+    }
+
+    fun closeResourceDropdown() {
+        _resourcesDropdownExpanded.value = false
+    }
+
+    fun onMemberSelected(member: MemberProfileResponseDTO) {
+        _selectedSubEventMembers.value = if (_selectedSubEventMembers.value.contains(member.memberId)) {
+            _selectedSubEventMembers.value - member.memberId
+        } else {
+            _selectedSubEventMembers.value + member.memberId
+        }
+    }
+
+    fun toggleMemberDropdown() {
+        _membersDropdownExpanded.value = !_membersDropdownExpanded.value
+    }
+
+    fun closeMemberDropdown() {
+        _membersDropdownExpanded.value = false
+    }
+
     fun resetSubEventDetails(){
         subEventId =0L
         _selectedSubEventType.value = SubEventType.PRE_WEDDING
+        _selectedSubEventResources.value = emptySet()
+        _selectedSubEventMembers.value = emptySet()
         subEventStartDate = timeProvider.nowDate()
         subEventEndDate = timeProvider.nowDate()
         subEventStartTime = timeProvider.nowTime()
@@ -181,8 +225,8 @@ class AddSubEventViewModel @Inject constructor(
 
                 val response = addSubEventUseCases.createNewSubEvent(
                     eventType= _selectedSubEventType.value.toString(),
-                    memberIds= emptySet(),
-                    resourceIds= emptySet(),
+                    memberIds= selectedSubEventMembers.value,
+                    resourceIds= selectedSubEventResources.value,
                     eventStartDate= subEventStart,
                     eventEndDate= subEventEnd,
                     eventLocation= subEventLocation,

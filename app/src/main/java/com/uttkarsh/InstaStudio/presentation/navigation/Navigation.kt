@@ -91,7 +91,7 @@ fun Navigation(
                 AddEventScreen(addEventViewModel, eventViewModel, memberViewModel, resourceViewModel, navController)
             }
             composable(Screens.AddSubEventDetailsScreen.route) {
-                AddSubEventScreen(addSubEventViewModel, addEventViewModel, navController)
+                AddSubEventScreen(addSubEventViewModel, addEventViewModel, memberViewModel, resourceViewModel, navController)
             }
         }
     }
