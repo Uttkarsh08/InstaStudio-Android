@@ -132,6 +132,10 @@ class AddSubEventViewModel @Inject constructor(
         datePickerTarget = null
     }
 
+    fun onDateDialogDismiss(){
+        datePickerTarget = null
+    }
+
     fun onTimeBoxClick(target: TimePickerTarget) {
         timePickerTarget = target
     }
@@ -142,6 +146,10 @@ class AddSubEventViewModel @Inject constructor(
             TimePickerTarget.END_TIME -> subEventEndTime = date
             null -> {}
         }
+        timePickerTarget = null
+    }
+
+    fun onTimeDialogDismiss(){
         timePickerTarget = null
     }
 

@@ -14,7 +14,10 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.uttkarsh.InstaStudio.domain.model.DatePickerTarget
+import com.uttkarsh.InstaStudio.domain.model.TimePickerTarget
 import com.uttkarsh.InstaStudio.presentation.navigation.Screens
+import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages.utils.DateTimeSection
 import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages.utils.MemberSelector
 import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages.utils.ResourceSelector
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AddEventViewModel
@@ -28,6 +31,10 @@ fun SubEventSection(
     addEventViewModel: AddEventViewModel,
     resourceViewModel: ResourceViewModel,
     memberViewModel: MemberViewModel,
+    eventStartDate: String,
+    eventStartTime: String,
+    eventEndDate: String,
+    eventEndTime: String,
     alatsiFont: FontFamily,
     navController: NavController
 ) {
@@ -119,27 +126,41 @@ fun SubEventSection(
                 }
             }
         } else {
-            ResourceSelector(
-                availableResources = availableResources,
-                selectedResources = selectedResources,
-                onResourceSelected = addEventViewModel::onResourceSelected,
-                expanded = addEventViewModel.resourcesDropdownExpanded.value,
-                onToggleExpand = addEventViewModel::toggleResourceDropdown,
-                onDismiss = addEventViewModel::closeResourceDropdown,
-                alatsiFont = alatsiFont
-            )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ){
+                DateTimeSection(
+                    eventStartDate = eventStartDate,
+                    eventStartTime = eventStartTime,
+                    eventEndDate = eventEndDate,
+                    eventEndTime = eventEndTime,
+                    onStartDateClick = { addEventViewModel.onDateBoxClick(DatePickerTarget.START_DATE) },
+                    onStartTimeClick = { addEventViewModel.onTimeBoxClick(TimePickerTarget.START_TIME) },
+                    onEndDateClick = { addEventViewModel.onDateBoxClick(DatePickerTarget.END_DATE) },
+                    onEndTimeClick = { addEventViewModel.onTimeBoxClick(TimePickerTarget.END_TIME) },
+                    alatsiFont = alatsiFont
+                )
 
-            Spacer(modifier = Modifier.height(16.dp))
+                ResourceSelector(
+                    availableResources = availableResources,
+                    selectedResources = selectedResources,
+                    onResourceSelected = addEventViewModel::onResourceSelected,
+                    expanded = addEventViewModel.resourcesDropdownExpanded.value,
+                    onToggleExpand = addEventViewModel::toggleResourceDropdown,
+                    onDismiss = addEventViewModel::closeResourceDropdown,
+                    alatsiFont = alatsiFont
+                )
 
-            MemberSelector(
-                availableMembers = availableMembers,
-                selectedMembers = selectedMembers,
-                onMemberSelected = addEventViewModel::onMemberSelected,
-                expanded = addEventViewModel.membersDropdownExpanded.value,
-                onToggleExpand = addEventViewModel::toggleMemberDropdown,
-                onDismiss = addEventViewModel::closeMemberDropdown,
-                alatsiFont = alatsiFont
-            )
+                MemberSelector(
+                    availableMembers = availableMembers,
+                    selectedMembers = selectedMembers,
+                    onMemberSelected = addEventViewModel::onMemberSelected,
+                    expanded = addEventViewModel.membersDropdownExpanded.value,
+                    onToggleExpand = addEventViewModel::toggleMemberDropdown,
+                    onDismiss = addEventViewModel::closeMemberDropdown,
+                    alatsiFont = alatsiFont
+                )
+            }
         }
     }
 }

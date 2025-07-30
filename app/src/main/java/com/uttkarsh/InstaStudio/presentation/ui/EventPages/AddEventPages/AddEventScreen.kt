@@ -39,7 +39,6 @@ import com.uttkarsh.InstaStudio.domain.model.DatePickerTarget
 import com.uttkarsh.InstaStudio.domain.model.TimePickerTarget
 import com.uttkarsh.InstaStudio.presentation.navigation.Screens
 import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages.utils.event.ClientInfoSection
-import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages.utils.DateTimeSection
 import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages.utils.event.EventTypeSelector
 import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages.utils.LocationSection
 import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages.utils.event.SaveDraftButtons
@@ -60,6 +59,7 @@ fun AddEventScreen(
     resourceViewModel: ResourceViewModel = hiltViewModel(),
     navController: NavController
 ) {
+
     val alatsiFont = remember { FontFamily(Font(R.font.alatsi)) }
     val eventStartDate = addEventViewModel.eventStartDate
     val eventEndDate = addEventViewModel.eventEndDate
@@ -76,18 +76,37 @@ fun AddEventScreen(
     val errorMessage = (state as? AddEventState.Error)?.message
 
     if (datePickerTarget != null) {
+        val initialDate = when (datePickerTarget) {
+            DatePickerTarget.START_DATE -> eventStartDate
+            DatePickerTarget.END_DATE -> eventEndDate
+        }
+
         ShowDatePickerDialog(
             onDateSelected = { date ->
                 addEventViewModel.onDatePicked(date)
-            }
+            },
+            onDismiss = {
+                addEventViewModel.onDateDialogDismiss()
+            },
+            initialDate = initialDate,
+            alatsiFont = alatsiFont
         )
     }
 
     if (timePickerTarget != null) {
+        val initialTime = when (timePickerTarget) {
+            TimePickerTarget.START_TIME -> eventStartTime
+            TimePickerTarget.END_TIME -> eventEndTime
+        }
         ShowTimePickerDialog(
             onTimeSelected = { time ->
                 addEventViewModel.onTimePicked(time)
-            }
+            },
+            onDismiss = {
+                addEventViewModel.onTimeDialogDismiss()
+            },
+            initialTime = initialTime,
+            alatsiFont
         )
     }
 
@@ -148,20 +167,6 @@ fun AddEventScreen(
                     item { EventTypeSelector(addEventViewModel, alatsiFont) }
                     item { ClientInfoSection(addEventViewModel, alatsiFont) }
                     item {
-                        DateTimeSection(
-                            eventStartDate = eventStartDate,
-                            eventStartTime = eventStartTime,
-                            eventEndDate = eventEndDate,
-                            eventEndTime = eventStartTime,
-                            onStartDateClick = { addEventViewModel.onDateBoxClick(DatePickerTarget.START_DATE) },
-                            onStartTimeClick = { addEventViewModel.onTimeBoxClick(TimePickerTarget.START_TIME) },
-                            onEndDateClick = { addEventViewModel.onDateBoxClick(DatePickerTarget.END_DATE) },
-                            onEndTimeClick = { addEventViewModel.onTimeBoxClick(TimePickerTarget.END_TIME) },
-                            alatsiFont = alatsiFont
-                        )
-
-                    }
-                    item {
                         LocationSection(
                             location = addEventViewModel.eventLocation,
                             onLocationChange = addEventViewModel::updateEventLocation,
@@ -179,6 +184,10 @@ fun AddEventScreen(
                             addEventViewModel,
                             resourceViewModel,
                             memberViewModel,
+                            eventStartDate = eventStartDate,
+                            eventStartTime = eventStartTime,
+                            eventEndDate = eventEndDate,
+                            eventEndTime = eventEndTime,
                             alatsiFont,
                             navController
                         )

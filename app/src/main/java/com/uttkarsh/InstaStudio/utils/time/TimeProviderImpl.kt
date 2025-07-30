@@ -7,6 +7,7 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 import javax.inject.Singleton
 
 @Singleton
@@ -108,6 +109,25 @@ class TimeProviderImpl : TimeProvider {
         }
     }
 
+    override fun formatMillis(millis: Long, pattern: String): String {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val dateTime = LocalDateTime.ofInstant(
+                java.time.Instant.ofEpochMilli(millis),
+                java.time.ZoneId.systemDefault()
+            )
+            val formatter = DateTimeFormatter.ofPattern(pattern, Locale.US)
+            dateTime.format(formatter)
+        } else {
+            val sdf = SimpleDateFormat(pattern, Locale.US)
+            sdf.format(Date(millis))
+        }
+    }
+
+    override fun parseToMillis(dateStr: String, pattern: String): Long {
+        val formatter = SimpleDateFormat(pattern, Locale.ROOT)
+        formatter.timeZone = TimeZone.getTimeZone("IST")
+        return formatter.parse(dateStr)?.time ?: System.currentTimeMillis()
+    }
 
 }
 

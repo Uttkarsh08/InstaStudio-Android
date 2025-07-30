@@ -187,16 +187,24 @@ class AddEventViewModel @Inject constructor(
         datePickerTarget = null
     }
 
+    fun onDateDialogDismiss(){
+        datePickerTarget = null
+    }
+
     fun onTimeBoxClick(target: TimePickerTarget) {
         timePickerTarget = target
     }
 
-    fun onTimePicked(date: String) {
+    fun onTimePicked(time: String) {
         when (timePickerTarget) {
-            TimePickerTarget.START_TIME -> eventStartTime = date
-            TimePickerTarget.END_TIME -> eventEndTime = date
+            TimePickerTarget.START_TIME -> eventStartTime = time
+            TimePickerTarget.END_TIME -> eventEndTime = time
             null -> {}
         }
+        timePickerTarget = null
+    }
+
+    fun onTimeDialogDismiss(){
         timePickerTarget = null
     }
 
@@ -292,16 +300,28 @@ class AddEventViewModel @Inject constructor(
             try {
                 _addEventState.value = AddEventState.Loading
 
-                val eventStart = eventStartDate + "T" + eventStartTime
-                val eventEnd = eventEndDate + "T" + eventEndTime
+                var finalEventStart = eventStartDate + "T" + eventStartTime
+                var finalEventEnd = eventEndDate + "T" + eventEndTime
 
                 var subEventsIds = emptySet<Long>()
-                if(isSubEventEnabled){
+
+                if(isSubEventEnabled && subEventsMap.value.isNotEmpty()){
                     _selectedEventResources.value = emptySet()
                     _selectedEventMembers.value = emptySet()
                      subEventsIds = subEventsMap.value.map { it.value.eventId }.toSet()
-                }else{
-                    subEventsIds = emptySet()
+
+                    val startDateTimes = subEventsMap.value.values.mapNotNull {
+                        timeProvider.parseToLocalDateTime(it.eventStartDate)
+                    }
+
+                    val endDateTimes = subEventsMap.value.values.mapNotNull {
+                        timeProvider.parseToLocalDateTime(it.eventEndDate)
+                    }
+
+                    if (startDateTimes.isNotEmpty() && endDateTimes.isNotEmpty()) {
+                        finalEventStart = startDateTimes.min().toString()
+                        finalEventEnd = endDateTimes.max().toString()
+                    }
                 }
 
                 val response = eventUseCases.createNewEvent(
@@ -311,8 +331,8 @@ class AddEventViewModel @Inject constructor(
                     subEventIds = subEventsIds,
                     memberIds = _selectedEventMembers.value,
                     resourceIds = _selectedEventResources.value,
-                    eventStart = eventStart,
-                    eventEnd = eventEnd,
+                    eventStart = finalEventStart,
+                    eventEnd = finalEventEnd,
                     eventLocation = eventLocation,
                     eventCity = eventCity,
                     eventState = eventState,

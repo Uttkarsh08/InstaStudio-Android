@@ -8,8 +8,9 @@ import com.uttkarsh.InstaStudio.utils.session.SessionManager
 import com.uttkarsh.InstaStudio.utils.time.TimeProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class CreateNewEventUseCase(
+class CreateNewEventUseCase @Inject constructor(
     private val eventRepository: EventRepository,
     private val sessionManager: SessionManager,
     private val timeProvider: TimeProvider

@@ -89,18 +89,36 @@ fun AddSubEventScreen(
     val errorMessage = (state as? AddSubEventState.Error)?.message
 
     if (datePickerTarget != null) {
+        val initialDate = when (datePickerTarget) {
+            DatePickerTarget.START_DATE -> subEventStartDate
+            DatePickerTarget.END_DATE -> subEventEndDate
+        }
         ShowDatePickerDialog(
             onDateSelected = { date ->
                 addSubEventViewModel.onDatePicked(date)
-            }
+            },
+            onDismiss = {
+                addSubEventViewModel.onDateDialogDismiss()
+            },
+            initialDate = initialDate,
+            alatsiFont
         )
     }
 
     if (timePickerTarget != null) {
+        val initialTime = when (timePickerTarget) {
+            TimePickerTarget.START_TIME -> subEventStartTime
+            TimePickerTarget.END_TIME -> subEventEndTime
+        }
         ShowTimePickerDialog(
             onTimeSelected = { time ->
                 addSubEventViewModel.onTimePicked(time)
-            }
+            },
+            onDismiss = {
+                addSubEventViewModel.onTimeDialogDismiss()
+            },
+            initialTime = initialTime,
+            alatsiFont = alatsiFont
         )
     }
 
@@ -298,5 +316,21 @@ fun AddSubEventScreen(
                 launchSingleTop = true
             }
         }
+    }
+
+    LaunchedEffect(subEventStartDate, subEventStartTime, subEventEndDate, subEventEndTime
+    ) {
+            memberViewModel.getAvailableMembers(
+                subEventStartTime,
+                subEventStartTime,
+                subEventEndDate,
+                subEventEndTime
+            )
+            resourceViewModel.getAvailableResources(
+                subEventStartDate,
+                subEventStartTime,
+                subEventEndDate,
+                subEventEndTime
+            )
     }
 }
