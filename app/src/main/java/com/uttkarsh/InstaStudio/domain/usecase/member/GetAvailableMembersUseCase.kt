@@ -4,8 +4,9 @@ import com.uttkarsh.InstaStudio.domain.model.dto.member.MemberProfileResponseDTO
 import com.uttkarsh.InstaStudio.domain.repository.MemberRepository
 import com.uttkarsh.InstaStudio.utils.session.SessionManager
 import java.time.LocalDateTime
+import javax.inject.Inject
 
-class GetAvailableMembersUseCase(
+class GetAvailableMembersUseCase @Inject constructor(
     private val memberRepository: MemberRepository,
     private val sessionManager: SessionManager
 ) {

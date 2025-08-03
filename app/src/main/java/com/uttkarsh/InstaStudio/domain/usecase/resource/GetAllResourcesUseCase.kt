@@ -5,8 +5,9 @@ import com.uttkarsh.InstaStudio.domain.model.dto.resource.ResourceResponseDTO
 import com.uttkarsh.InstaStudio.domain.repository.ResourceRepository
 import com.uttkarsh.InstaStudio.utils.session.SessionManager
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class GetAllResourcesUseCase(
+class GetAllResourcesUseCase @Inject constructor(
     private val resourceRepository: ResourceRepository,
     private val sessionManager: SessionManager
 ) {

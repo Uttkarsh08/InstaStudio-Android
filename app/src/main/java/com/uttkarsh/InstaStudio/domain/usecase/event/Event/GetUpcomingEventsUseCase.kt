@@ -5,8 +5,9 @@ import com.uttkarsh.InstaStudio.domain.model.dto.event.EventListResponseDTO
 import com.uttkarsh.InstaStudio.domain.repository.EventRepository
 import com.uttkarsh.InstaStudio.utils.session.SessionManager
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class GetUpcomingEventsUseCase(
+class GetUpcomingEventsUseCase @Inject constructor(
     private val eventRepository: EventRepository,
     private val sessionManager: SessionManager
 ) {

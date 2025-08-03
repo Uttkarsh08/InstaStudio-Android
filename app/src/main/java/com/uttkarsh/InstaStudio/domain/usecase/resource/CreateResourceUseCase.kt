@@ -5,8 +5,9 @@ import com.uttkarsh.InstaStudio.domain.model.dto.resource.ResourceResponseDTO
 import com.uttkarsh.InstaStudio.domain.model.validators.validate
 import com.uttkarsh.InstaStudio.domain.repository.ResourceRepository
 import com.uttkarsh.InstaStudio.utils.session.SessionManager
+import javax.inject.Inject
 
-class CreateResourceUseCase(
+class CreateResourceUseCase @Inject constructor(
     private val repository: ResourceRepository,
     private val sessionManager: SessionManager
 ) {

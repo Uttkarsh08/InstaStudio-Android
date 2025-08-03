@@ -3,8 +3,9 @@ package com.uttkarsh.InstaStudio.domain.usecase.member
 import com.uttkarsh.InstaStudio.domain.model.dto.member.MemberProfileResponseDTO
 import com.uttkarsh.InstaStudio.domain.repository.MemberRepository
 import com.uttkarsh.InstaStudio.utils.session.SessionManager
+import javax.inject.Inject
 
-class GetMemberByIdUseCase(
+class GetMemberByIdUseCase @Inject constructor(
     private val memberRepository: MemberRepository,
     private val sessionManager: SessionManager
 ) {

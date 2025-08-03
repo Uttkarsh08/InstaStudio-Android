@@ -5,8 +5,9 @@ import com.uttkarsh.InstaStudio.domain.model.dto.member.MemberProfileResponseDTO
 import com.uttkarsh.InstaStudio.domain.model.validators.validate
 import com.uttkarsh.InstaStudio.domain.repository.MemberRepository
 import com.uttkarsh.InstaStudio.utils.session.SessionManager
+import javax.inject.Inject
 
-class CreateMemberUseCase(
+class CreateMemberUseCase @Inject constructor(
     private val memberRepository: MemberRepository,
     private val sessionManager: SessionManager
 ) {

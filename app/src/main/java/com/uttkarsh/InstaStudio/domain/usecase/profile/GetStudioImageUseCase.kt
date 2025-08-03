@@ -7,8 +7,9 @@ import com.uttkarsh.InstaStudio.utils.image.ImageUtils
 import com.uttkarsh.InstaStudio.utils.session.SessionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class GetStudioImageUseCase(
+class GetStudioImageUseCase @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val sessionManager: SessionManager
 ) {

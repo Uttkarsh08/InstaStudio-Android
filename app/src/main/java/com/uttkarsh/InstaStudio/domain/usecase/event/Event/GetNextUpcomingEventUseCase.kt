@@ -5,8 +5,9 @@ import com.uttkarsh.InstaStudio.domain.repository.EventRepository
 import com.uttkarsh.InstaStudio.utils.session.SessionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class GetNextUpcomingEventUseCase(
+class GetNextUpcomingEventUseCase @Inject constructor(
     private val eventRepository: EventRepository,
     private val sessionManager: SessionManager
 ) {

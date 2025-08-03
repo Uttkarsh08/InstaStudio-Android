@@ -4,8 +4,9 @@ import com.uttkarsh.InstaStudio.domain.model.dto.resource.ResourceResponseDTO
 import com.uttkarsh.InstaStudio.domain.repository.ResourceRepository
 import com.uttkarsh.InstaStudio.utils.session.SessionManager
 import java.time.LocalDateTime
+import javax.inject.Inject
 
-class GetAvailableResourcesUseCase(
+class GetAvailableResourcesUseCase @Inject constructor(
     private val resourceRepository: ResourceRepository,
     private val sessionManager: SessionManager
 ) {
