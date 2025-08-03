@@ -21,6 +21,7 @@ import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages.utils.D
 import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages.utils.MemberSelector
 import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages.utils.ResourceSelector
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AddEventViewModel
+import com.uttkarsh.InstaStudio.presentation.viewmodel.AddSubEventViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.MemberViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.ResourceViewModel
 import com.uttkarsh.InstaStudio.utils.states.MemberState
@@ -29,6 +30,7 @@ import com.uttkarsh.InstaStudio.utils.states.ResourceState
 @Composable
 fun SubEventSection(
     addEventViewModel: AddEventViewModel,
+    addSubEventViewModel: AddSubEventViewModel,
     resourceViewModel: ResourceViewModel,
     memberViewModel: MemberViewModel,
     eventStartDate: String,
@@ -42,6 +44,7 @@ fun SubEventSection(
     val subEventsMap by addEventViewModel.subEventsMap.collectAsState()
     val selectedMembers by addEventViewModel.selectedEventMembers.collectAsState()
     val selectedResources by addEventViewModel.selectedEventResources.collectAsState()
+    val showDialog by addSubEventViewModel.showDeleteDialog
 
     val availableMembersState by memberViewModel.memberState.collectAsState()
     val availableResourcesState by resourceViewModel.resourceState.collectAsState()
@@ -83,6 +86,7 @@ fun SubEventSection(
             if (isSubEventEnabled) {
                 Button(
                     onClick = {
+                        addSubEventViewModel.markAddSubEventScreenForReset()
                         navController.navigate(Screens.AddSubEventDetailsScreen.route)
                     },
                     colors = ButtonDefaults.buttonColors(
@@ -121,14 +125,22 @@ fun SubEventSection(
                 subEventsMap.values.forEach { subEvent ->
                     SubEventCard(
                         subEvent = subEvent,
-                        onDeleteClick = { addEventViewModel.removeSubEvent(subEvent) }
+                        onCardClicked = {
+                            addSubEventViewModel.resetAddSubEventState()
+                            addSubEventViewModel.prepareEditSubEvent(subEvent)
+                            navController.navigate(Screens.AddSubEventDetailsScreen.route)
+
+                        },
+                        onDeleteClick = {
+                            addSubEventViewModel.askToDeleteSubEvent(subEvent)
+                        }
                     )
                 }
             }
         } else {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
-            ){
+            ) {
                 DateTimeSection(
                     eventStartDate = eventStartDate,
                     eventStartTime = eventStartTime,
@@ -163,4 +175,50 @@ fun SubEventSection(
             }
         }
     }
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { addSubEventViewModel.cancelDelete() },
+            title = {
+                Text(
+                    text = "Delete Sub-Event",
+                    fontFamily = alatsiFont,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            },
+            text = {
+                Text(
+                    text = "Are you sure you want to delete this sub-event? " +
+                            "This action cannot be undone.",
+                    fontFamily = alatsiFont,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    addEventViewModel.removeSubEvent(addSubEventViewModel.subEventPendingDelete!!)
+                    addSubEventViewModel.confirmDeleteSubEvent()
+                }) {
+                    Text(
+                        text = "Delete",
+                        fontFamily = alatsiFont,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { addSubEventViewModel.cancelDelete() }) {
+                    Text(
+                        text = "Cancel",
+                        fontFamily = alatsiFont,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+        )
+    }
+
 }

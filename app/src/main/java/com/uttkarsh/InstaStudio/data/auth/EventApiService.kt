@@ -8,8 +8,10 @@ import com.uttkarsh.InstaStudio.domain.model.dto.event.EventResponseDTO
 import com.uttkarsh.InstaStudio.domain.model.dto.event.SubEventRequestDTO
 import com.uttkarsh.InstaStudio.domain.model.dto.event.SubEventResponseDTO
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 import javax.inject.Singleton
@@ -62,5 +64,17 @@ interface EventApiService {
         @Path("studioId") studioId: Long,
         @Path("eventId") eventId: Long,
     ): ApiResponse<SubEventResponseDTO>
+
+    @PUT("/api/v1/edit-sub-event/{eventId}")
+    suspend fun EditSubEventById(
+        @Path("eventId") eventId: Long,
+        @Body request: SubEventRequestDTO
+    ): ApiResponse<SubEventResponseDTO>
+
+    @DELETE("/api/v1/{studioId}/delete-sub-event/{eventId}")
+    suspend fun deleteSubEventById(
+        @Path("studioId") studioId: Long,
+        @Path("eventId") eventId: Long,
+    ): ApiResponse<Unit>
 
 }

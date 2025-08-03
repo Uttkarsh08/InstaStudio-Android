@@ -11,9 +11,11 @@ import androidx.lifecycle.viewModelScope
 import com.uttkarsh.InstaStudio.domain.model.DatePickerTarget
 import com.uttkarsh.InstaStudio.domain.model.SubEventType
 import com.uttkarsh.InstaStudio.domain.model.TimePickerTarget
+import com.uttkarsh.InstaStudio.domain.model.dto.event.SubEventResponseDTO
 import com.uttkarsh.InstaStudio.domain.model.dto.member.MemberProfileResponseDTO
 import com.uttkarsh.InstaStudio.domain.model.dto.resource.ResourceResponseDTO
 import com.uttkarsh.InstaStudio.domain.usecase.event.addSubEvent.AddSubEventUseCases
+import com.uttkarsh.InstaStudio.domain.usecase.event.subEvent.SubEventUseCases
 import com.uttkarsh.InstaStudio.utils.states.AddSubEventState
 import com.uttkarsh.InstaStudio.utils.time.TimeProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,6 +29,7 @@ import kotlin.Long
 @HiltViewModel
 class AddSubEventViewModel @Inject constructor(
     private val addSubEventUseCases: AddSubEventUseCases,
+    private val subEventUseCases: SubEventUseCases,
     private val timeProvider: TimeProvider
 ): ViewModel(){
 
@@ -65,6 +68,12 @@ class AddSubEventViewModel @Inject constructor(
     var subEventState by mutableStateOf("")
         private set
 
+    private val _showDeleteDialog = mutableStateOf(false)
+    val showDeleteDialog: State<Boolean> = _showDeleteDialog
+
+    private val _subEventPendingDelete = mutableStateOf<SubEventResponseDTO?>(null)
+    val subEventPendingDelete: SubEventResponseDTO? get() = _subEventPendingDelete.value
+
     private val _subEventTypes = SubEventType.entries
     val subEventTypes: List<SubEventType> = _subEventTypes
 
@@ -90,9 +99,36 @@ class AddSubEventViewModel @Inject constructor(
         private set
 
     fun resetAddSubEventScreen(){
-        resetAddSubEventState()
-        resetSubEventDetails()
-        shouldResetAddSubEventScreen = false
+        if (shouldResetAddSubEventScreen) {
+            resetAddSubEventState()
+            resetSubEventDetails()
+            shouldResetAddSubEventScreen = false
+            Log.d("AddSubEventVM", "Screen Reset Done")
+        }
+    }
+
+    fun markAddSubEventScreenForReset() {
+        Log.d("AddSubEventVM", "markAddSubEventScreenForReset called")
+        shouldResetAddSubEventScreen = true
+    }
+
+    fun askToDeleteSubEvent(subEvent: SubEventResponseDTO) {
+        _subEventPendingDelete.value = subEvent
+        _showDeleteDialog.value = true
+    }
+
+    fun confirmDeleteSubEvent() {
+        _subEventPendingDelete.value?.let {
+            updateSubEventId(it.eventId)
+            deleteSubEventById()
+        }
+        _showDeleteDialog.value = false
+        _subEventPendingDelete.value = null
+    }
+
+    fun cancelDelete() {
+        _showDeleteDialog.value = false
+        _subEventPendingDelete.value = null
     }
 
     fun updateSubEventId(id: Long){
@@ -225,11 +261,10 @@ class AddSubEventViewModel @Inject constructor(
 
             _addSubEventState.value = AddSubEventState.Loading
 
-            val subEventStart = subEventStartDate+"T"+subEventStartTime
-            val subEventEnd = subEventEndDate+"T"+subEventEndTime
-
             try {
 
+            val subEventStart = subEventStartDate+"T"+subEventStartTime
+            val subEventEnd = subEventEndDate+"T"+subEventEndTime
 
                 val response = addSubEventUseCases.createNewSubEvent(
                     eventType= _selectedSubEventType.value.toString(),
@@ -248,6 +283,66 @@ class AddSubEventViewModel @Inject constructor(
                 _addSubEventState.value = AddSubEventState.Error(e.localizedMessage ?: "Unexpected error occurred")
             }
         }
+    }
+
+    fun editSubEventById(){
+        viewModelScope.launch(Dispatchers.IO) {
+            _addSubEventState.value = AddSubEventState.Loading
+
+            try {
+
+                val subEventStart = subEventStartDate+"T"+subEventStartTime
+                val subEventEnd = subEventEndDate+"T"+subEventEndTime
+
+                val response = subEventUseCases.editSubEventById(
+                    subEventId = subEventId,
+                    eventType= _selectedSubEventType.value.toString(),
+                    memberIds= selectedSubEventMembers.value,
+                    resourceIds= selectedSubEventResources.value,
+                    eventStartDate= subEventStart,
+                    eventEndDate= subEventEnd,
+                    eventLocation= subEventLocation,
+                    eventCity= subEventCity,
+                    eventState= subEventState
+                )
+
+                _addSubEventState.value = AddSubEventState.Success(response)
+
+            }catch (e: Exception) {
+                _addSubEventState.value = AddSubEventState.Error(e.localizedMessage ?: "Unexpected error occurred")
+            }
+        }
+    }
+
+    fun deleteSubEventById(){
+        viewModelScope.launch(Dispatchers.IO) {
+            _addSubEventState.value = AddSubEventState.Loading
+            try {
+                subEventUseCases.deleteSubEventById(subEventId)
+
+                _addSubEventState.value = AddSubEventState.DeletionSuccess
+            }catch (e: Exception) {
+                _addSubEventState.value = AddSubEventState.Error(e.localizedMessage ?: "Unexpected error occurred")
+            }
+        }
+    }
+
+    fun prepareEditSubEvent(event: SubEventResponseDTO){
+
+        val (startDate, startTime) = event.eventStartDate.split("T")
+        val (endDate, endTime) = event.eventEndDate.split("T")
+
+        subEventId = event.eventId
+        subEventStartDate = startDate
+        subEventStartTime = startTime
+        subEventEndDate = endDate
+        subEventEndTime = endTime
+        subEventLocation = event.eventLocation
+        subEventCity = event.eventCity
+        subEventState = event.eventState
+        _selectedSubEventType.value = SubEventType.fromDisplayName(event.eventType)
+        _selectedSubEventResources.value = event.resources.map { it.resourceId }.toSet()
+        _selectedSubEventMembers.value = event.members.map { it.memberId }.toSet()
     }
 
 }

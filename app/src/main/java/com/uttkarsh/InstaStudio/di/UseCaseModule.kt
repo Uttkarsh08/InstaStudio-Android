@@ -17,6 +17,8 @@ import com.uttkarsh.InstaStudio.domain.usecase.event.addEvent.AddEventUseCases
 import com.uttkarsh.InstaStudio.domain.usecase.event.addEvent.CreateNewEventUseCase
 import com.uttkarsh.InstaStudio.domain.usecase.event.addSubEvent.AddSubEventUseCases
 import com.uttkarsh.InstaStudio.domain.usecase.event.addSubEvent.CreateNewSubEventUseCase
+import com.uttkarsh.InstaStudio.domain.usecase.event.subEvent.DeleteSubEventByIdUseCase
+import com.uttkarsh.InstaStudio.domain.usecase.event.subEvent.EditSubEventByIdUseCase
 import com.uttkarsh.InstaStudio.domain.usecase.event.subEvent.GetSubEventByIdUseCase
 import com.uttkarsh.InstaStudio.domain.usecase.event.subEvent.SubEventUseCases
 import com.uttkarsh.InstaStudio.domain.usecase.member.CreateMemberUseCase
@@ -143,10 +145,13 @@ object UseCaseModule {
     @Provides
     fun provideSubEventUseCases(
         eventRepository: EventRepository,
-        sessionManager: SessionManager
+        sessionManager: SessionManager,
+        timeProvider: TimeProvider
     ): SubEventUseCases {
         return SubEventUseCases(
-            getSubEventById = GetSubEventByIdUseCase(eventRepository, sessionManager)
+            getSubEventById = GetSubEventByIdUseCase(eventRepository, sessionManager),
+            editSubEventById = EditSubEventByIdUseCase(eventRepository, sessionManager, timeProvider),
+            deleteSubEventById = DeleteSubEventByIdUseCase(eventRepository, sessionManager)
         )
     }
 

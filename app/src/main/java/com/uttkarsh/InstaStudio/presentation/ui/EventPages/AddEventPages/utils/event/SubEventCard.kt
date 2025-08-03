@@ -1,6 +1,8 @@
 package com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages.utils.event
 
+
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,7 +13,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -33,6 +38,7 @@ import com.uttkarsh.InstaStudio.presentation.ui.utils.rememberTimeProvider
 @Composable
 fun SubEventCard(
     subEvent: SubEventResponseDTO,
+    onCardClicked: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
 
@@ -41,98 +47,104 @@ fun SubEventCard(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .height(60.dp),
+            .height(60.dp)
+            .clickable { onCardClicked() },
         shape = RoundedCornerShape(15.dp),
         color = MaterialTheme.colorScheme.tertiaryContainer
     ) {
-            Row(
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+
+            val timeProvider = rememberTimeProvider()
+
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
+                    .fillMaxHeight()
+                    .wrapContentWidth(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    timeProvider.formatDate(subEvent.eventStartDate).toString().substring(0, 6),
+                    fontFamily = alatsiFont,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    timeProvider.formatTime(subEvent.eventStartDate).toString(),
+                    fontFamily = alatsiFont,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Icon(painterResource(R.drawable.verticalline), contentDescription = null)
+            }
+
+            Row(
+                modifier = Modifier.wrapContentWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                Image(
 
-                val timeProvider = rememberTimeProvider()
+                    painter = rememberAsyncImagePainter("https://img.icons8.com/ios-glyphs/30/sorting-options.png"),
+                    contentDescription = "Marker Icon",
+                    modifier = Modifier.size(15.dp),
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
+                )
 
-                Column(
-                    modifier = Modifier.fillMaxHeight()
-                        .weight(0.3f)
-                        .wrapContentWidth(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Text(
+                    subEvent.eventType,
+                    fontFamily = alatsiFont,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontWeight = FontWeight.Thin
+                )
+            }
+
+
+            Row(
+                modifier = Modifier.wrapContentWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = rememberAsyncImagePainter("https://img.icons8.com/ios/50/marker--v1.png"),
+                    contentDescription = "Marker Icon",
+                    modifier = Modifier.size(15.dp),
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
+                )
+                Text(
+                    subEvent.eventLocation,
+                    fontFamily = alatsiFont,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontWeight = FontWeight.Thin
+                )
+            }
+
+            Row(
+            ) {
+                IconButton(
+                    onClick = { onDeleteClick() }
                 ) {
-                    Text(
-                    timeProvider.formatDate(subEvent.eventStartDate).toString().substring(0, 6),
-                        fontFamily = alatsiFont,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                    timeProvider.formatTime(subEvent.eventStartDate).toString(),
-                        fontFamily = alatsiFont,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontWeight = FontWeight.Bold
+                    Icon(
+                        imageVector = Icons.Default.DeleteOutline,
+                        contentDescription = null
                     )
                 }
-
-                Row(
-                    modifier = Modifier.weight(0.1f),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ){
-                    Icon(painterResource(R.drawable.verticalline), contentDescription = null)
-                }
-
-
-                Row(
-                    modifier = Modifier.weight(0.7f),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-
-                ) {
-                    Row(
-                        modifier = Modifier.wrapContentWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ){
-                        Image(
-                            painter = rememberAsyncImagePainter("https://img.icons8.com/ios/50/marker--v1.png"),
-                            contentDescription = "Marker Icon",
-                            modifier = Modifier.size(15.dp),
-                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
-                        )
-
-                        Text(
-                            subEvent.eventType,
-                            fontFamily = alatsiFont,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            fontWeight = FontWeight.Thin
-                        )
-                    }
-
-
-                    Row(
-                        modifier = Modifier.wrapContentWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Image(
-                            painter = rememberAsyncImagePainter("https://img.icons8.com/ios-glyphs/30/sorting-options.png"),
-                            contentDescription = "Marker Icon",
-                            modifier = Modifier.size(15.dp),
-                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
-                        )
-                        Text(
-                            subEvent.eventLocation,
-                            fontFamily = alatsiFont,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            fontWeight = FontWeight.Thin
-                        )
-                    }
-                }
-
 
             }
+        }
     }
 
 }

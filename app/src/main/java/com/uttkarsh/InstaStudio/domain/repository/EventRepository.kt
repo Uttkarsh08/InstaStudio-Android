@@ -60,5 +60,13 @@ class EventRepository @Inject constructor(
         return eventApi.getSubEventById(studioId, eventId)
     }
 
+    suspend fun editSubEventById(eventId: Long, request: SubEventRequestDTO): ApiResponse<SubEventResponseDTO> {
+        return eventApi.EditSubEventById(eventId, request)
+
+    }
+
+    suspend fun deleteSubEventById(studioId: Long, eventId: Long): ApiResponse<Unit> {
+        return eventApi.deleteSubEventById(studioId, eventId)
+    }
 
 }

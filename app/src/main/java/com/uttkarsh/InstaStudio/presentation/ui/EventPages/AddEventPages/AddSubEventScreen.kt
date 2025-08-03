@@ -72,6 +72,7 @@ fun AddSubEventScreen(
     val subEventEndDate = addSubEventViewModel.subEventEndDate
     val subEventStartTime = addSubEventViewModel.subEventStartTime
     val subEventEndTime = addSubEventViewModel.subEventEndTime
+    val shouldResetScreen = addSubEventViewModel.shouldResetAddSubEventScreen
 
     val selectedMembers by addSubEventViewModel.selectedSubEventMembers.collectAsState()
     val selectedResources by addSubEventViewModel.selectedSubEventResources.collectAsState()
@@ -122,7 +123,7 @@ fun AddSubEventScreen(
         )
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(shouldResetScreen) {
         addSubEventViewModel.resetAddSubEventScreen()
     }
 
@@ -134,7 +135,7 @@ fun AddSubEventScreen(
             AppTopBar(
                 color = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                title = "Add SubEvent",
+                title = if (addSubEventViewModel.subEventId == 0L) "Add SubEvent" else "Edit SubEvent",
                 isNavIcon = true,
                 navIcon = R.drawable.back,
                 isRightIcon = false,
@@ -252,7 +253,11 @@ fun AddSubEventScreen(
                         ) {
                             Button(
                                 onClick = {
-                                    addSubEventViewModel.createNewSubEvent()
+                                    if (addSubEventViewModel.subEventId == 0L) {
+                                        addSubEventViewModel.createNewSubEvent()
+                                    } else {
+                                        addSubEventViewModel.editSubEventById()
+                                    }
                                 },
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.tertiary,
@@ -299,6 +304,10 @@ fun AddSubEventScreen(
             is AddSubEventState.Error -> {
                 // Error UI handled separately
             }
+
+            AddSubEventState.DeletionSuccess -> {
+                //Not to be handled here
+            }
         }
     }
 
@@ -310,7 +319,7 @@ fun AddSubEventScreen(
             addEventsViewModel.addSubEvent(subEvent)
             Log.d("AddSubEventScreen", "Adding SubEvent: ${subEvent.eventId}")
 
-            addSubEventViewModel.resetAddSubEventScreen()
+            addSubEventViewModel.markAddSubEventScreenForReset()
             navController.navigate(Screens.AddEventDetailsScreen.route) {
                 popUpTo(Screens.AddSubEventDetailsScreen.route) { inclusive = true }
                 launchSingleTop = true
@@ -321,7 +330,7 @@ fun AddSubEventScreen(
     LaunchedEffect(subEventStartDate, subEventStartTime, subEventEndDate, subEventEndTime
     ) {
             memberViewModel.getAvailableMembers(
-                subEventStartTime,
+                subEventStartDate,
                 subEventStartTime,
                 subEventEndDate,
                 subEventEndTime

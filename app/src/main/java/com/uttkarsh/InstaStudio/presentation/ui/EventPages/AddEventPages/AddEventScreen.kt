@@ -46,6 +46,7 @@ import com.uttkarsh.InstaStudio.presentation.ui.EventPages.AddEventPages.utils.e
 import com.uttkarsh.InstaStudio.presentation.ui.utils.ShowDatePickerDialog
 import com.uttkarsh.InstaStudio.presentation.ui.utils.ShowTimePickerDialog
 import com.uttkarsh.InstaStudio.presentation.viewmodel.AddEventViewModel
+import com.uttkarsh.InstaStudio.presentation.viewmodel.AddSubEventViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.EventViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.MemberViewModel
 import com.uttkarsh.InstaStudio.presentation.viewmodel.ResourceViewModel
@@ -54,6 +55,7 @@ import com.uttkarsh.InstaStudio.utils.states.AddEventState
 @Composable
 fun AddEventScreen(
     addEventViewModel: AddEventViewModel = hiltViewModel(),
+    addSubEventViewModel: AddSubEventViewModel = hiltViewModel(),
     eventViewModel: EventViewModel = hiltViewModel(),
     memberViewModel: MemberViewModel = hiltViewModel(),
     resourceViewModel: ResourceViewModel = hiltViewModel(),
@@ -182,6 +184,7 @@ fun AddEventScreen(
                     item {
                         SubEventSection(
                             addEventViewModel,
+                            addSubEventViewModel,
                             resourceViewModel,
                             memberViewModel,
                             eventStartDate = eventStartDate,
